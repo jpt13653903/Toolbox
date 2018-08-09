@@ -26,6 +26,11 @@
 #include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
+#ifndef WINVER
+  #error FileWrapper is Windows-only at the moment...
+#endif
+//------------------------------------------------------------------------------
+
 class FileWrapper{
   public:
     enum ACCESS{

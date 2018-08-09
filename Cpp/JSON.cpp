@@ -27,6 +27,7 @@ using namespace std;
 bool operator== (string& A, const char* B){ return !(A.compare(B)); }
 //------------------------------------------------------------------------------
 
+// Converts UTF-32 to UTF-8 and appends it to the string
 void operator+= (string& S, uint32_t Char){
   int  j = 0;
   byte Head = 0x3F; // Active bits in the leading byte
