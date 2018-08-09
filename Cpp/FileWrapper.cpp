@@ -18,32 +18,32 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#include "clFileWrapper.h"
+#include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
-clFileWrapper::clFileWrapper(){
+FileWrapper::FileWrapper(){
   Handle = INVALID_HANDLE_VALUE;
 }
 //------------------------------------------------------------------------------
 
-clFileWrapper::~clFileWrapper(){
+FileWrapper::~FileWrapper(){
   Close();
 }
 //------------------------------------------------------------------------------
 
-bool clFileWrapper::Open(const char* Filename, ACCESS Access){
+bool FileWrapper::Open(const char* Filename, ACCESS Access){
   if(!Filename || !Filename[0]) return false;
 
-  STRING Codec;
+  UnicodeString Codec;
   Codec = Filename;
 
-  Open(Codec.UTF16(), Access);
+  Open((const wchar_t*)Codec.UTF16(), Access);
 
   return Handle != INVALID_HANDLE_VALUE;
 }
 //------------------------------------------------------------------------------
 
-bool clFileWrapper::Open(const wchar_t* Filename, ACCESS Access){
+bool FileWrapper::Open(const wchar_t* Filename, ACCESS Access){
   if(!Filename || !Filename[0]) return false;
 
   if(Handle != INVALID_HANDLE_VALUE) Close();
@@ -108,27 +108,27 @@ bool clFileWrapper::Open(const wchar_t* Filename, ACCESS Access){
 }
 //------------------------------------------------------------------------------
 
-void clFileWrapper::Close(){
+void FileWrapper::Close(){
   if(Handle == INVALID_HANDLE_VALUE) return;
   CloseHandle(Handle);
   Handle = INVALID_HANDLE_VALUE;
 }
 //------------------------------------------------------------------------------
 
-long double clFileWrapper::GetSize(){
-  long double   f;
-  unsigned long high = 0;
+uint64_t FileWrapper::GetSize(){
+  uint64_t result;
+  DWORD    high = 0;
 
   if(Handle){
-    f  = GetFileSize(Handle, &high);
-    f += high * 4.294967296e9;
-    return f;
+    result  = GetFileSize(Handle, &high);
+    result += ((uint64_t)high) << 32;
+    return result;
   }
   return 0;
 }
 //------------------------------------------------------------------------------
 
-unsigned clFileWrapper::Read(char* Buffer, unsigned MustRead){
+unsigned FileWrapper::Read(char* Buffer, unsigned MustRead){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   DWORD Length;
@@ -137,14 +137,14 @@ unsigned clFileWrapper::Read(char* Buffer, unsigned MustRead){
 }
 //------------------------------------------------------------------------------
 
-unsigned clFileWrapper::Write(const char* Buffer){
+unsigned FileWrapper::Write(const char* Buffer){
   int j;
   for(j = 0; Buffer[j]; j++);
   return Write(Buffer, j);
 }
 //------------------------------------------------------------------------------
 
-unsigned clFileWrapper::Write(const char* Buffer, unsigned MustWrite){
+unsigned FileWrapper::Write(const char* Buffer, unsigned MustWrite){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   DWORD Length;
@@ -153,14 +153,14 @@ unsigned clFileWrapper::Write(const char* Buffer, unsigned MustWrite){
 }
 //------------------------------------------------------------------------------
 
-bool clFileWrapper::Flush(){
+bool FileWrapper::Flush(){
   if(Handle == INVALID_HANDLE_VALUE) return false;
 
   return FlushFileBuffers(Handle);
 }
 //------------------------------------------------------------------------------
 
-void clFileWrapper::GetTime(
+void FileWrapper::GetTime(
   FILETIME* Creation,
   FILETIME* Access,
   FILETIME* Modified
@@ -171,7 +171,7 @@ void clFileWrapper::GetTime(
 }
 //------------------------------------------------------------------------------
 
-void clFileWrapper::SetTime(
+void FileWrapper::SetTime(
   const FILETIME* Creation,
   const FILETIME* Access,
   const FILETIME* Modified

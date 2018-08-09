@@ -18,14 +18,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#ifndef clFileWrapper_h
-#define clFileWrapper_h
+#ifndef FileWrapper_h
+#define FileWrapper_h
 //------------------------------------------------------------------------------
 
-#include "clUnicodeString.h"
+#include "General.h"
+#include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
-class clFileWrapper{
+class FileWrapper{
   public:
     enum ACCESS{
       // Normal buffered
@@ -37,14 +38,14 @@ class clFileWrapper{
     HANDLE Handle;
 
   public:
-    clFileWrapper();
-   ~clFileWrapper();
+    FileWrapper();
+   ~FileWrapper();
 
     bool Open (const  char  * Filename, ACCESS Access); // UTF-8
     bool Open (const wchar_t* Filename, ACCESS Access);
     void Close();
 
-    long double GetSize();
+    uint64_t GetSize();
 
     unsigned Read (      char* Buffer, unsigned MustRead);
     unsigned Write(const char* Buffer); // Null-terminated

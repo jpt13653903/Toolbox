@@ -18,8 +18,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#ifndef clCalculator_h
-#define clCalculator_h
+#ifndef Calculator_h
+#define Calculator_h
 //------------------------------------------------------------------------------
 
 #include <math.h>
@@ -27,11 +27,11 @@
 #include <stdint.h>
 //------------------------------------------------------------------------------
 
-#include "clLLRBTree.h"
-#include "clUnicodeString.h"
+#include "LLRBTree.h"
+#include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
-class clCalculator{
+class Calculator{
   public:
     enum MEASURE{
       Degrees = 1,
@@ -58,7 +58,7 @@ class clCalculator{
     struct NODE{
       OPERATION   Operation;
       long double Value;
-      clUnicodeString      Name;
+      UnicodeString      Name;
       NODE*       Left;
       NODE*       Right;
       NODE*       Other;
@@ -73,7 +73,7 @@ class clCalculator{
     NODE* NewNode (NODE* Root = 0);
     NODE* CopyNode(NODE* Root);
 
-    void FuncName(clUnicodeString* Name);
+    void FuncName(UnicodeString* Name);
 
     bool ConditionOp(NODE* Root);
     bool LogicOp    (NODE* Root);
@@ -86,7 +86,7 @@ class clCalculator{
     bool Value      (NODE* Root);
     bool Float      (long double* f);
 
-    void        ViewTree  (NODE* Root, clUnicodeString* Result, unsigned BufferSize);
+    void        ViewTree  (NODE* Root, UnicodeString* Result, unsigned BufferSize);
     long double CalcTree  (NODE* Root, const char* Variable, long double Value);
     void        DeleteTree(NODE* Root);
     bool        Simplify  (NODE* Root);
@@ -95,12 +95,12 @@ class clCalculator{
 
   public:
     MEASURE Measure;
-    clCalculator();
-   ~clCalculator();
+    Calculator();
+   ~Calculator();
 
     void        BuildTree    (const char* Formula);
     long double CalculateTree(const char* Variable = "", long double Value = 0.);
-    void        ShowTree     (clUnicodeString* Result, unsigned BufferSize);
+    void        ShowTree     (UnicodeString* Result, unsigned BufferSize);
     long double Calculate    (const char* Formula, const char* Variable = "",
                               long double Value = 0.);
 };

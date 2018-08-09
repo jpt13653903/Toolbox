@@ -18,7 +18,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#include "clXML.h"
+#include "XML.h"
 //------------------------------------------------------------------------------
 
 #define en_dash "\xE2\x80\x93"
@@ -26,22 +26,22 @@
 //------------------------------------------------------------------------------
 
 static int ENTITY_Compare(void* Left, void* Right){
-  clXML::ENTITY* left  = (clXML::ENTITY*)Left;
-  clXML::ENTITY* right = (clXML::ENTITY*)Right;
+  XML::ENTITY* left  = (XML::ENTITY*)Left;
+  XML::ENTITY* right = (XML::ENTITY*)Right;
 
   return left->Name.Compare(right->Name);
 }
 //------------------------------------------------------------------------------
 
 static int ATTRIBUTE_Compare(void* Left, void* Right){
-  clXML::ATTRIBUTE* left  = (clXML::ATTRIBUTE*)Left;
-  clXML::ATTRIBUTE* right = (clXML::ATTRIBUTE*)Right;
+  XML::ATTRIBUTE* left  = (XML::ATTRIBUTE*)Left;
+  XML::ATTRIBUTE* right = (XML::ATTRIBUTE*)Right;
 
   return left->Name.Compare(right->Name);
 }
 //------------------------------------------------------------------------------
 
-clXML::ENTITY::ENTITY(const char* Name){
+XML::ENTITY::ENTITY(const char* Name){
   this->Name += Name;
 
   Children  .Compare = ENTITY_Compare;
@@ -49,7 +49,7 @@ clXML::ENTITY::ENTITY(const char* Name){
 }
 //------------------------------------------------------------------------------
 
-clXML::ENTITY::~ENTITY(){
+XML::ENTITY::~ENTITY(){
   ENTITY* Child = (ENTITY*)Children.First();
   while(Child){
     delete Child;
@@ -66,50 +66,50 @@ clXML::ENTITY::~ENTITY(){
 }
 //------------------------------------------------------------------------------
 
-clXML::ATTRIBUTE::ATTRIBUTE(const char* Name, const char* Value){
+XML::ATTRIBUTE::ATTRIBUTE(const char* Name, const char* Value){
   this->Name  += Name;
   this->Value += Value;
 }
 //------------------------------------------------------------------------------
 
-clXML::ATTRIBUTE::~ATTRIBUTE(){
+XML::ATTRIBUTE::~ATTRIBUTE(){
 }
 //------------------------------------------------------------------------------
 
-clXML::NESTING::NESTING(const char* EntityName){
+XML::NESTING::NESTING(const char* EntityName){
   Next   = 0;
   Entity = new ENTITY(EntityName);
 }
 //------------------------------------------------------------------------------
 
-clXML::NESTING::~NESTING(){
+XML::NESTING::~NESTING(){
  // This happens when End() is called.
  // Entity deleted later.
 }
 //------------------------------------------------------------------------------
 
-clXML::clXML(){
+XML::XML(){
   Nesting = 0;
   Root    = 0;
 }
 //------------------------------------------------------------------------------
 
-clXML::~clXML(){
+XML::~XML(){
   Clear();
 }
 //------------------------------------------------------------------------------
 
-void clXML::Clear(){
+void XML::Clear(){
   while(Nesting)        End();
   if   (Root   ) delete Root;
   Root = 0;
 }
 //------------------------------------------------------------------------------
 
-void clXML::New(const char* Document){
+void XML::New(const char* Document){
   Clear();
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Document, &LegalName);
 
   Nesting = new NESTING(LegalName.UTF8());
@@ -117,10 +117,10 @@ void clXML::New(const char* Document){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Begin(const char* Entity){
+void XML::Begin(const char* Entity){
   if(!Nesting) return;
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Entity, &LegalName);
 
   NESTING* Temp = new NESTING(LegalName.UTF8());
@@ -131,7 +131,7 @@ void clXML::Begin(const char* Entity){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Comment(const char* Comment){
+void XML::Comment(const char* Comment){
   if(!Nesting) return;
 
   Nesting->Entity->Comments += "<!-- ";
@@ -156,16 +156,16 @@ void clXML::Comment(const char* Comment){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, int Value){
+void XML::Attribute(const char* Name, int Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = Value;
   Attribute(Name, s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, bool Value){
+void XML::Attribute(const char* Name, bool Value){
   if(!Nesting) return;
 
   if(Value) Attribute(Name, "1");
@@ -173,29 +173,29 @@ void clXML::Attribute(const char* Name, bool Value){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, double Value){
+void XML::Attribute(const char* Name, double Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = Value;
   Attribute(Name, s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, unsigned Value){
+void XML::Attribute(const char* Name, unsigned Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = "0x";
   s.AppendHex(Value, 8);
   Attribute(Name , s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, const char* Value){
+void XML::Attribute(const char* Name, const char* Value){
   if(!Nesting) return;
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Name, &LegalName);
 
   ATTRIBUTE* Temp = new ATTRIBUTE(LegalName.UTF8(), Value);
@@ -203,21 +203,21 @@ void clXML::Attribute(const char* Name, const char* Value){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Attribute(const char* Name, clUnicodeString* Value){
+void XML::Attribute(const char* Name, UnicodeString* Value){
   Attribute(Name, Value->UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Content(int Value){
+void XML::Content(int Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = Value;
   Content(s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Content(bool Value){
+void XML::Content(bool Value){
   if(!Nesting) return;
 
   if(Value) Content("1");
@@ -225,26 +225,26 @@ void clXML::Content(bool Value){
 }
 //------------------------------------------------------------------------------
 
-void clXML::Content(double Value){
+void XML::Content(double Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = Value;
   Content(s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Content(unsigned Value){
+void XML::Content(unsigned Value){
   if(!Nesting) return;
 
-  clUnicodeString s;
+  UnicodeString s;
   s = "0x";
   s.AppendHex(Value, 8);
   Content (s.UTF8());
 }
 //------------------------------------------------------------------------------
 
-void clXML::Content(const char* Value){
+void XML::Content(const char* Value){
   if(!Nesting) return;
   if(!Value  ) return;
 
@@ -252,7 +252,7 @@ void clXML::Content(const char* Value){
 }
 //------------------------------------------------------------------------------
 
-void clXML::End(){
+void XML::End(){
   if(!Nesting) return;
 
   NESTING* Temp = Nesting;
@@ -261,8 +261,8 @@ void clXML::End(){
 }
 //------------------------------------------------------------------------------
 
-void clXML::GetLegalName(const char* Name, clUnicodeString* LegalName){
-  clUnicodeString Temp;
+void XML::GetLegalName(const char* Name, UnicodeString* LegalName){
+  UnicodeString Temp;
   Temp = Name;
 
  *LegalName = "";
@@ -320,9 +320,9 @@ void clXML::GetLegalName(const char* Name, clUnicodeString* LegalName){
 }
 //------------------------------------------------------------------------------
 
-void clXML::GetLegalContent(
-  clUnicodeString* Content, 
-  clUnicodeString* LegalContent
+void XML::GetLegalContent(
+  UnicodeString* Content, 
+  UnicodeString* LegalContent
 ){
   *LegalContent = "";
 
@@ -358,7 +358,7 @@ void clXML::GetLegalContent(
 }
 //------------------------------------------------------------------------------
 
-void clXML::SaveEntity(ENTITY* Entity, unsigned Indent){
+void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
   unsigned j;
 
   if(Entity->Comments.Length32()){
@@ -465,7 +465,7 @@ void clXML::SaveEntity(ENTITY* Entity, unsigned Indent){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::Save(const char* Filename){
+bool XML::Save(const char* Filename){
   if(!Root) return false;
 
   while(Nesting) End();
@@ -489,9 +489,9 @@ bool clXML::Save(const char* Filename){
 }
 //------------------------------------------------------------------------------
 
-void clXML::PrintLineNumber(){
-  int n = 0;
-  int Line = 1;
+void XML::PrintLineNumber(){
+  unsigned n = 0;
+  int   Line = 1;
   for(n = 0; n < ReadIndex; n++){
     if(ReadBuffer[n] == '\n') Line++;
   }
@@ -499,7 +499,7 @@ void clXML::PrintLineNumber(){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadSpace(){
+bool XML::ReadSpace(){
   if(ReadIndex >= ReadSize) return false;
 
   if(
@@ -523,7 +523,7 @@ bool clXML::ReadSpace(){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadComment(){
+bool XML::ReadComment(){
   if(ReadIndex >= ReadSize) return false;
 
   if(
@@ -551,7 +551,7 @@ bool clXML::ReadComment(){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadSpecial(){
+bool XML::ReadSpecial(){
   if(ReadIndex >= ReadSize) return false;
 
   int NestLevel = 0;
@@ -590,7 +590,7 @@ bool clXML::ReadSpecial(){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadName(clUnicodeString* Buffer){
+bool XML::ReadName(UnicodeString* Buffer){
  *Buffer = "";
 
   while(ReadSpace() || ReadComment());
@@ -614,7 +614,7 @@ bool clXML::ReadName(clUnicodeString* Buffer){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadContent(clUnicodeString* Buffer, char End){
+bool XML::ReadContent(UnicodeString* Buffer, char End){
   while(ReadIndex < ReadSize){
     if(
       ReadBuffer[ReadIndex] == '<' ||
@@ -675,7 +675,7 @@ bool clXML::ReadContent(clUnicodeString* Buffer, char End){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(clLLRBTree* Tree){
+bool XML::ReadAttribute(LLRBTree* Tree){
   ATTRIBUTE* Temp = new ATTRIBUTE("", "");
 
   if(!ReadName(&Temp->Name)){ // No name
@@ -729,7 +729,7 @@ bool clXML::ReadAttribute(clLLRBTree* Tree){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadHeader(){
+bool XML::ReadHeader(){
   while(ReadSpace() || ReadComment());
 
   if(
@@ -741,7 +741,7 @@ bool clXML::ReadHeader(){
   ){
     ReadIndex += 5;
 
-    clLLRBTree Attributes;
+    LLRBTree Attributes;
     Attributes.Compare = ATTRIBUTE_Compare;
 
     while(ReadAttribute(&Attributes));
@@ -781,7 +781,7 @@ bool clXML::ReadHeader(){
 }
 //------------------------------------------------------------------------------
 
-clXML::ENTITY* clXML::ReadEntity(){
+XML::ENTITY* XML::ReadEntity(){
   while(ReadSpace() || ReadComment() || ReadSpecial());
 
   if(
@@ -790,7 +790,7 @@ clXML::ENTITY* clXML::ReadEntity(){
   ) return 0;
   ReadIndex++;
 
-  clUnicodeString Buffer;
+  UnicodeString Buffer;
   if(!ReadName(&Buffer)){
     printf("Error: %s\n  %s\n", "XML Error", "Invalid tag");
     PrintLineNumber();
@@ -873,7 +873,7 @@ clXML::ENTITY* clXML::ReadEntity(){
 }
 //------------------------------------------------------------------------------
 
-bool clXML::Load(const char* Filename){
+bool XML::Load(const char* Filename){
   Clear();
 
   FILE* File = fopen(Filename, "rb");
@@ -918,10 +918,10 @@ bool clXML::Load(const char* Filename){
 }
 //------------------------------------------------------------------------------
 
-clXML::ENTITY* clXML::FindChild(ENTITY* Entity, const char* Name){
+XML::ENTITY* XML::FindChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Name, &LegalName);
 
   ENTITY Key(LegalName.UTF8());
@@ -929,10 +929,10 @@ clXML::ENTITY* clXML::FindChild(ENTITY* Entity, const char* Name){
 }
 //------------------------------------------------------------------------------
 
-clXML::ENTITY* clXML::NextChild(ENTITY* Entity, const char* Name){
+XML::ENTITY* XML::NextChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Name, &LegalName);
 
   ENTITY* Result = (ENTITY*)Entity->Children.Next();
@@ -941,12 +941,12 @@ clXML::ENTITY* clXML::NextChild(ENTITY* Entity, const char* Name){
 }
 //------------------------------------------------------------------------------
 
-clXML::ATTRIBUTE* clXML::FindAttribute(
+XML::ATTRIBUTE* XML::FindAttribute(
   ENTITY* Entity, const char* Name
 ){
   if(!Entity) return 0;
 
-  clUnicodeString LegalName;
+  UnicodeString LegalName;
   GetLegalName(Name, &LegalName);
 
   ATTRIBUTE Key(LegalName.UTF8(), "");
@@ -954,7 +954,7 @@ clXML::ATTRIBUTE* clXML::FindAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*     Entity,
   const char* Name,
   int*        Value
@@ -968,7 +968,7 @@ bool clXML::ReadAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*     Entity,
   const char* Name,
   bool*       Value
@@ -982,7 +982,7 @@ bool clXML::ReadAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*     Entity,
   const char* Name,
   char*       Value
@@ -996,10 +996,10 @@ bool clXML::ReadAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*          Entity,
   const char*      Name,
-  clUnicodeString* Value
+  UnicodeString* Value
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
@@ -1010,7 +1010,7 @@ bool clXML::ReadAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*     Entity,
   const char* Name,
   double*     Value
@@ -1024,7 +1024,7 @@ bool clXML::ReadAttribute(
 }
 //------------------------------------------------------------------------------
 
-bool clXML::ReadAttribute(
+bool XML::ReadAttribute(
   ENTITY*     Entity,
   const char* Name,
   unsigned*   Value

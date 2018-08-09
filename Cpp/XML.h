@@ -29,36 +29,36 @@
 // Illegal characters in names are replaced with underscores.
 //------------------------------------------------------------------------------
 
-#ifndef clXML_h
-#define clXML_h
+#ifndef XML_h
+#define XML_h
 //------------------------------------------------------------------------------
 
 #include <stdio.h>
 #include <string.h>
 //------------------------------------------------------------------------------
 
-#include "clCalculator.h"
+#include "Calculator.h"
 //------------------------------------------------------------------------------
 
-class clXML{
+class XML{
   public:
     struct ATTRIBUTE{
-      clUnicodeString Name;
-      clUnicodeString Value;
-      clUnicodeString LegalValue;
+      UnicodeString Name;
+      UnicodeString Value;
+      UnicodeString LegalValue;
 
       ATTRIBUTE(const char* Name, const char* Value);
      ~ATTRIBUTE();
     };
 
     struct ENTITY{
-      clUnicodeString Name;
-      clUnicodeString Comments;
-      clUnicodeString Content;
-      clUnicodeString LegalContent;
+      UnicodeString Name;
+      UnicodeString Comments;
+      UnicodeString Content;
+      UnicodeString LegalContent;
 
-      clLLRBTree Children;   // Child entities, sorted by name
-      clLLRBTree Attributes; // Sorted by name
+      LLRBTree Children;   // Child entities, sorted by name
+      LLRBTree Attributes; // Sorted by name
 
       ENTITY(const char* Name);
      ~ENTITY();
@@ -75,12 +75,12 @@ class clXML{
     };
     NESTING* Nesting;
 
-    clUnicodeString Buffer;
-    void GetLegalName   (const char     * Name   , clUnicodeString* LegalName   );
-    void GetLegalContent(clUnicodeString* Content, clUnicodeString* LegalContent);
-    void SaveEntity     (ENTITY         * Entity , unsigned         Indent = 0  );
+    UnicodeString Buffer;
+    void GetLegalName   (const char   * Name   , UnicodeString* LegalName   );
+    void GetLegalContent(UnicodeString* Content, UnicodeString* LegalContent);
+    void SaveEntity     (ENTITY       * Entity , unsigned       Indent = 0  );
 
-    clCalculator Calc;
+    Calculator Calc;
 
     unsigned ReadSize;
     unsigned ReadIndex;
@@ -91,15 +91,15 @@ class clXML{
     bool    ReadSpace    ();
     bool    ReadComment  ();
     bool    ReadSpecial  ();
-    bool    ReadName     (clUnicodeString* Buffer);
-    bool    ReadContent  (clUnicodeString* Buffer, char End = 0);
-    bool    ReadAttribute(clLLRBTree     * Tree);
+    bool    ReadName     (UnicodeString* Buffer);
+    bool    ReadContent  (UnicodeString* Buffer, char End = 0);
+    bool    ReadAttribute(LLRBTree     * Tree);
     bool    ReadHeader   ();
     ENTITY* ReadEntity   ();
 
   public:
-    clXML();
-   ~clXML();
+    XML();
+   ~XML();
 
     // Discard all previous data
     void Clear();
@@ -115,12 +115,12 @@ class clXML{
     void Comment(const char* Comment);
 
     // Adds a new attribute to the current entity
-    void Attribute(const char* Name, int              Value); // Decimal
-    void Attribute(const char* Name, bool             Value);
-    void Attribute(const char* Name, double           Value);
-    void Attribute(const char* Name, unsigned         Value); // Hexadecimal
-    void Attribute(const char* Name, const char*      Value);
-    void Attribute(const char* Name, clUnicodeString* Value);
+    void Attribute(const char* Name, int            Value); // Decimal
+    void Attribute(const char* Name, bool           Value);
+    void Attribute(const char* Name, double         Value);
+    void Attribute(const char* Name, unsigned       Value); // Hexadecimal
+    void Attribute(const char* Name, const char*    Value);
+    void Attribute(const char* Name, UnicodeString* Value);
 
     // Adds to the existing content of the current entity
     void Content(int         Value);
@@ -148,12 +148,12 @@ class clXML{
     ATTRIBUTE* FindAttribute(ENTITY* Entity, const char* Name);
 
     // Use these to read attributes directly
-    bool ReadAttribute(ENTITY* Entity, const char* Name, int*             Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*            Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, char*            Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, clUnicodeString* Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, double*          Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*        Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, int*           Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*          Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, char*          Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, UnicodeString* Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, double*        Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*      Value);
 };
 //------------------------------------------------------------------------------
 

@@ -31,7 +31,7 @@
 //  0 if Left key = Right key
 //  1 if Left key > Right key
 // For find and remove, Left is the key and Right the node
-typedef int (*clLLRBTree_Compare)(void* Left, void* Right);
+typedef int (*LLRBTree_Compare)(void* Left, void* Right);
 //------------------------------------------------------------------------------
 
 /**
@@ -39,7 +39,7 @@ The data is stored in a Left-Leaning Red-Black Tree, as described by
 Robert Sedgewick, Department of Computer Science, Princeton University,
 Princeton, NJ 08544
 */
-class clLLRBTree{
+class LLRBTree{
   private:
     struct Node{
       Node* Left;
@@ -84,8 +84,8 @@ class clLLRBTree{
 //------------------------------------------------------------------------------
 
   public:
-    clLLRBTree();
-   ~clLLRBTree();
+    LLRBTree();
+   ~LLRBTree();
 
     void  Insert(void* Data); // Adds "Data" to the tree. Duplicates are sorted
                               // by order of insertion.
@@ -114,7 +114,7 @@ class clLLRBTree{
 
     unsigned ItemCount();
 
-    clLLRBTree_Compare Compare;
+    LLRBTree_Compare Compare;
 };
 //------------------------------------------------------------------------------
 

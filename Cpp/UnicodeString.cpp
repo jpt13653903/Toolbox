@@ -18,10 +18,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#include "clUnicodeString.h"
+#include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
-clUnicodeString::clUnicodeString(){
+UnicodeString::UnicodeString(){
   Valid_8     = Valid_16     = false;
   Length_8    = Length_16    = Length_32    = 0;
   Allocated_8 = Allocated_16 = Allocated_32 = 4;
@@ -32,14 +32,14 @@ clUnicodeString::clUnicodeString(){
 }
 //------------------------------------------------------------------------------
 
-clUnicodeString::~clUnicodeString(){
+UnicodeString::~UnicodeString(){
   delete[] Data_8;
   delete[] Data_16;
   delete[] Data_32;
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Invalidate(){
+void UnicodeString::Invalidate(){
   if(Valid_8){
     delete[] Data_8;
     Length_8    = 0;
@@ -60,7 +60,7 @@ void clUnicodeString::Invalidate(){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Append(char Data){
+void UnicodeString::Append(char Data){
   size_t j;
   char*  Temp;
 
@@ -79,7 +79,7 @@ void clUnicodeString::Append(char Data){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Append(char16 Data){
+void UnicodeString::Append(char16 Data){
   size_t  j;
   char16* Temp;
 
@@ -98,7 +98,7 @@ void clUnicodeString::Append(char16 Data){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Append(char32 Data){
+void UnicodeString::Append(char32 Data){
   size_t  j;
   char32* Temp;
 
@@ -117,7 +117,7 @@ void clUnicodeString::Append(char32 Data){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Update8(){
+void UnicodeString::Update8(){
   if(Valid_8) return;
 
   Length_8  = 0;
@@ -166,7 +166,7 @@ void clUnicodeString::Update8(){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Update16(){
+void UnicodeString::Update16(){
   if(Valid_16) return;
 
   Length_16  = 0;
@@ -188,7 +188,7 @@ void clUnicodeString::Update16(){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Update32_From8(){
+void UnicodeString::Update32_From8(){
   Valid_8  = true;
   Valid_16 = false;
 
@@ -267,7 +267,7 @@ void clUnicodeString::Update32_From8(){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::Update32_From16(){
+void UnicodeString::Update32_From16(){
   Valid_8  = false;
   Valid_16 = true;
 
@@ -295,7 +295,7 @@ void clUnicodeString::Update32_From16(){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (char c){
+void UnicodeString::operator= (char c){
   Invalidate();
 
   delete[] Data_32;
@@ -307,7 +307,7 @@ void clUnicodeString::operator= (char c){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (char16 c){
+void UnicodeString::operator= (char16 c){
   Invalidate();
 
   delete[] Data_32;
@@ -319,7 +319,7 @@ void clUnicodeString::operator= (char16 c){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (char32 c){
+void UnicodeString::operator= (char32 c){
   Invalidate();
 
   delete[] Data_32;
@@ -331,7 +331,7 @@ void clUnicodeString::operator= (char32 c){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (int d){
+void UnicodeString::operator= (int d){
   size_t j, l;
   char32 c;
 
@@ -371,7 +371,7 @@ void clUnicodeString::operator= (int d){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (int64_t d){
+void UnicodeString::operator= (int64_t d){
   if(d < 0){
     operator+= ('-');
     operator+= ((uint64_t)(-d));
@@ -381,7 +381,7 @@ void clUnicodeString::operator= (int64_t d){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (uint64_t d){
+void UnicodeString::operator= (uint64_t d){
   size_t j, l;
   char32 c;
 
@@ -412,12 +412,12 @@ void clUnicodeString::operator= (uint64_t d){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (double f){
+void UnicodeString::operator= (double f){
   SetFloat(f, 9, false);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (const char* String){
+void UnicodeString::operator= (const char* String){
   size_t j;
   Invalidate();
 
@@ -432,7 +432,7 @@ void clUnicodeString::operator= (const char* String){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (const char16* String){
+void UnicodeString::operator= (const char16* String){
   size_t j;
   Invalidate();
 
@@ -447,7 +447,7 @@ void clUnicodeString::operator= (const char16* String){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (const char32* String){
+void UnicodeString::operator= (const char32* String){
   size_t j;
   Invalidate();
 
@@ -460,7 +460,7 @@ void clUnicodeString::operator= (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator= (const clUnicodeString& String){
+void UnicodeString::operator= (const UnicodeString& String){
   size_t j;
   Invalidate();
 
@@ -474,70 +474,66 @@ void clUnicodeString::operator= (const clUnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (char c){
+void UnicodeString::operator+= (char c){
   operator+= ((char32)((unsigned char)c));
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (char16 c){
+void UnicodeString::operator+= (char16 c){
   operator+= ((char32)c);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (char32 c){
+void UnicodeString::operator+= (char32 c){
   Invalidate();
 
   Append(c);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (int d){
-  clUnicodeString s;
+void UnicodeString::operator+= (int d){
+  UnicodeString s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (int64_t d){
-  clUnicodeString s;
+void UnicodeString::operator+= (int64_t d){
+  UnicodeString s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (uint64_t d){
-  clUnicodeString s;
+void UnicodeString::operator+= (uint64_t d){
+  UnicodeString s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (double f){
-  clUnicodeString s;
+void UnicodeString::operator+= (double f){
+  UnicodeString s;
   s = f;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (const char* String){
-  size_t j;
-
-  clUnicodeString Temp;
+void UnicodeString::operator+= (const char* String){
+  UnicodeString Temp;
   Temp = String;
   operator+=(Temp);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (const char16* String){
-  size_t j;
-
-  clUnicodeString Temp;
+void UnicodeString::operator+= (const char16* String){
+  UnicodeString Temp;
   Temp = String;
   operator+=(Temp);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (const char32* String){
+void UnicodeString::operator+= (const char32* String){
   size_t j;
   Invalidate();
 
@@ -545,18 +541,18 @@ void clUnicodeString::operator+= (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::operator+= (const clUnicodeString& String){
+void UnicodeString::operator+= (const UnicodeString& String){
   operator+= (String.Data_32);
 }
 //------------------------------------------------------------------------------
 
-char32 clUnicodeString::operator[] (size_t Index){
+char32 UnicodeString::operator[] (size_t Index){
   if(Index >= 0 && Index < Length_32) return Data_32[Index];
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::SetLength32(size_t Length){
+void UnicodeString::SetLength32(size_t Length){
   Invalidate();
 
   if(Length < Length_32){
@@ -568,41 +564,41 @@ void clUnicodeString::SetLength32(size_t Length){
 }
 //------------------------------------------------------------------------------
 
-size_t clUnicodeString::Length8(){
+size_t UnicodeString::Length8(){
   Update8();
   return Length_8;
 }
 //------------------------------------------------------------------------------
 
-size_t clUnicodeString::Length16(){
+size_t UnicodeString::Length16(){
   Update16();
   return Length_16;
 }
 //------------------------------------------------------------------------------
 
-size_t clUnicodeString::Length32(){
+size_t UnicodeString::Length32(){
   return Length_32;
 }
 //------------------------------------------------------------------------------
 
-char* clUnicodeString::UTF8(){
+char* UnicodeString::UTF8(){
   Update8();
   return Data_8;
 }
 //------------------------------------------------------------------------------
 
-char16* clUnicodeString::UTF16(){
+char16* UnicodeString::UTF16(){
   Update16();
   return Data_16;
 }
 //------------------------------------------------------------------------------
 
-char32* clUnicodeString::UTF32(){
+char32* UnicodeString::UTF32(){
   return Data_32;
 }
 //------------------------------------------------------------------------------
 
-char* clUnicodeString::New8(){
+char* UnicodeString::New8(){
   Update8();
 
   size_t j;
@@ -615,7 +611,7 @@ char* clUnicodeString::New8(){
 }
 //------------------------------------------------------------------------------
 
-char16* clUnicodeString::New16(){
+char16* UnicodeString::New16(){
   Update16();
 
   size_t  j;
@@ -628,7 +624,7 @@ char16* clUnicodeString::New16(){
 }
 //------------------------------------------------------------------------------
 
-char32* clUnicodeString::New32(){
+char32* UnicodeString::New32(){
   size_t  j;
   char32* Temp = new char32[Length_32+1];
 
@@ -639,23 +635,23 @@ char32* clUnicodeString::New32(){
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator== (const char* String){
-  clUnicodeString s2;
+bool UnicodeString::operator== (const char* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator== (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator== (const char16* String){
-  clUnicodeString s2;
+bool UnicodeString::operator== (const char16* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator== (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator== (const char32* String){
+bool UnicodeString::operator== (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -666,48 +662,48 @@ bool clUnicodeString::operator== (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator== (clUnicodeString& String){
+bool UnicodeString::operator== (UnicodeString& String){
   return operator== (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator!= (const char* String){
+bool UnicodeString::operator!= (const char* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator!= (const char16* String){
+bool UnicodeString::operator!= (const char16* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator!= (const char32* String){
+bool UnicodeString::operator!= (const char32* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator!= (clUnicodeString& String){
+bool UnicodeString::operator!= (UnicodeString& String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator< (const char* String){
-  clUnicodeString s2;
+bool UnicodeString::operator< (const char* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator< (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator< (const char16* String){
-  clUnicodeString s2;
+bool UnicodeString::operator< (const char16* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator< (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator< (const char32* String){
+bool UnicodeString::operator< (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -720,28 +716,28 @@ bool clUnicodeString::operator< (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator< (clUnicodeString& String){
+bool UnicodeString::operator< (UnicodeString& String){
   return operator< (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator> (const char* String){
-  clUnicodeString s2;
+bool UnicodeString::operator> (const char* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator> (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator> (const char16* String){
-  clUnicodeString s2;
+bool UnicodeString::operator> (const char16* String){
+  UnicodeString s2;
   s2 = String;
 
   return operator> (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator> (const char32* String){
+bool UnicodeString::operator> (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -754,12 +750,12 @@ bool clUnicodeString::operator> (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool clUnicodeString::operator> (clUnicodeString& String){
+bool UnicodeString::operator> (UnicodeString& String){
   return operator> (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-int clUnicodeString::Compare(const clUnicodeString& String){
+int UnicodeString::Compare(const UnicodeString& String){
   size_t j;
 
   for(j = 0; Data_32[j] && String.Data_32[j]; j++){
@@ -773,8 +769,8 @@ int clUnicodeString::Compare(const clUnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-int clUnicodeString::CompareNoCase(const clUnicodeString& String){
-  clUnicodeString Left, Right;
+int UnicodeString::CompareNoCase(const UnicodeString& String){
+  UnicodeString Left, Right;
 
   Left  = *this;
   Right = String;
@@ -786,8 +782,8 @@ int clUnicodeString::CompareNoCase(const clUnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-int clUnicodeString::CompareNoCase(const char* String){
-  clUnicodeString Left, Right;
+int UnicodeString::CompareNoCase(const char* String){
+  UnicodeString Left, Right;
 
   Left  = *this;
   Right = String;
@@ -799,52 +795,52 @@ int clUnicodeString::CompareNoCase(const char* String){
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char* String1, clUnicodeString& String2){
+bool operator== (const char* String1, UnicodeString& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char16* String1, clUnicodeString& String2){
+bool operator== (const char16* String1, UnicodeString& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char32* String1, clUnicodeString& String2){
+bool operator== (const char32* String1, UnicodeString& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char* String1, clUnicodeString& String2){
+bool operator< (const char* String1, UnicodeString& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char16* String1, clUnicodeString& String2){
+bool operator< (const char16* String1, UnicodeString& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char32* String1, clUnicodeString& String2){
+bool operator< (const char32* String1, UnicodeString& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char* String1, clUnicodeString& String2){
+bool operator> (const char* String1, UnicodeString& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char16* String1, clUnicodeString& String2){
+bool operator> (const char16* String1, UnicodeString& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char32* String1, clUnicodeString& String2){
+bool operator> (const char32* String1, UnicodeString& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::SetHex(unsigned i, int Places){ // Hexadecimal
+void UnicodeString::SetHex(unsigned i, int Places){ // Hexadecimal
   Invalidate();
 
   bool   Negative = false;
@@ -883,7 +879,7 @@ void clUnicodeString::SetHex(unsigned i, int Places){ // Hexadecimal
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::SetFloat(double d, int SignificantFigures, bool Fill){
+void UnicodeString::SetFloat(double d, int SignificantFigures, bool Fill){
   int    shift, places;
   bool   sign, trailing;
   char32 c;
@@ -980,19 +976,19 @@ void clUnicodeString::SetFloat(double d, int SignificantFigures, bool Fill){
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::AppendHex(unsigned i, int Places){
+void UnicodeString::AppendHex(unsigned i, int Places){
   Invalidate();
 
-  clUnicodeString s;
+  UnicodeString s;
   s.SetHex(i, Places);
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void clUnicodeString::AppendFloat(double d, int SignificantFigures, bool Fill){
+void UnicodeString::AppendFloat(double d, int SignificantFigures, bool Fill){
   Invalidate();
 
-  clUnicodeString s;
+  UnicodeString s;
   s.SetFloat(d, SignificantFigures, Fill);
   operator+= (s);
 }
@@ -1000,7 +996,7 @@ void clUnicodeString::AppendFloat(double d, int SignificantFigures, bool Fill){
 
 // http://www.info.teradata.com/HTMLPubs/DB_TTU_14_00/index.html#page/
 // International_Character_Set/B035_1125_111K/appe.15.10.html
-void clUnicodeString::UpperCase(){
+void UnicodeString::UpperCase(){
   size_t j;
   Invalidate();
 

@@ -18,7 +18,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //==============================================================================
 
-#include "clCalculator.h"
+#include "Calculator.h"
 //------------------------------------------------------------------------------
 
 #define e  2.718281828459045235360L
@@ -34,12 +34,12 @@ long double fix(long double x){
 }
 //------------------------------------------------------------------------------
 
-static clLLRBTree* Constants;
+static LLRBTree* Constants;
 //------------------------------------------------------------------------------
 
 struct CONSTANT{
-  clUnicodeString      Name; // Including any leading '\'
-  long double Value;
+  UnicodeString Name; // Including any leading '\'
+  long double   Value;
 
   CONSTANT(const char* Name){
     this->Name = Name;
@@ -65,7 +65,7 @@ static void AddConstant(const char* Name, long double Value){
 static int InstanceCount = 0;
 //------------------------------------------------------------------------------
 
-clCalculator::clCalculator(){
+Calculator::Calculator(){
   Tree    = 0;
   Measure = Radians;
 
@@ -73,7 +73,7 @@ clCalculator::clCalculator(){
     // If the calculator is defined as a global variable, there is no
     // guarantee that the Constants tree has been initialised before this
     // constructor is called, if it is also a non-pointer global variable.
-    Constants          = new clLLRBTree;
+    Constants          = new LLRBTree;
     Constants->Compare = CONSTANT_Compare;
 
     AddConstant("e"        , e                );
@@ -104,7 +104,7 @@ clCalculator::clCalculator(){
 }
 //------------------------------------------------------------------------------
 
-clCalculator::~clCalculator(){
+Calculator::~Calculator(){
   InstanceCount--;
 
   if(!InstanceCount){
@@ -120,7 +120,7 @@ clCalculator::~clCalculator(){
 }
 //------------------------------------------------------------------------------
 
-clCalculator::NODE::NODE(){
+Calculator::NODE::NODE(){
   Operation = Val;
   Value     = 0.0;
   Left      = 0;
@@ -129,7 +129,7 @@ clCalculator::NODE::NODE(){
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::DeleteTree(NODE* Root){
+void Calculator::DeleteTree(NODE* Root){
   if(Root){
     DeleteTree(Root->Left );
     DeleteTree(Root->Right);
@@ -139,7 +139,7 @@ void clCalculator::DeleteTree(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-clCalculator::NODE* clCalculator::CopyNode(NODE* Root){
+Calculator::NODE* Calculator::CopyNode(NODE* Root){
   NODE* N = new NODE;
   if(Root){
     N->Operation = Root->Operation;
@@ -155,7 +155,7 @@ clCalculator::NODE* clCalculator::CopyNode(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-clCalculator::NODE* clCalculator::NewNode(NODE* Root){
+Calculator::NODE* Calculator::NewNode(NODE* Root){
   NODE* N = new NODE;
   if(Root){
     N->Operation = Root->Operation;
@@ -169,7 +169,7 @@ clCalculator::NODE* clCalculator::NewNode(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::ConditionOp(NODE* Root){
+bool Calculator::ConditionOp(NODE* Root){
   if(Buffer[Index] == '['){
     Index++;
     Root->Operation = Condition;
@@ -190,7 +190,7 @@ bool clCalculator::ConditionOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::LogicOp(NODE* Root){
+bool Calculator::LogicOp(NODE* Root){
   NODE* N;
 
   if(AddOp(Root)){
@@ -313,7 +313,7 @@ bool clCalculator::LogicOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::AddOp(NODE* Root){
+bool Calculator::AddOp(NODE* Root){
   NODE* N;
 
   if(MulOp(Root)){
@@ -346,7 +346,7 @@ bool clCalculator::AddOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::MulOp(NODE* Root){
+bool Calculator::MulOp(NODE* Root){
   NODE* N;
 
   if(PowerOp(Root)){
@@ -399,7 +399,7 @@ bool clCalculator::MulOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::PowerOp(NODE* Root){
+bool Calculator::PowerOp(NODE* Root){
   NODE* N;
 
   if(Function(Root)){
@@ -424,7 +424,7 @@ bool clCalculator::PowerOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::FuncName(clUnicodeString* Name){
+void Calculator::FuncName(UnicodeString* Name){
   *Name = "";
 
   int i = Index;
@@ -438,9 +438,9 @@ void clCalculator::FuncName(clUnicodeString* Name){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Function(NODE* Root){
+bool Calculator::Function(NODE* Root){
   NODE*  N;
-  clUnicodeString s;
+  UnicodeString s;
   bool   Minus = false;
 
   if(Buffer[Index] == '-'){
@@ -651,7 +651,7 @@ bool clCalculator::Function(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Factorial(NODE* Root){
+bool Calculator::Factorial(NODE* Root){
 NODE* N;
 if(Value(Root)){
   if(Buffer[Index] == '!'){
@@ -668,7 +668,7 @@ return true;
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Exponent(NODE* Root){
+bool Calculator::Exponent(NODE* Root){
   int  s = 1;
   int  i;
   bool Binary;
@@ -699,9 +699,9 @@ bool clCalculator::Exponent(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Value(NODE* Root){
+bool Calculator::Value(NODE* Root){
   bool        Minus = false;
-  clUnicodeString      s;
+  UnicodeString      s;
   NODE*       N;
   long double f;
 
@@ -792,7 +792,7 @@ bool clCalculator::Value(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Float(long double* f){
+bool Calculator::Float(long double* f){
   int s = 1;
   int i;
   long double temp;
@@ -818,7 +818,7 @@ bool clCalculator::Float(long double* f){
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::BuildTree(const char* Formula){
+void Calculator::BuildTree(const char* Formula){
   DeleteTree(Tree);
   Tree = 0;
   int j, q;
@@ -855,7 +855,7 @@ bool comp(char* a, char* b){
 }
 //------------------------------------------------------------------------------
 
-long double clCalculator::CalcTree(NODE* Root, const char* Variable,
+long double Calculator::CalcTree(NODE* Root, const char* Variable,
 long double Value){
   long double A;
   long double B;
@@ -1249,12 +1249,12 @@ long double Value){
 }
 //------------------------------------------------------------------------------
 
-long double clCalculator::CalculateTree(const char* Variable, long double Value){
+long double Calculator::CalculateTree(const char* Variable, long double Value){
   return CalcTree(Tree, Variable, Value);
 }
 //------------------------------------------------------------------------------
 
-long double clCalculator::Calculate(
+long double Calculator::Calculate(
   const char* Formula,
   const char* Variable,
   long double Value
@@ -1264,7 +1264,7 @@ long double clCalculator::Calculate(
 }
 //------------------------------------------------------------------------------
 
-bool clCalculator::Simplify(NODE* Root){
+bool Calculator::Simplify(NODE* Root){
   NODE* N;
   if(Root){
     while(Simplify(Root->Left ));
@@ -1443,7 +1443,7 @@ bool clCalculator::Simplify(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::Diff(NODE* Root, const char* Variable){
+void Calculator::Diff(NODE* Root, const char* Variable){
   NODE* N;
   NODE* Temp;
   if(Root){
@@ -2302,8 +2302,8 @@ void clCalculator::Diff(NODE* Root, const char* Variable){
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::ViewTree(NODE* Root, clUnicodeString* Result, unsigned BufferSize){
-  clUnicodeString A, B;
+void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize){
+  UnicodeString A, B;
 
   if(Root){
     if(Root->Right){ // Function
@@ -2805,7 +2805,7 @@ void clCalculator::ViewTree(NODE* Root, clUnicodeString* Result, unsigned Buffer
 }
 //------------------------------------------------------------------------------
 
-void clCalculator::ShowTree(clUnicodeString* Result, unsigned BufferSize){
+void Calculator::ShowTree(UnicodeString* Result, unsigned BufferSize){
   ViewTree(Tree, Result, BufferSize);
 }
 //------------------------------------------------------------------------------
