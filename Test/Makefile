@@ -29,12 +29,14 @@ Headers = *.h \
 
 all: bin/testDebugMessages.exe \
      bin/testFileWrapper.exe   \
-     bin/testCalculator.exe
+     bin/testCalculator.exe    \
+     bin/testJSON.exe
 
 test: all
 	bin/testDebugMessages.exe
 	bin/testFileWrapper.exe
 	bin/testCalculator.exe
+	bin/testJSON.exe
 
 clean:
 	rm -rf obj

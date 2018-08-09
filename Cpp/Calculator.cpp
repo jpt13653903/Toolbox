@@ -29,23 +29,17 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 void operator+= (string& S, double d){
-  char s[0x100];
-  sprintf(s, "%0.12lg", d);
-  S += s;
+  char s[0x100]; sprintf(s, "%0.12lg", d); S += s;
 }
 //------------------------------------------------------------------------------
 
 void operator+= (string& S, int i){
-  char s[0x100];
-  sprintf(s, "%d", i);
-  S += s;
+  char s[0x100]; sprintf(s, "%d", i); S += s;
 }
 //------------------------------------------------------------------------------
 
 void operator+= (string& S, void* p){
-  char s[0x100];
-  sprintf(s, "%p", p);
-  S += s;
+  char s[0x100]; sprintf(s, "%p", p); S += s;
 }
 //------------------------------------------------------------------------------
 
@@ -2328,454 +2322,486 @@ void Calculator::ViewTree(NODE* Root, string* Result){
 
   if(Root){
     if(Root->Right){ // Function
-    switch(Root->Operation){
-      case Fact:
-        ViewTree(Root->Right, &A);
-        *Result += A ;
-        *Result += "!";
+      switch(Root->Operation){
+        case Fact:
+          ViewTree(Root->Right, &A);
+          *Result += A ;
+          *Result += "!";
+          return;
+
+        case Power:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += ")^(";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Multiply:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += "*";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Divide:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += "/";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Remainder:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += "rem";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Add:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += "+";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Subtract:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result += "(";
+          *Result += A ;
+          *Result += "-";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Log:
+          ViewTree(Root->Right, &A);
+          *Result += "log(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Log2:
+          ViewTree(Root->Right, &A);
+          *Result += "log2(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Ln:
+          ViewTree(Root->Right, &A);
+          *Result += "ln(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Abs:
+          ViewTree(Root->Right, &A);
+          *Result += "abs(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Round:
+          ViewTree(Root->Right, &A);
+          *Result += "round(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Fix:
+          ViewTree(Root->Right, &A);
+          *Result += "fix(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Floor:
+          ViewTree(Root->Right, &A);
+          *Result += "floor(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Ceil:
+          ViewTree(Root->Right, &A);
+          *Result += "ceil(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Rand:
+          ViewTree(Root->Right, &A);
+          *Result += "rand(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Sin:
+          ViewTree(Root->Right, &A);
+          *Result += "sin(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ASin:
+          ViewTree(Root->Right, &A);
+          *Result += "asin(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Cos:
+          ViewTree(Root->Right, &A);
+          *Result += "cos(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACos:
+          ViewTree(Root->Right, &A);
+          *Result += "acos(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Tan:
+          ViewTree(Root->Right, &A);
+          *Result += "tan(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ATan:
+          ViewTree(Root->Right, &A);
+          *Result += "atan(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Sec:
+          ViewTree(Root->Right, &A);
+          *Result += "sec(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ASec:
+          ViewTree(Root->Right, &A);
+          *Result += "asec(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Cosec:
+          ViewTree(Root->Right, &A);
+          *Result += "cosec(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACosec:
+          ViewTree(Root->Right, &A);
+          *Result += "acosec(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Cot:
+          ViewTree(Root->Right, &A);
+          *Result += "cot(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACot:
+          ViewTree(Root->Right, &A);
+          *Result += "acot(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Sinh:
+          ViewTree(Root->Right, &A);
+          *Result += "sinh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ASinh:
+          ViewTree(Root->Right, &A);
+          *Result += "asinh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Cosh:
+          ViewTree(Root->Right, &A);
+          *Result += "cosh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACosh:
+          ViewTree(Root->Right, &A);
+          *Result += "acosh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Tanh:
+          ViewTree(Root->Right, &A);
+          *Result += "tanh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ATanh:
+          ViewTree(Root->Right, &A);
+          *Result += "atanh(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Sech:
+          ViewTree(Root->Right, &A);
+          *Result += "sech(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ASech:
+          ViewTree(Root->Right, &A);
+          *Result += "asech(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Cosech:
+          ViewTree(Root->Right, &A);
+          *Result += "cosech(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACosech:
+          ViewTree(Root->Right, &A);
+          *Result += "acosech(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Coth:
+          ViewTree(Root->Right, &A);
+          *Result += "coth(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case ACoth:
+          ViewTree(Root->Right, &A);
+          *Result += "acoth(";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case Condition:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "[";
+          *Result += A ;
+          *Result += "]";
+          *Result += B ;
+          ViewTree(Root->Other, &A);
+          *Result += A ;
+          return;
+
+        case Greater:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += ">";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Less:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "<";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Equal:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "=";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case GreaterEqual:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += ">=";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case LessEqual:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "<=";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case NotEqual:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "~=";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Not:
+          ViewTree(Root->Left , &A);
+          *Result  = "(~";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case bNot:
+          ViewTree(Root->Left , &A);
+          *Result  = "(not";
+          *Result += A ;
+          *Result += ")";
+          return;
+
+        case And:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "&";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Or:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += "|";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case Xor:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += ":";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case bAnd:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += " and ";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case bOr:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += " or ";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        case bXor:
+          ViewTree(Root->Left , &A);
+          ViewTree(Root->Right, &B);
+          *Result  = "(";
+          *Result += A ;
+          *Result += " xor ";
+          *Result += B ;
+          *Result += ")";
+          return;
+
+        default:
+          *Result  = "(Unknown Operation: ";
+          *Result += (int)Root->Operation;
+          *Result += ", Value: 0x";
+          *Result += (double)round(Root->Value);
+          *Result += ", Name: ";
+          *Result += Root->Name;
+          *Result += ", Left: ";
+          *Result += Root->Left;
+          *Result += ", Right: ";
+          *Result += Root->Right;
+          *Result += ", Other: ";
+          *Result += Root->Other;
+          *Result += ")";
+          return;
+      }
+    }else{ // Value
+      if(Root->Operation == Var){
+        *Result = Root->Name;
         return;
 
-      case Power:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += ")^(";
-        *Result += B ;
-        *Result += ")";
+      }else if(Root->Operation == Val){
+        if(Root->Value < 0.0){
+          *Result  = '(';
+          *Result += (double)Root->Value;
+          *Result += ')';
+        }else{
+          *Result  = "";
+          *Result += (double)Root->Value;
+        }
         return;
 
-      case Multiply:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += "*";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Divide:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += "/";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Remainder:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += "rem";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Add:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += "+";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Subtract:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result += "(";
-        *Result += A ;
-        *Result += "-";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Log:
-        ViewTree(Root->Right, &A);
-        *Result += "log(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Log2:
-        ViewTree(Root->Right, &A);
-        *Result += "log2(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Ln:
-        ViewTree(Root->Right, &A);
-        *Result += "ln(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Abs:
-        ViewTree(Root->Right, &A);
-        *Result += "abs(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Round:
-        ViewTree(Root->Right, &A);
-        *Result += "round(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Fix:
-        ViewTree(Root->Right, &A);
-        *Result += "fix(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Floor:
-        ViewTree(Root->Right, &A);
-        *Result += "floor(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Ceil:
-        ViewTree(Root->Right, &A);
-        *Result += "ceil(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Rand:
-        ViewTree(Root->Right, &A);
-        *Result += "rand(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Sin:
-        ViewTree(Root->Right, &A);
-        *Result += "sin(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ASin:
-        ViewTree(Root->Right, &A);
-        *Result += "asin(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Cos:
-        ViewTree(Root->Right, &A);
-        *Result += "cos(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACos:
-        ViewTree(Root->Right, &A);
-        *Result += "acos(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Tan:
-        ViewTree(Root->Right, &A);
-        *Result += "tan(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ATan:
-        ViewTree(Root->Right, &A);
-        *Result += "atan(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Sec:
-        ViewTree(Root->Right, &A);
-        *Result += "sec(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ASec:
-        ViewTree(Root->Right, &A);
-        *Result += "asec(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Cosec:
-        ViewTree(Root->Right, &A);
-        *Result += "cosec(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACosec:
-        ViewTree(Root->Right, &A);
-        *Result += "acosec(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Cot:
-        ViewTree(Root->Right, &A);
-        *Result += "cot(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACot:
-        ViewTree(Root->Right, &A);
-        *Result += "acot(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Sinh:
-        ViewTree(Root->Right, &A);
-        *Result += "sinh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ASinh:
-        ViewTree(Root->Right, &A);
-        *Result += "asinh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Cosh:
-        ViewTree(Root->Right, &A);
-        *Result += "cosh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACosh:
-        ViewTree(Root->Right, &A);
-        *Result += "acosh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Tanh:
-        ViewTree(Root->Right, &A);
-        *Result += "tanh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ATanh:
-        ViewTree(Root->Right, &A);
-        *Result += "atanh(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Sech:
-        ViewTree(Root->Right, &A);
-        *Result += "sech(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ASech:
-        ViewTree(Root->Right, &A);
-        *Result += "asech(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Cosech:
-        ViewTree(Root->Right, &A);
-        *Result += "cosech(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACosech:
-        ViewTree(Root->Right, &A);
-        *Result += "acosech(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Coth:
-        ViewTree(Root->Right, &A);
-        *Result += "coth(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case ACoth:
-        ViewTree(Root->Right, &A);
-        *Result += "acoth(";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case Condition:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "[";
-        *Result += A ;
-        *Result += "]";
-        *Result += B ;
-        ViewTree(Root->Other, &A);
-        *Result += A ;
-        return;
-
-      case Greater:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += ">";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Less:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "<";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Equal:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "=";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case GreaterEqual:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += ">=";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case LessEqual:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "<=";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case NotEqual:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "~=";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Not:
-        ViewTree(Root->Left , &A);
-        *Result  = "(~";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case bNot:
-        ViewTree(Root->Left , &A);
-        *Result  = "(not";
-        *Result += A ;
-        *Result += ")";
-        return;
-
-      case And:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "&";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Or:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += "|";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case Xor:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += ":";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case bAnd:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += " and ";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case bOr:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += " or ";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      case bXor:
-        ViewTree(Root->Left , &A);
-        ViewTree(Root->Right, &B);
-        *Result  = "(";
-        *Result += A ;
-        *Result += " xor ";
-        *Result += B ;
-        *Result += ")";
-        return;
-
-      default:
-        *Result  = "(Unknown Operation: ";
+      }else{
+        *Result  = "(Invalid node: Operation: ";
         *Result += (int)Root->Operation;
-        *Result += ", Value: 0x";
-        *Result += (double)round(Root->Value);
+        *Result += ", Value: ";
+        *Result += (double)Root->Value;
         *Result += ", Name: ";
         *Result += Root->Name;
         *Result += ", Left: ";
@@ -2786,39 +2812,7 @@ void Calculator::ViewTree(NODE* Root, string* Result){
         *Result += Root->Other;
         *Result += ")";
         return;
-    }
-    }else{ // Value
-    if(Root->Operation == Var){
-      *Result = Root->Name;
-      return;
-
-    }else if(Root->Operation == Val){
-      if(Root->Value < 0.0){
-        *Result  = '(';
-        *Result += (double)Root->Value;
-        *Result += ')';
-      }else{
-        *Result  = "";
-        *Result += (double)Root->Value;
       }
-      return;
-
-    }else{
-      *Result  = "(Invalid node: Operation: ";
-      *Result += (int)Root->Operation;
-      *Result += ", Value: ";
-      *Result += (double)Root->Value;
-      *Result += ", Name: ";
-      *Result += Root->Name;
-      *Result += ", Left: ";
-      *Result += Root->Left;
-      *Result += ", Right: ";
-      *Result += Root->Right;
-      *Result += ", Other: ";
-      *Result += Root->Other;
-      *Result += ")";
-      return;
-    }
     }
   }else{
     *Result = "";

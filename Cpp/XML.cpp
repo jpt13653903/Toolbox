@@ -83,8 +83,8 @@ XML::NESTING::NESTING(const char* EntityName){
 //------------------------------------------------------------------------------
 
 XML::NESTING::~NESTING(){
- // This happens when End() is called.
- // Entity deleted later.
+  // This happens when End() is called.
+  // Entity deleted later.
 }
 //------------------------------------------------------------------------------
 
@@ -270,23 +270,23 @@ void XML::GetLegalName(const char* Name, UnicodeString* LegalName){
   int j = 0;
 
   if(
-  (Temp[0] == ':'                          ) ||
-  (Temp[0] == '_'                          ) ||
-  (Temp[0] >= 'A'     && Temp[0] <= 'Z'    ) ||
-  (Temp[0] >= 'a'     && Temp[0] <= 'z'    ) ||
-  (Temp[0] >= 0x000C0 && Temp[0] <= 0x000D6) ||
-  (Temp[0] >= 0x000D8 && Temp[0] <= 0x000F6) ||
-  (Temp[0] >= 0x000F8 && Temp[0] <= 0x002FF) ||
-  (Temp[0] >= 0x00370 && Temp[0] <= 0x0037D) ||
-  (Temp[0] >= 0x0037F && Temp[0] <= 0x01FFF) ||
-  (Temp[0] >= 0x0200C && Temp[0] <= 0x0200D) ||
-  (Temp[0] >= 0x02070 && Temp[0] <= 0x0218F) ||
-  (Temp[0] >= 0x02C00 && Temp[0] <= 0x02FEF) ||
-  (Temp[0] >= 0x03001 && Temp[0] <= 0x0D7FF) ||
-  (Temp[0] >= 0x0F900 && Temp[0] <= 0x0FDCF) ||
-  (Temp[0] >= 0x0FDF0 && Temp[0] <= 0x0FFFD) ||
-  (Temp[0] >= 0x10000 && Temp[0] <= 0xEFFFF)
- )    *LegalName += Temp[0];
+    (Temp[0] == ':'                          ) ||
+    (Temp[0] == '_'                          ) ||
+    (Temp[0] >= 'A'     && Temp[0] <= 'Z'    ) ||
+    (Temp[0] >= 'a'     && Temp[0] <= 'z'    ) ||
+    (Temp[0] >= 0x000C0 && Temp[0] <= 0x000D6) ||
+    (Temp[0] >= 0x000D8 && Temp[0] <= 0x000F6) ||
+    (Temp[0] >= 0x000F8 && Temp[0] <= 0x002FF) ||
+    (Temp[0] >= 0x00370 && Temp[0] <= 0x0037D) ||
+    (Temp[0] >= 0x0037F && Temp[0] <= 0x01FFF) ||
+    (Temp[0] >= 0x0200C && Temp[0] <= 0x0200D) ||
+    (Temp[0] >= 0x02070 && Temp[0] <= 0x0218F) ||
+    (Temp[0] >= 0x02C00 && Temp[0] <= 0x02FEF) ||
+    (Temp[0] >= 0x03001 && Temp[0] <= 0x0D7FF) ||
+    (Temp[0] >= 0x0F900 && Temp[0] <= 0x0FDCF) ||
+    (Temp[0] >= 0x0FDF0 && Temp[0] <= 0x0FFFD) ||
+    (Temp[0] >= 0x10000 && Temp[0] <= 0xEFFFF)
+  )    *LegalName += Temp[0];
   else *LegalName += '_'    ;
 
   j = 1;
@@ -679,25 +679,25 @@ bool XML::ReadAttribute(LLRBTree* Tree){
   ATTRIBUTE* Temp = new ATTRIBUTE("", "");
 
   if(!ReadName(&Temp->Name)){ // No name
-  delete Temp;
-  return false;
+    delete Temp;
+    return false;
   }
 
   while(ReadSpace() || ReadComment());
 
   if(ReadBuffer[ReadIndex] != '='){ // No assignment
-  delete Temp;
-  printf("Error: %s\n  %s\n", "XML Error", "No Assignment");
-  PrintLineNumber();
-  return false;
+    delete Temp;
+    printf("Error: %s\n  %s\n", "XML Error", "No Assignment");
+    PrintLineNumber();
+    return false;
   }
   ReadIndex++;
 
   while(ReadSpace() || ReadComment());
 
   if( // No value
-  ReadBuffer[ReadIndex] != '"' &&
-  ReadBuffer[ReadIndex] != '\''
+    ReadBuffer[ReadIndex] != '"' &&
+    ReadBuffer[ReadIndex] != '\''
   ){
     delete Temp;
     printf("Error: %s\n  %s\n", "XML Error", "No Value");
@@ -710,18 +710,18 @@ bool XML::ReadAttribute(LLRBTree* Tree){
   ReadContent(&Temp->Value, End);
 
   if(ReadBuffer[ReadIndex] != End){ // Open string
-  delete Temp;
-  printf("Error: %s\n  %s\n", "XML Error", "Open String");
-  PrintLineNumber();
-  return false;
+    delete Temp;
+    printf("Error: %s\n  %s\n", "XML Error", "Open String");
+    PrintLineNumber();
+    return false;
   }
   ReadIndex++;
 
   if(Tree->Find(Temp)){ // Duplicate entry
-  delete Temp;
-  printf("Error: %s\n  %s\n", "XML Error", "Duplicate Attribute");
-  PrintLineNumber();
-  return false;
+    delete Temp;
+    printf("Error: %s\n  %s\n", "XML Error", "Duplicate Attribute");
+    PrintLineNumber();
+    return false;
   }
 
   Tree->Insert(Temp);
