@@ -53,13 +53,21 @@ bool TestExpressions(){
 }
 //------------------------------------------------------------------------------
 
+void TreeView(const char* Expression){
+  std::string Tree;
+  Calc.BuildTree(Expression);
+  Calc.ShowTree(&Tree);
+  info("%s\n%s", Expression, Tree.c_str());
+}
+//------------------------------------------------------------------------------
+
 bool TestTreeView(){
   Start("Viewing the tree");
 
-  std::string Tree;
-  Calc.BuildTree(" 3 + x  * 5"); Calc.ShowTree(&Tree); info("Tree:\n%s", Tree.c_str());
-  Calc.BuildTree("(3 + x) * 5"); Calc.ShowTree(&Tree); info("Tree:\n%s", Tree.c_str());
-  Calc.BuildTree("sin(log(e^(pi + x)))"); Calc.ShowTree(&Tree); info("Tree:\n%s", Tree.c_str());
+  TreeView(" 3 + x  * 5");
+  TreeView("(3 + x) * 5");
+  TreeView("sin(log(e^(pi + x)))");
+  TreeView("d(sin(log(e^(pi + x))))dx");
 
   Done(); return true;
 }
