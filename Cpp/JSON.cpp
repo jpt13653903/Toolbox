@@ -568,7 +568,7 @@ bool JSON::ReadObject(JSON* ObjectList){
     ReadSpace();
     if(ReadBuffer[ReadIndex] != ':'){
       ReadError("\":\" expected");
-      return true;
+      return false;
     }
     ReadIndex++;
     if(ReadIndex >= ReadSize){
@@ -587,7 +587,7 @@ bool JSON::ReadObject(JSON* ObjectList){
     }
     if(ReadIndex >= ReadSize || ReadBuffer[ReadIndex] != ','){
       ReadError("\",\" expected");
-      return true;
+      return false;
     }
     ReadIndex++;
   }
@@ -628,7 +628,7 @@ bool JSON::ReadArray(JSON* ObjectList){
     ReadSpace();
     if(ReadIndex >= ReadSize || ReadBuffer[ReadIndex] != ','){
       ReadError("\",\" expected");
-      return true;
+      return false;
     }
     ReadIndex++;
   }
