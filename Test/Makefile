@@ -1,5 +1,5 @@
 CC      = g++
-Options = -Wall -fexceptions -O2
+Options = -Wall -fexceptions -O2 -DDEBUG
 #-------------------------------------------------------------------------------
 
 Toolbox = ../Cpp
@@ -20,13 +20,21 @@ Objects = obj/Calculator.o    \
           obj/UnicodeString.o \
           obj/XML.o
 
-Headers = $(Toolbox)/*.h
+Headers = *.h \
+          $(Toolbox)/*.h
 #-------------------------------------------------------------------------------
 
 .PHONY:    clean all
 .PRECIOUS: $(Objects)
 
-all: bin/test.exe
+all: bin/testDebugMessages.exe \
+     bin/testFileWrapper.exe   \
+     bin/testCalculator.exe
+
+test: all
+	bin/testDebugMessages.exe
+	bin/testFileWrapper.exe
+	bin/testCalculator.exe
 
 clean:
 	rm -rf obj

@@ -129,16 +129,18 @@ typedef uint16_t word;
   #define debug(...)
 #endif
 
-#define info(...) do                                             \
-{                                                                \
-  printf(ANSI_FG_CYAN "Info: "          ANSI_RESET __VA_ARGS__); \
-  printf(ANSI_FG_BRIGHT_BLACK " [%s]\n" ANSI_RESET,   __FILE__); \
+#define info(...) do                                    \
+{                                                       \
+  printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
+  printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
+         ANSI_RESET, __FILE__, __LINE__, __func__);     \
 }while(0)
 
-#define warning(...) do                                          \
-{                                                                \
-  printf(ANSI_FG_YELLOW "Warning: "     ANSI_RESET __VA_ARGS__); \
-  printf(ANSI_FG_BRIGHT_BLACK " [%s]\n" ANSI_RESET,   __FILE__); \
+#define warning(...) do                                      \
+{                                                            \
+  printf(ANSI_FG_YELLOW "Warning: " ANSI_RESET __VA_ARGS__); \
+  printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"      \
+         ANSI_RESET, __FILE__, __LINE__, __func__);          \
 }while(0)
 
 #define error(...) do                                          \

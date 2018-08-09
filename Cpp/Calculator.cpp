@@ -21,16 +21,37 @@
 #include "Calculator.h"
 //------------------------------------------------------------------------------
 
+using namespace std;
+//------------------------------------------------------------------------------
+
 #define e  2.718281828459045235360L
 #define pi 3.141592653589793238463L
 //------------------------------------------------------------------------------
 
+void operator+= (string& S, double d){
+  char s[0x100];
+  sprintf(s, "%0.12lg", d);
+  S += s;
+}
+//------------------------------------------------------------------------------
+
+void operator+= (string& S, int i){
+  char s[0x100];
+  sprintf(s, "%d", i);
+  S += s;
+}
+//------------------------------------------------------------------------------
+
+void operator+= (string& S, void* p){
+  char s[0x100];
+  sprintf(s, "%p", p);
+  S += s;
+}
+//------------------------------------------------------------------------------
+
 long double fix(long double x){
-  if(x < 0.0){
-    return ceill(x);
-  }else{
-    return floorl(x);
-  }
+  if(x < 0.0) return ceill(x);
+  else        return floorl(x);
 }
 //------------------------------------------------------------------------------
 
@@ -38,8 +59,8 @@ static LLRBTree* Constants;
 //------------------------------------------------------------------------------
 
 struct CONSTANT{
-  UnicodeString Name; // Including any leading '\'
-  long double   Value;
+  string      Name; // Including any leading '\'
+  long double Value;
 
   CONSTANT(const char* Name){
     this->Name = Name;
@@ -52,7 +73,7 @@ static int CONSTANT_Compare(void* Left, void* Right){
   CONSTANT* left  = (CONSTANT*)Left;
   CONSTANT* right = (CONSTANT*)Right;
 
-  return left->Name.Compare(right->Name);
+  return left->Name.compare(right->Name);
 }
 //------------------------------------------------------------------------------
 
@@ -424,7 +445,7 @@ bool Calculator::PowerOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::FuncName(UnicodeString* Name){
+void Calculator::FuncName(string* Name){
   *Name = "";
 
   int i = Index;
@@ -440,7 +461,7 @@ void Calculator::FuncName(UnicodeString* Name){
 
 bool Calculator::Function(NODE* Root){
   NODE*  N;
-  UnicodeString s;
+  string s;
   bool   Minus = false;
 
   if(Buffer[Index] == '-'){
@@ -462,7 +483,7 @@ bool Calculator::Function(NODE* Root){
     N = NewNode();
     if(!Value(N)) return false;
     if(N->Operation != Var) return false;
-    Diff(Root, N->Name.UTF8());
+    Diff(Root, N->Name.c_str());
     DeleteTree(N);
   }else if(s == "log"){
     Index += 3;
@@ -701,7 +722,7 @@ bool Calculator::Exponent(NODE* Root){
 
 bool Calculator::Value(NODE* Root){
   bool        Minus = false;
-  UnicodeString      s;
+  string      s;
   NODE*       N;
   long double f;
 
@@ -763,17 +784,17 @@ bool Calculator::Value(NODE* Root){
     }
   }else{
     FuncName(&s);
-    if(s.Length32()){
-      CONSTANT  Key(s.UTF8());
+    if(s.length()){
+      CONSTANT  Key(s.c_str());
       CONSTANT* Constant = (CONSTANT*)Constants->Find(&Key);
       if(Constant){
-        Index += Constant->Name.Length8();
+        Index += Constant->Name.length();
         Root->Operation = Val;
         Root->Value = Constant->Value;
         if(Minus) Root->Value *= -1.;
 
       }else{
-        Index += s.Length8();
+        Index += s.length();
         Root->Operation = Var;
         Root->Name      = s;
         if(Minus){
@@ -2302,31 +2323,31 @@ void Calculator::Diff(NODE* Root, const char* Variable){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize){
-  UnicodeString A, B;
+void Calculator::ViewTree(NODE* Root, string* Result){
+  string A, B;
 
   if(Root){
     if(Root->Right){ // Function
     switch(Root->Operation){
       case Fact:
-        ViewTree(Root->Right, &A, BufferSize);
+        ViewTree(Root->Right, &A);
         *Result += A ;
         *Result += "!";
         return;
 
       case Power:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
-        *Result += ")^";
+        *Result += ")^(";
         *Result += B ;
         *Result += ")";
         return;
 
       case Multiply:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
         *Result += "*";
@@ -2335,8 +2356,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Divide:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
         *Result += "/";
@@ -2345,8 +2366,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Remainder:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
         *Result += "rem";
@@ -2355,8 +2376,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Add:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
         *Result += "+";
@@ -2365,8 +2386,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Subtract:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result += "(";
         *Result += A ;
         *Result += "-";
@@ -2375,250 +2396,250 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Log:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "log";
+        ViewTree(Root->Right, &A);
+        *Result += "log(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Log2:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "log2";
+        ViewTree(Root->Right, &A);
+        *Result += "log2(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Ln:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "ln";
+        ViewTree(Root->Right, &A);
+        *Result += "ln(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Abs:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "abs";
+        ViewTree(Root->Right, &A);
+        *Result += "abs(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Round:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "round";
+        ViewTree(Root->Right, &A);
+        *Result += "round(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Fix:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "fix";
+        ViewTree(Root->Right, &A);
+        *Result += "fix(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Floor:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "floor";
+        ViewTree(Root->Right, &A);
+        *Result += "floor(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Ceil:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "ceil";
+        ViewTree(Root->Right, &A);
+        *Result += "ceil(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Rand:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "rand";
+        ViewTree(Root->Right, &A);
+        *Result += "rand(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Sin:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "sin";
+        ViewTree(Root->Right, &A);
+        *Result += "sin(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ASin:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "asin";
+        ViewTree(Root->Right, &A);
+        *Result += "asin(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Cos:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "cos";
+        ViewTree(Root->Right, &A);
+        *Result += "cos(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACos:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acos";
+        ViewTree(Root->Right, &A);
+        *Result += "acos(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Tan:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "tan";
+        ViewTree(Root->Right, &A);
+        *Result += "tan(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ATan:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "atan";
+        ViewTree(Root->Right, &A);
+        *Result += "atan(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Sec:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "sec";
+        ViewTree(Root->Right, &A);
+        *Result += "sec(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ASec:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "asec";
+        ViewTree(Root->Right, &A);
+        *Result += "asec(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Cosec:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "cosec";
+        ViewTree(Root->Right, &A);
+        *Result += "cosec(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACosec:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acosec";
+        ViewTree(Root->Right, &A);
+        *Result += "acosec(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Cot:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "cot";
+        ViewTree(Root->Right, &A);
+        *Result += "cot(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACot:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acot";
+        ViewTree(Root->Right, &A);
+        *Result += "acot(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Sinh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "sinh";
+        ViewTree(Root->Right, &A);
+        *Result += "sinh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ASinh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "asinh";
+        ViewTree(Root->Right, &A);
+        *Result += "asinh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Cosh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "cosh";
+        ViewTree(Root->Right, &A);
+        *Result += "cosh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACosh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acosh";
+        ViewTree(Root->Right, &A);
+        *Result += "acosh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Tanh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "tanh";
+        ViewTree(Root->Right, &A);
+        *Result += "tanh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ATanh:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "atanh";
+        ViewTree(Root->Right, &A);
+        *Result += "atanh(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Sech:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "sech";
+        ViewTree(Root->Right, &A);
+        *Result += "sech(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ASech:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "asech";
+        ViewTree(Root->Right, &A);
+        *Result += "asech(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Cosech:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "cosech";
+        ViewTree(Root->Right, &A);
+        *Result += "cosech(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACosech:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acosech";
+        ViewTree(Root->Right, &A);
+        *Result += "acosech(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Coth:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "coth";
+        ViewTree(Root->Right, &A);
+        *Result += "coth(";
         *Result += A ;
         *Result += ")";
         return;
 
       case ACoth:
-        ViewTree(Root->Right, &A, BufferSize);
-        *Result += "acoth";
+        ViewTree(Root->Right, &A);
+        *Result += "acoth(";
         *Result += A ;
         *Result += ")";
         return;
 
       case Condition:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "[";
         *Result += A ;
         *Result += "]";
         *Result += B ;
-        ViewTree(Root->Other, &A, BufferSize);
+        ViewTree(Root->Other, &A);
         *Result += A ;
         return;
 
       case Greater:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += ">";
@@ -2627,8 +2648,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Less:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "<";
@@ -2637,8 +2658,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Equal:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "=";
@@ -2647,8 +2668,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case GreaterEqual:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += ">=";
@@ -2657,8 +2678,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case LessEqual:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "<=";
@@ -2667,8 +2688,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case NotEqual:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "~=";
@@ -2677,22 +2698,22 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Not:
-        ViewTree(Root->Left , &A, BufferSize);
+        ViewTree(Root->Left , &A);
         *Result  = "(~";
         *Result += A ;
         *Result += ")";
         return;
 
       case bNot:
-        ViewTree(Root->Left , &A, BufferSize);
+        ViewTree(Root->Left , &A);
         *Result  = "(not";
         *Result += A ;
         *Result += ")";
         return;
 
       case And:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "&";
@@ -2701,8 +2722,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Or:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += "|";
@@ -2711,8 +2732,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case Xor:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += ":";
@@ -2721,8 +2742,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case bAnd:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += " and ";
@@ -2731,8 +2752,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case bOr:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += " or ";
@@ -2741,8 +2762,8 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
         return;
 
       case bXor:
-        ViewTree(Root->Left , &A, BufferSize);
-        ViewTree(Root->Right, &B, BufferSize);
+        ViewTree(Root->Left , &A);
+        ViewTree(Root->Right, &B);
         *Result  = "(";
         *Result += A ;
         *Result += " xor ";
@@ -2752,17 +2773,17 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
 
       default:
         *Result  = "(Unknown Operation: ";
-        *Result += Root->Operation;
+        *Result += (int)Root->Operation;
         *Result += ", Value: 0x";
-        Result->AppendFloat((double)round(Root->Value), 12);
+        *Result += (double)round(Root->Value);
         *Result += ", Name: ";
         *Result += Root->Name;
         *Result += ", Left: ";
-        *Result += (size_t)Root->Left;
+        *Result += Root->Left;
         *Result += ", Right: ";
-        *Result += (size_t)Root->Right;
+        *Result += Root->Right;
         *Result += ", Other: ";
-        *Result += (size_t)Root->Other;
+        *Result += Root->Other;
         *Result += ")";
         return;
     }
@@ -2774,26 +2795,27 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
     }else if(Root->Operation == Val){
       if(Root->Value < 0.0){
         *Result  = '(';
-        Result->AppendFloat((double)Root->Value, 12);
+        *Result += (double)Root->Value;
         *Result += ')';
       }else{
-        Result->SetFloat((double)Root->Value, 12);
+        *Result  = "";
+        *Result += (double)Root->Value;
       }
       return;
 
     }else{
       *Result  = "(Invalid node: Operation: ";
-      *Result += Root->Operation;
+      *Result += (int)Root->Operation;
       *Result += ", Value: ";
       *Result += (double)Root->Value;
       *Result += ", Name: ";
       *Result += Root->Name;
       *Result += ", Left: ";
-      *Result += (size_t)Root->Left;
+      *Result += Root->Left;
       *Result += ", Right: ";
-      *Result += (size_t)Root->Right;
+      *Result += Root->Right;
       *Result += ", Other: ";
-      *Result += (size_t)Root->Other;
+      *Result += Root->Other;
       *Result += ")";
       return;
     }
@@ -2805,8 +2827,9 @@ void Calculator::ViewTree(NODE* Root, UnicodeString* Result, unsigned BufferSize
 }
 //------------------------------------------------------------------------------
 
-void Calculator::ShowTree(UnicodeString* Result, unsigned BufferSize){
-  ViewTree(Tree, Result, BufferSize);
+void Calculator::ShowTree(string* Result){
+  *Result = "";
+  ViewTree(Tree, Result);
 }
 //------------------------------------------------------------------------------
 

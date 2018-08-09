@@ -23,12 +23,13 @@
 //------------------------------------------------------------------------------
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string>
 //------------------------------------------------------------------------------
 
 #include "LLRBTree.h"
-#include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
 class Calculator{
@@ -58,7 +59,7 @@ class Calculator{
     struct NODE{
       OPERATION   Operation;
       long double Value;
-      UnicodeString      Name;
+      std::string Name;
       NODE*       Left;
       NODE*       Right;
       NODE*       Other;
@@ -73,7 +74,7 @@ class Calculator{
     NODE* NewNode (NODE* Root = 0);
     NODE* CopyNode(NODE* Root);
 
-    void FuncName(UnicodeString* Name);
+    void FuncName(std::string* Name);
 
     bool ConditionOp(NODE* Root);
     bool LogicOp    (NODE* Root);
@@ -86,7 +87,7 @@ class Calculator{
     bool Value      (NODE* Root);
     bool Float      (long double* f);
 
-    void        ViewTree  (NODE* Root, UnicodeString* Result, unsigned BufferSize);
+    void        ViewTree  (NODE* Root, std::string* Result);
     long double CalcTree  (NODE* Root, const char* Variable, long double Value);
     void        DeleteTree(NODE* Root);
     bool        Simplify  (NODE* Root);
@@ -98,10 +99,10 @@ class Calculator{
     Calculator();
    ~Calculator();
 
-    void        BuildTree    (const char* Formula);
-    long double CalculateTree(const char* Variable = "", long double Value = 0.);
-    void        ShowTree     (UnicodeString* Result, unsigned BufferSize);
-    long double Calculate    (const char* Formula, const char* Variable = "",
+    void        BuildTree    (const char * Formula);
+    long double CalculateTree(const char * Variable = "", long double Value = 0.);
+    void        ShowTree     (std::string* Result);
+    long double Calculate    (const char * Formula, const char* Variable = "",
                               long double Value = 0.);
 };
 //------------------------------------------------------------------------------

@@ -1,34 +1,5 @@
-#define DEBUG
-//------------------------------------------------------------------------------
-
-#include "General.h"
+#include "test.h"
 #include "FileWrapper.h"
-//------------------------------------------------------------------------------
-
-void Start(const char* Message){
-  info("%s", Message); printf("\n");
-}
-//------------------------------------------------------------------------------
-
-void Done(){
-  printf(ANSI_FG_BRIGHT_BLACK
-         "----------------------------------------"
-         "----------------------------------------\n\n");
-}
-//------------------------------------------------------------------------------
-
-bool TestDebugMessages(){
-  Start("Debug Messages");
-
-  debug  ("Testing debug %d"  , 123);
-  info   ("Testing info %d"   , 123);
-  warning("Testing warning %d", 123);
-  error  ("Testing error %d"  , 123);
-
-  error("Testing GetErrorString(): \"%s\"", GetErrorString(123));
-
-  Done(); return true;
-}
 //------------------------------------------------------------------------------
 
 bool TestFileWrapper(){
@@ -56,7 +27,7 @@ bool TestFileWrapper(){
 
   info("UTF-16 encoded file name...");
   if(!File.Open(FileName_UTF16, FileWrapper::faRead)){
-    error("Cannot open file \"%s\"", FileName_UTF8);
+    error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
     return false;
   }
   Size = File.GetSize();
@@ -75,11 +46,14 @@ bool TestFileWrapper(){
 
 int main(){
   printf("\n\n");
-  if(!TestDebugMessages()) return -1;
-  if(!TestFileWrapper  ()) return -1;
+  if(!TestFileWrapper()) goto main_Error;
 
-  info(ANSI_FG_GREEN "All OK");
+  info(ANSI_FG_GREEN "All OK"); Done();
   return 0;
+
+  main_Error:
+    Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
+    return -1;
 }
 //------------------------------------------------------------------------------
 
