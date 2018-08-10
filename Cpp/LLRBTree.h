@@ -30,7 +30,7 @@ The data is stored in a Left-Leaning Red-Black Tree, as described by
 Robert Sedgewick, Department of Computer Science, Princeton University,
 Princeton, NJ 08544
 */
-class LLRBTree{
+class LLRB_TREE{
   private:
     struct Node{
       Node* Left;
@@ -75,8 +75,8 @@ class LLRBTree{
 //------------------------------------------------------------------------------
 
   public:
-    LLRBTree();
-   ~LLRBTree();
+    LLRB_TREE();
+   ~LLRB_TREE();
 
     void  Insert(void* Data); // Adds "Data" to the tree. Duplicates are sorted
                               // by order of insertion.

@@ -28,11 +28,16 @@
 
   #ifndef WINVER
     #define  WINVER        0x0601 // Windows 7
+  #endif
+  #ifndef NTDDI_VERSION
     #define  NTDDI_VERSION 0x06010000
+  #endif
+  #ifndef _WIN32_IE
     #define  _WIN32_IE     WINVER
+  #endif
+  #ifndef _WIN32_WINNT
     #define  _WIN32_WINNT  WINVER
   #endif
-
   #ifndef UNICODE
     #define UNICODE
   #endif

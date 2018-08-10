@@ -19,7 +19,7 @@ static int DefaultCompare(void* Left, void* Right){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node::Node(void* Data, Node* Next, Node* Prev, int Tag){
+LLRB_TREE::Node::Node(void* Data, Node* Next, Node* Prev, int Tag){
   Left = Right = 0;
   Colour       = true;
   this->Data   = Data;
@@ -32,7 +32,7 @@ LLRBTree::Node::Node(void* Data, Node* Next, Node* Prev, int Tag){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node::~Node(){
+LLRB_TREE::Node::~Node(){
   if(Left ) delete Left;
   if(Right) delete Right;
 
@@ -41,7 +41,7 @@ LLRBTree::Node::~Node(){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::LLRBTree(){
+LLRB_TREE::LLRB_TREE(){
   Root         = 0;
   CurrentNode  = 0;
   TheItemCount = 0;
@@ -49,18 +49,18 @@ LLRBTree::LLRBTree(){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::~LLRBTree(){
+LLRB_TREE::~LLRB_TREE(){
   Clear();
 }
 //------------------------------------------------------------------------------
 
-bool LLRBTree::IsRed(Node* N){
+bool LLRB_TREE::IsRed(Node* N){
   if(N) return N->Colour;
   return false;
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::FixUp(Node* N){
+LLRB_TREE::Node* LLRB_TREE::FixUp(Node* N){
   if(IsRed(N->Right) && !IsRed(N->Left      )) N = RotateLeft (N);
   if(IsRed(N->Left ) &&  IsRed(N->Left->Left)) N = RotateRight(N);
   if(IsRed(N->Left ) &&  IsRed(N->Right     ))     FlipColours(N);
@@ -69,7 +69,7 @@ LLRBTree::Node* LLRBTree::FixUp(Node* N){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::RotateLeft(Node* N){
+LLRB_TREE::Node* LLRB_TREE::RotateLeft(Node* N){
   Node* t   = N->Right;
   N->Right  = t->Left;
   t->Left   = N;
@@ -80,7 +80,7 @@ LLRBTree::Node* LLRBTree::RotateLeft(Node* N){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::RotateRight(Node* N){
+LLRB_TREE::Node* LLRB_TREE::RotateRight(Node* N){
   Node* t   = N->Left;
   N->Left   = t->Right;
   t->Right  = N;
@@ -91,14 +91,14 @@ LLRBTree::Node* LLRBTree::RotateRight(Node* N){
 }
 //------------------------------------------------------------------------------
 
-void LLRBTree::FlipColours(Node* N){
+void LLRB_TREE::FlipColours(Node* N){
   N       ->Colour = !N       ->Colour;
   N->Left ->Colour = !N->Left ->Colour;
   N->Right->Colour = !N->Right->Colour;
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::Insert(Node* N, void* Data, int Tag){
+LLRB_TREE::Node* LLRB_TREE::Insert(Node* N, void* Data, int Tag){
   if(!N){
     TheItemCount++;
     return new Node(Data, TempNext, TempPrev, Tag);
@@ -124,7 +124,7 @@ LLRBTree::Node* LLRBTree::Insert(Node* N, void* Data, int Tag){
 }
 //------------------------------------------------------------------------------
 
-void LLRBTree::Insert(void* Data){
+void LLRB_TREE::Insert(void* Data){
   TempNext = TempPrev = 0;
 
   Root = Insert(Root, Data);
@@ -132,7 +132,7 @@ void LLRBTree::Insert(void* Data){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::MoveRedLeft(Node* N){
+LLRB_TREE::Node* LLRB_TREE::MoveRedLeft(Node* N){
   FlipColours(N);
 
   if(IsRed(N->Right->Left)){
@@ -145,7 +145,7 @@ LLRBTree::Node* LLRBTree::MoveRedLeft(Node* N){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::MoveRedRight(Node* N){
+LLRB_TREE::Node* LLRB_TREE::MoveRedRight(Node* N){
   FlipColours(N);
 
   if(IsRed(N->Left->Left)){
@@ -157,7 +157,7 @@ LLRBTree::Node* LLRBTree::MoveRedRight(Node* N){
 }
 //------------------------------------------------------------------------------
 
-int LLRBTree::RemoveCompare(void* Left, void* Right, int TagLeft, int TagRight){
+int LLRB_TREE::RemoveCompare(void* Left, void* Right, int TagLeft, int TagRight){
   int result;
 
   result = Compare(Left, Right);
@@ -170,7 +170,7 @@ int LLRBTree::RemoveCompare(void* Left, void* Right, int TagLeft, int TagRight){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::RemoveMin(Node* N){
+LLRB_TREE::Node* LLRB_TREE::RemoveMin(Node* N){
   if(!N->Left){
     if(CurrentNode == N) CurrentNode = 0;
     TheItemCount--;
@@ -185,7 +185,7 @@ LLRBTree::Node* LLRBTree::RemoveMin(Node* N){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::Remove(Node* N, void* Key, int Tag){
+LLRB_TREE::Node* LLRB_TREE::Remove(Node* N, void* Key, int Tag){
   Node* Temp;
 
   if(!N) return 0;
@@ -228,7 +228,7 @@ LLRBTree::Node* LLRBTree::Remove(Node* N, void* Key, int Tag){
 }
 //------------------------------------------------------------------------------
 
-void LLRBTree::Remove(void* Key){
+void LLRB_TREE::Remove(void* Key){
   Node* Temp; 
   Node* N; 
 
@@ -254,7 +254,7 @@ void LLRBTree::Remove(void* Key){
 }
 //------------------------------------------------------------------------------
 
-LLRBTree::Node* LLRBTree::Find(Node* N, void* Key){
+LLRB_TREE::Node* LLRB_TREE::Find(Node* N, void* Key){
   int   result;
   Node* Temp = 0;
 
@@ -271,7 +271,7 @@ LLRBTree::Node* LLRBTree::Find(Node* N, void* Key){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Find(void* Key){
+void* LLRB_TREE::Find(void* Key){
   CurrentNode = Find(Root, Key);
   if(CurrentNode) return CurrentNode->Data;
 
@@ -279,7 +279,7 @@ void* LLRBTree::Find(void* Key){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Before(void* Key){
+void* LLRB_TREE::Before(void* Key){
   int   result;
   Node* N;
 
@@ -301,7 +301,7 @@ void* LLRBTree::Before(void* Key){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::After(void* Key){
+void* LLRB_TREE::After(void* Key){
   int   result;
   Node* N;
 
@@ -323,7 +323,7 @@ void* LLRBTree::After(void* Key){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::First(){
+void* LLRB_TREE::First(){
   if(!Root) return 0;
 
   CurrentNode = Root;
@@ -333,7 +333,7 @@ void* LLRBTree::First(){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Last(){
+void* LLRB_TREE::Last(){
   if(!Root) return 0;
 
   CurrentNode = Root;
@@ -343,34 +343,34 @@ void* LLRBTree::Last(){
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Next(){
+void* LLRB_TREE::Next(){
   if(CurrentNode) CurrentNode = CurrentNode->Next;
   if(CurrentNode) return        CurrentNode->Data;
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Previous(){
+void* LLRB_TREE::Previous(){
   if(CurrentNode) CurrentNode = CurrentNode->Prev;
   if(CurrentNode) return        CurrentNode->Data;
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::Current(){
+void* LLRB_TREE::Current(){
   if(CurrentNode) return CurrentNode->Data;
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void* LLRBTree::RootItem(){
+void* LLRB_TREE::RootItem(){
   CurrentNode = Root;
   if(CurrentNode) return CurrentNode->Data;
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void LLRBTree::Clear(){
+void LLRB_TREE::Clear(){
   if(Root) delete Root;
   Root         = 0;
   CurrentNode  = 0;
@@ -378,7 +378,7 @@ void LLRBTree::Clear(){
 }
 //------------------------------------------------------------------------------
 
-unsigned LLRBTree::ItemCount(){
+unsigned LLRB_TREE::ItemCount(){
   return TheItemCount;
 }
 //------------------------------------------------------------------------------

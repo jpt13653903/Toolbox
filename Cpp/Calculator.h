@@ -23,7 +23,7 @@
 #include "LLRBTree.h"
 //------------------------------------------------------------------------------
 
-class Calculator{
+class CALCULATOR{
   public:
     enum MEASURE{
       Degrees = 1,
@@ -87,14 +87,14 @@ class Calculator{
 
   public:
     MEASURE Measure;
-    Calculator();
-   ~Calculator();
+    CALCULATOR();
+   ~CALCULATOR();
 
     void        BuildTree    (const char * Formula);
     long double CalculateTree(const char * Variable = "", long double Value = 0.);
     void        ShowTree     (std::string* Result);
     long double Calculate    (const char * Formula, const char* Variable = "",
-                              long double Value = 0.);
+                              long double  Value = 0.);
 };
 //------------------------------------------------------------------------------
 

@@ -10,11 +10,10 @@
 //==============================================================================
 
 #include "test.h"
-#include "FileWrapper.h"
 #include "Calculator.h"
 //------------------------------------------------------------------------------
 
-static Calculator Calc;
+static CALCULATOR Calc;
 //------------------------------------------------------------------------------
 
 void Calculate(const char* Expression){
@@ -67,7 +66,7 @@ bool TestExpressions(){
 void TreeView(const char* Expression){
   std::string Tree;
   Calc.BuildTree(Expression);
-  Calc.ShowTree(&Tree);
+  Calc.ShowTree (&Tree);
   info("%s\n%s", Expression, Tree.c_str());
 }
 //------------------------------------------------------------------------------

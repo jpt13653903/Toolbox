@@ -23,7 +23,7 @@
 #define char32 uint32_t
 //------------------------------------------------------------------------------
 
-class UnicodeString{
+class UNICODE_STRING{
   private:
     // UTF-32 container (main container)
     char32* Data_32;
@@ -54,8 +54,8 @@ class UnicodeString{
     void Update32_From16(); // Fills Data_32 from Data_16
 
   public:
-    UnicodeString();
-   ~UnicodeString();
+    UNICODE_STRING();
+   ~UNICODE_STRING();
 
     void operator= (char     c);
     void operator= (char16   c);
@@ -68,7 +68,7 @@ class UnicodeString{
     void operator= (const char  * String); // UTF-8
     void operator= (const char16* String); // UTF-16
     void operator= (const char32* String); // UTF-32
-    void operator= (const UnicodeString& String);
+    void operator= (const UNICODE_STRING& String);
 
     void operator+= (char     c);
     void operator+= (char16   c);
@@ -81,27 +81,27 @@ class UnicodeString{
     void operator+= (const char  * String); // UTF-8
     void operator+= (const char16* String); // UTF-16
     void operator+= (const char32* String); // UTF-32
-    void operator+= (const UnicodeString& String);
+    void operator+= (const UNICODE_STRING& String);
 
     bool operator== (const char  * String); // UTF-8
     bool operator== (const char16* String); // UTF-16
     bool operator== (const char32* String); // UTF-32
-    bool operator== (      UnicodeString& String);
+    bool operator== (      UNICODE_STRING& String);
 
     bool operator!= (const char  * String); // UTF-8
     bool operator!= (const char16* String); // UTF-16
     bool operator!= (const char32* String); // UTF-32
-    bool operator!= (      UnicodeString& String);
+    bool operator!= (      UNICODE_STRING& String);
 
     bool operator< (const char  * String); // UTF-8
     bool operator< (const char16* String); // UTF-16
     bool operator< (const char32* String); // UTF-32
-    bool operator< (      UnicodeString& String);
+    bool operator< (      UNICODE_STRING& String);
 
     bool operator> (const char  * String); // UTF-8
     bool operator> (const char16* String); // UTF-16
     bool operator> (const char32* String); // UTF-32
-    bool operator> (      UnicodeString& String);
+    bool operator> (      UNICODE_STRING& String);
 
     char32 operator[] (size_t Index);
 
@@ -130,23 +130,23 @@ class UnicodeString{
     void UpperCase(); // Make upper case
 
     // Returns -1 for smaller, 0 for equal and 1 for larger
-    int Compare      (const UnicodeString& String);
-    int CompareNoCase(const UnicodeString& String);
+    int Compare      (const UNICODE_STRING& String);
+    int CompareNoCase(const UNICODE_STRING& String);
     int CompareNoCase(const char  * String);
 };
 //------------------------------------------------------------------------------
 
-bool operator== (const char  * String1, UnicodeString& String2); // UTF-8
-bool operator== (const char16* String1, UnicodeString& String2); // UTF-16
-bool operator== (const char32* String1, UnicodeString& String2); // UTF-32
+bool operator== (const char  * String1, UNICODE_STRING& String2); // UTF-8
+bool operator== (const char16* String1, UNICODE_STRING& String2); // UTF-16
+bool operator== (const char32* String1, UNICODE_STRING& String2); // UTF-32
 
-bool operator< (const char  * String1, UnicodeString& String2); // UTF-8
-bool operator< (const char16* String1, UnicodeString& String2); // UTF-16
-bool operator< (const char32* String1, UnicodeString& String2); // UTF-32
+bool operator< (const char  * String1, UNICODE_STRING& String2); // UTF-8
+bool operator< (const char16* String1, UNICODE_STRING& String2); // UTF-16
+bool operator< (const char32* String1, UNICODE_STRING& String2); // UTF-32
 
-bool operator> (const char  * String1, UnicodeString& String2); // UTF-8
-bool operator> (const char16* String1, UnicodeString& String2); // UTF-16
-bool operator> (const char32* String1, UnicodeString& String2); // UTF-32
+bool operator> (const char  * String1, UNICODE_STRING& String2); // UTF-8
+bool operator> (const char16* String1, UNICODE_STRING& String2); // UTF-16
+bool operator> (const char32* String1, UNICODE_STRING& String2); // UTF-32
 //------------------------------------------------------------------------------
 
 #endif

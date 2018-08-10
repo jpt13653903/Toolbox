@@ -44,8 +44,8 @@ bool TestBuild(){
 bool TestLoad(){
   Start("Testing loading from file");
 
-  FileWrapper File;
-  if(!File.Open("Resources/JSON.json", FileWrapper::faRead)){
+  FILE_WRAPPER File;
+  if(!File.Open("Resources/JSON.json", FILE_WRAPPER::faRead)){
     error("Cannot open \"Resources/JSON.json\" for reading");
     return false;
   }

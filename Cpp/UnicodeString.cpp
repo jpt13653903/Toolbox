@@ -12,7 +12,7 @@
 #include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
-UnicodeString::UnicodeString(){
+UNICODE_STRING::UNICODE_STRING(){
   Valid_8     = Valid_16     = false;
   Length_8    = Length_16    = Length_32    = 0;
   Allocated_8 = Allocated_16 = Allocated_32 = 4;
@@ -23,14 +23,14 @@ UnicodeString::UnicodeString(){
 }
 //------------------------------------------------------------------------------
 
-UnicodeString::~UnicodeString(){
+UNICODE_STRING::~UNICODE_STRING(){
   delete[] Data_8;
   delete[] Data_16;
   delete[] Data_32;
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Invalidate(){
+void UNICODE_STRING::Invalidate(){
   if(Valid_8){
     delete[] Data_8;
     Length_8    = 0;
@@ -51,7 +51,7 @@ void UnicodeString::Invalidate(){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Append(char Data){
+void UNICODE_STRING::Append(char Data){
   size_t j;
   char*  Temp;
 
@@ -70,7 +70,7 @@ void UnicodeString::Append(char Data){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Append(char16 Data){
+void UNICODE_STRING::Append(char16 Data){
   size_t  j;
   char16* Temp;
 
@@ -89,7 +89,7 @@ void UnicodeString::Append(char16 Data){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Append(char32 Data){
+void UNICODE_STRING::Append(char32 Data){
   size_t  j;
   char32* Temp;
 
@@ -108,7 +108,7 @@ void UnicodeString::Append(char32 Data){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Update8(){
+void UNICODE_STRING::Update8(){
   if(Valid_8) return;
 
   Length_8  = 0;
@@ -157,7 +157,7 @@ void UnicodeString::Update8(){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Update16(){
+void UNICODE_STRING::Update16(){
   if(Valid_16) return;
 
   Length_16  = 0;
@@ -179,7 +179,7 @@ void UnicodeString::Update16(){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Update32_From8(){
+void UNICODE_STRING::Update32_From8(){
   Valid_8  = true;
   Valid_16 = false;
 
@@ -258,7 +258,7 @@ void UnicodeString::Update32_From8(){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::Update32_From16(){
+void UNICODE_STRING::Update32_From16(){
   Valid_8  = false;
   Valid_16 = true;
 
@@ -286,7 +286,7 @@ void UnicodeString::Update32_From16(){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (char c){
+void UNICODE_STRING::operator= (char c){
   Invalidate();
 
   delete[] Data_32;
@@ -298,7 +298,7 @@ void UnicodeString::operator= (char c){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (char16 c){
+void UNICODE_STRING::operator= (char16 c){
   Invalidate();
 
   delete[] Data_32;
@@ -310,7 +310,7 @@ void UnicodeString::operator= (char16 c){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (char32 c){
+void UNICODE_STRING::operator= (char32 c){
   Invalidate();
 
   delete[] Data_32;
@@ -322,7 +322,7 @@ void UnicodeString::operator= (char32 c){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (int d){
+void UNICODE_STRING::operator= (int d){
   size_t j, l;
   char32 c;
 
@@ -362,7 +362,7 @@ void UnicodeString::operator= (int d){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (int64_t d){
+void UNICODE_STRING::operator= (int64_t d){
   if(d < 0){
     operator+= ('-');
     operator+= ((uint64_t)(-d));
@@ -372,7 +372,7 @@ void UnicodeString::operator= (int64_t d){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (uint64_t d){
+void UNICODE_STRING::operator= (uint64_t d){
   size_t j, l;
   char32 c;
 
@@ -403,12 +403,12 @@ void UnicodeString::operator= (uint64_t d){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (double f){
+void UNICODE_STRING::operator= (double f){
   SetFloat(f, 9, false);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (const char* String){
+void UNICODE_STRING::operator= (const char* String){
   size_t j;
   Invalidate();
 
@@ -423,7 +423,7 @@ void UnicodeString::operator= (const char* String){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (const char16* String){
+void UNICODE_STRING::operator= (const char16* String){
   size_t j;
   Invalidate();
 
@@ -438,7 +438,7 @@ void UnicodeString::operator= (const char16* String){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (const char32* String){
+void UNICODE_STRING::operator= (const char32* String){
   size_t j;
   Invalidate();
 
@@ -451,7 +451,7 @@ void UnicodeString::operator= (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator= (const UnicodeString& String){
+void UNICODE_STRING::operator= (const UNICODE_STRING& String){
   size_t j;
   Invalidate();
 
@@ -465,66 +465,66 @@ void UnicodeString::operator= (const UnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (char c){
+void UNICODE_STRING::operator+= (char c){
   operator+= ((char32)((unsigned char)c));
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (char16 c){
+void UNICODE_STRING::operator+= (char16 c){
   operator+= ((char32)c);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (char32 c){
+void UNICODE_STRING::operator+= (char32 c){
   Invalidate();
 
   Append(c);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (int d){
-  UnicodeString s;
+void UNICODE_STRING::operator+= (int d){
+  UNICODE_STRING s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (int64_t d){
-  UnicodeString s;
+void UNICODE_STRING::operator+= (int64_t d){
+  UNICODE_STRING s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (uint64_t d){
-  UnicodeString s;
+void UNICODE_STRING::operator+= (uint64_t d){
+  UNICODE_STRING s;
   s = d;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (double f){
-  UnicodeString s;
+void UNICODE_STRING::operator+= (double f){
+  UNICODE_STRING s;
   s = f;
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (const char* String){
-  UnicodeString Temp;
+void UNICODE_STRING::operator+= (const char* String){
+  UNICODE_STRING Temp;
   Temp = String;
   operator+=(Temp);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (const char16* String){
-  UnicodeString Temp;
+void UNICODE_STRING::operator+= (const char16* String){
+  UNICODE_STRING Temp;
   Temp = String;
   operator+=(Temp);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (const char32* String){
+void UNICODE_STRING::operator+= (const char32* String){
   size_t j;
   Invalidate();
 
@@ -532,18 +532,18 @@ void UnicodeString::operator+= (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::operator+= (const UnicodeString& String){
+void UNICODE_STRING::operator+= (const UNICODE_STRING& String){
   operator+= (String.Data_32);
 }
 //------------------------------------------------------------------------------
 
-char32 UnicodeString::operator[] (size_t Index){
+char32 UNICODE_STRING::operator[] (size_t Index){
   if(Index >= 0 && Index < Length_32) return Data_32[Index];
   return 0;
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::SetLength32(size_t Length){
+void UNICODE_STRING::SetLength32(size_t Length){
   Invalidate();
 
   if(Length < Length_32){
@@ -555,41 +555,41 @@ void UnicodeString::SetLength32(size_t Length){
 }
 //------------------------------------------------------------------------------
 
-size_t UnicodeString::Length8(){
+size_t UNICODE_STRING::Length8(){
   Update8();
   return Length_8;
 }
 //------------------------------------------------------------------------------
 
-size_t UnicodeString::Length16(){
+size_t UNICODE_STRING::Length16(){
   Update16();
   return Length_16;
 }
 //------------------------------------------------------------------------------
 
-size_t UnicodeString::Length32(){
+size_t UNICODE_STRING::Length32(){
   return Length_32;
 }
 //------------------------------------------------------------------------------
 
-char* UnicodeString::UTF8(){
+char* UNICODE_STRING::UTF8(){
   Update8();
   return Data_8;
 }
 //------------------------------------------------------------------------------
 
-char16* UnicodeString::UTF16(){
+char16* UNICODE_STRING::UTF16(){
   Update16();
   return Data_16;
 }
 //------------------------------------------------------------------------------
 
-char32* UnicodeString::UTF32(){
+char32* UNICODE_STRING::UTF32(){
   return Data_32;
 }
 //------------------------------------------------------------------------------
 
-char* UnicodeString::New8(){
+char* UNICODE_STRING::New8(){
   Update8();
 
   size_t j;
@@ -602,7 +602,7 @@ char* UnicodeString::New8(){
 }
 //------------------------------------------------------------------------------
 
-char16* UnicodeString::New16(){
+char16* UNICODE_STRING::New16(){
   Update16();
 
   size_t  j;
@@ -615,7 +615,7 @@ char16* UnicodeString::New16(){
 }
 //------------------------------------------------------------------------------
 
-char32* UnicodeString::New32(){
+char32* UNICODE_STRING::New32(){
   size_t  j;
   char32* Temp = new char32[Length_32+1];
 
@@ -626,23 +626,23 @@ char32* UnicodeString::New32(){
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator== (const char* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator== (const char* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator== (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator== (const char16* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator== (const char16* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator== (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator== (const char32* String){
+bool UNICODE_STRING::operator== (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -653,48 +653,48 @@ bool UnicodeString::operator== (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator== (UnicodeString& String){
+bool UNICODE_STRING::operator== (UNICODE_STRING& String){
   return operator== (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator!= (const char* String){
+bool UNICODE_STRING::operator!= (const char* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator!= (const char16* String){
+bool UNICODE_STRING::operator!= (const char16* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator!= (const char32* String){
+bool UNICODE_STRING::operator!= (const char32* String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator!= (UnicodeString& String){
+bool UNICODE_STRING::operator!= (UNICODE_STRING& String){
   return !operator== (String);
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator< (const char* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator< (const char* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator< (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator< (const char16* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator< (const char16* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator< (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator< (const char32* String){
+bool UNICODE_STRING::operator< (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -707,28 +707,28 @@ bool UnicodeString::operator< (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator< (UnicodeString& String){
+bool UNICODE_STRING::operator< (UNICODE_STRING& String){
   return operator< (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator> (const char* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator> (const char* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator> (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator> (const char16* String){
-  UnicodeString s2;
+bool UNICODE_STRING::operator> (const char16* String){
+  UNICODE_STRING s2;
   s2 = String;
 
   return operator> (s2.UTF32());
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator> (const char32* String){
+bool UNICODE_STRING::operator> (const char32* String){
   size_t j;
 
   for(j = 0; Data_32[j] && String[j]; j++){
@@ -741,12 +741,12 @@ bool UnicodeString::operator> (const char32* String){
 }
 //------------------------------------------------------------------------------
 
-bool UnicodeString::operator> (UnicodeString& String){
+bool UNICODE_STRING::operator> (UNICODE_STRING& String){
   return operator> (String.UTF32());
 }
 //------------------------------------------------------------------------------
 
-int UnicodeString::Compare(const UnicodeString& String){
+int UNICODE_STRING::Compare(const UNICODE_STRING& String){
   size_t j;
 
   for(j = 0; Data_32[j] && String.Data_32[j]; j++){
@@ -760,8 +760,8 @@ int UnicodeString::Compare(const UnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-int UnicodeString::CompareNoCase(const UnicodeString& String){
-  UnicodeString Left, Right;
+int UNICODE_STRING::CompareNoCase(const UNICODE_STRING& String){
+  UNICODE_STRING Left, Right;
 
   Left  = *this;
   Right = String;
@@ -773,8 +773,8 @@ int UnicodeString::CompareNoCase(const UnicodeString& String){
 }
 //------------------------------------------------------------------------------
 
-int UnicodeString::CompareNoCase(const char* String){
-  UnicodeString Left, Right;
+int UNICODE_STRING::CompareNoCase(const char* String){
+  UNICODE_STRING Left, Right;
 
   Left  = *this;
   Right = String;
@@ -786,52 +786,52 @@ int UnicodeString::CompareNoCase(const char* String){
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char* String1, UnicodeString& String2){
+bool operator== (const char* String1, UNICODE_STRING& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char16* String1, UnicodeString& String2){
+bool operator== (const char16* String1, UNICODE_STRING& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator== (const char32* String1, UnicodeString& String2){
+bool operator== (const char32* String1, UNICODE_STRING& String2){
   return String2 == String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char* String1, UnicodeString& String2){
+bool operator< (const char* String1, UNICODE_STRING& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char16* String1, UnicodeString& String2){
+bool operator< (const char16* String1, UNICODE_STRING& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator< (const char32* String1, UnicodeString& String2){
+bool operator< (const char32* String1, UNICODE_STRING& String2){
   return String2 > String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char* String1, UnicodeString& String2){
+bool operator> (const char* String1, UNICODE_STRING& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char16* String1, UnicodeString& String2){
+bool operator> (const char16* String1, UNICODE_STRING& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-bool operator> (const char32* String1, UnicodeString& String2){
+bool operator> (const char32* String1, UNICODE_STRING& String2){
   return String2 < String1;
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::SetHex(unsigned i, int Places){ // Hexadecimal
+void UNICODE_STRING::SetHex(unsigned i, int Places){ // Hexadecimal
   Invalidate();
 
   bool   Negative = false;
@@ -870,7 +870,7 @@ void UnicodeString::SetHex(unsigned i, int Places){ // Hexadecimal
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::SetFloat(double d, int SignificantFigures, bool Fill){
+void UNICODE_STRING::SetFloat(double d, int SignificantFigures, bool Fill){
   int    shift, places;
   bool   sign, trailing;
   char32 c;
@@ -967,19 +967,19 @@ void UnicodeString::SetFloat(double d, int SignificantFigures, bool Fill){
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::AppendHex(unsigned i, int Places){
+void UNICODE_STRING::AppendHex(unsigned i, int Places){
   Invalidate();
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s.SetHex(i, Places);
   operator+= (s);
 }
 //------------------------------------------------------------------------------
 
-void UnicodeString::AppendFloat(double d, int SignificantFigures, bool Fill){
+void UNICODE_STRING::AppendFloat(double d, int SignificantFigures, bool Fill){
   Invalidate();
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s.SetFloat(d, SignificantFigures, Fill);
   operator+= (s);
 }
@@ -987,7 +987,7 @@ void UnicodeString::AppendFloat(double d, int SignificantFigures, bool Fill){
 
 // http://www.info.teradata.com/HTMLPubs/DB_TTU_14_00/index.html#page/
 // International_Character_Set/B035_1125_111K/appe.15.10.html
-void UnicodeString::UpperCase(){
+void UNICODE_STRING::UpperCase(){
   size_t j;
   Invalidate();
 

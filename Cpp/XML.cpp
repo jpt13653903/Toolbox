@@ -100,7 +100,7 @@ void XML::Clear(){
 void XML::New(const char* Document){
   Clear();
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Document, &LegalName);
 
   Nesting = new NESTING(LegalName.UTF8());
@@ -111,7 +111,7 @@ void XML::New(const char* Document){
 void XML::Begin(const char* Entity){
   if(!Nesting) return;
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Entity, &LegalName);
 
   NESTING* Temp = new NESTING(LegalName.UTF8());
@@ -150,7 +150,7 @@ void XML::Comment(const char* Comment){
 void XML::Attribute(const char* Name, int Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = Value;
   Attribute(Name, s.UTF8());
 }
@@ -167,7 +167,7 @@ void XML::Attribute(const char* Name, bool Value){
 void XML::Attribute(const char* Name, double Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = Value;
   Attribute(Name, s.UTF8());
 }
@@ -176,7 +176,7 @@ void XML::Attribute(const char* Name, double Value){
 void XML::Attribute(const char* Name, unsigned Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = "0x";
   s.AppendHex(Value, 8);
   Attribute(Name , s.UTF8());
@@ -186,7 +186,7 @@ void XML::Attribute(const char* Name, unsigned Value){
 void XML::Attribute(const char* Name, const char* Value){
   if(!Nesting) return;
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Name, &LegalName);
 
   ATTRIBUTE* Temp = new ATTRIBUTE(LegalName.UTF8(), Value);
@@ -194,7 +194,7 @@ void XML::Attribute(const char* Name, const char* Value){
 }
 //------------------------------------------------------------------------------
 
-void XML::Attribute(const char* Name, UnicodeString* Value){
+void XML::Attribute(const char* Name, UNICODE_STRING* Value){
   Attribute(Name, Value->UTF8());
 }
 //------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ void XML::Attribute(const char* Name, UnicodeString* Value){
 void XML::Content(int Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = Value;
   Content(s.UTF8());
 }
@@ -219,7 +219,7 @@ void XML::Content(bool Value){
 void XML::Content(double Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = Value;
   Content(s.UTF8());
 }
@@ -228,7 +228,7 @@ void XML::Content(double Value){
 void XML::Content(unsigned Value){
   if(!Nesting) return;
 
-  UnicodeString s;
+  UNICODE_STRING s;
   s = "0x";
   s.AppendHex(Value, 8);
   Content (s.UTF8());
@@ -252,8 +252,8 @@ void XML::End(){
 }
 //------------------------------------------------------------------------------
 
-void XML::GetLegalName(const char* Name, UnicodeString* LegalName){
-  UnicodeString Temp;
+void XML::GetLegalName(const char* Name, UNICODE_STRING* LegalName){
+  UNICODE_STRING Temp;
   Temp = Name;
 
  *LegalName = "";
@@ -312,8 +312,8 @@ void XML::GetLegalName(const char* Name, UnicodeString* LegalName){
 //------------------------------------------------------------------------------
 
 void XML::GetLegalContent(
-  UnicodeString* Content, 
-  UnicodeString* LegalContent
+  UNICODE_STRING* Content, 
+  UNICODE_STRING* LegalContent
 ){
   *LegalContent = "";
 
@@ -581,7 +581,7 @@ bool XML::ReadSpecial(){
 }
 //------------------------------------------------------------------------------
 
-bool XML::ReadName(UnicodeString* Buffer){
+bool XML::ReadName(UNICODE_STRING* Buffer){
  *Buffer = "";
 
   while(ReadSpace() || ReadComment());
@@ -605,7 +605,7 @@ bool XML::ReadName(UnicodeString* Buffer){
 }
 //------------------------------------------------------------------------------
 
-bool XML::ReadContent(UnicodeString* Buffer, char End){
+bool XML::ReadContent(UNICODE_STRING* Buffer, char End){
   while(ReadIndex < ReadSize){
     if(
       ReadBuffer[ReadIndex] == '<' ||
@@ -666,7 +666,7 @@ bool XML::ReadContent(UnicodeString* Buffer, char End){
 }
 //------------------------------------------------------------------------------
 
-bool XML::ReadAttribute(LLRBTree* Tree){
+bool XML::ReadAttribute(LLRB_TREE* Tree){
   ATTRIBUTE* Temp = new ATTRIBUTE("", "");
 
   if(!ReadName(&Temp->Name)){ // No name
@@ -732,7 +732,7 @@ bool XML::ReadHeader(){
   ){
     ReadIndex += 5;
 
-    LLRBTree Attributes;
+    LLRB_TREE Attributes;
     Attributes.Compare = ATTRIBUTE_Compare;
 
     while(ReadAttribute(&Attributes));
@@ -781,7 +781,7 @@ XML::ENTITY* XML::ReadEntity(){
   ) return 0;
   ReadIndex++;
 
-  UnicodeString Buffer;
+  UNICODE_STRING Buffer;
   if(!ReadName(&Buffer)){
     printf("Error: %s\n  %s\n", "XML Error", "Invalid tag");
     PrintLineNumber();
@@ -912,7 +912,7 @@ bool XML::Load(const char* Filename){
 XML::ENTITY* XML::FindChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Name, &LegalName);
 
   ENTITY Key(LegalName.UTF8());
@@ -923,7 +923,7 @@ XML::ENTITY* XML::FindChild(ENTITY* Entity, const char* Name){
 XML::ENTITY* XML::NextChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Name, &LegalName);
 
   ENTITY* Result = (ENTITY*)Entity->Children.Next();
@@ -937,7 +937,7 @@ XML::ATTRIBUTE* XML::FindAttribute(
 ){
   if(!Entity) return 0;
 
-  UnicodeString LegalName;
+  UNICODE_STRING LegalName;
   GetLegalName(Name, &LegalName);
 
   ATTRIBUTE Key(LegalName.UTF8(), "");
@@ -988,9 +988,9 @@ bool XML::ReadAttribute(
 //------------------------------------------------------------------------------
 
 bool XML::ReadAttribute(
-  ENTITY*          Entity,
-  const char*      Name,
-  UnicodeString* Value
+  ENTITY*         Entity,
+  const char*     Name,
+  UNICODE_STRING* Value
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){

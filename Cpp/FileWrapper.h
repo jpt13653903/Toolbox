@@ -22,7 +22,7 @@
 #endif
 //------------------------------------------------------------------------------
 
-class FileWrapper{
+class FILE_WRAPPER{
   public:
     enum ACCESS{
       // Normal buffered
@@ -34,8 +34,8 @@ class FileWrapper{
     HANDLE Handle;
 
   public:
-    FileWrapper();
-   ~FileWrapper();
+    FILE_WRAPPER();
+   ~FILE_WRAPPER();
 
     bool Open (const  char  * Filename, ACCESS Access); // UTF-8
     bool Open (const wchar_t* Filename, ACCESS Access);

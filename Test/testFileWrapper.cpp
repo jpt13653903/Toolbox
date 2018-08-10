@@ -14,14 +14,14 @@
 //------------------------------------------------------------------------------
 
 bool TestFileWrapper(){
-  Start("FileWrapper Class");
+  Start("FILE_WRAPPER Class");
 
   const  char  * FileName_UTF8  =  "Resources/Lorem Ipsum.txt";
   const wchar_t* FileName_UTF16 = L"Resources/Λορεμ Ιπσθμ.txt";
 
   info("UTF-8 encoded file name...");
-  FileWrapper File;
-  if(!File.Open(FileName_UTF8, FileWrapper::faRead)){
+  FILE_WRAPPER File;
+  if(!File.Open(FileName_UTF8, FILE_WRAPPER::faRead)){
     error("Cannot open file \"%s\"", FileName_UTF8);
     return false;
   }
@@ -37,7 +37,7 @@ bool TestFileWrapper(){
   Done();
 
   info("UTF-16 encoded file name...");
-  if(!File.Open(FileName_UTF16, FileWrapper::faRead)){
+  if(!File.Open(FileName_UTF16, FILE_WRAPPER::faRead)){
     error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
     return false;
   }

@@ -40,7 +40,7 @@ long double fix(long double x){
 }
 //------------------------------------------------------------------------------
 
-static LLRBTree* Constants;
+static LLRB_TREE* Constants;
 //------------------------------------------------------------------------------
 
 struct CONSTANT{
@@ -71,7 +71,7 @@ static void AddConstant(const char* Name, long double Value){
 static int InstanceCount = 0;
 //------------------------------------------------------------------------------
 
-Calculator::Calculator(){
+CALCULATOR::CALCULATOR(){
   Tree    = 0;
   Measure = Radians;
 
@@ -79,7 +79,7 @@ Calculator::Calculator(){
     // If the calculator is defined as a global variable, there is no
     // guarantee that the Constants tree has been initialised before this
     // constructor is called, if it is also a non-pointer global variable.
-    Constants          = new LLRBTree;
+    Constants          = new LLRB_TREE;
     Constants->Compare = CONSTANT_Compare;
 
     AddConstant("e"        , e                );
@@ -110,7 +110,7 @@ Calculator::Calculator(){
 }
 //------------------------------------------------------------------------------
 
-Calculator::~Calculator(){
+CALCULATOR::~CALCULATOR(){
   InstanceCount--;
 
   if(!InstanceCount){
@@ -126,7 +126,7 @@ Calculator::~Calculator(){
 }
 //------------------------------------------------------------------------------
 
-Calculator::NODE::NODE(){
+CALCULATOR::NODE::NODE(){
   Operation = Val;
   Value     = 0.0;
   Left      = 0;
@@ -135,7 +135,7 @@ Calculator::NODE::NODE(){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::DeleteTree(NODE* Root){
+void CALCULATOR::DeleteTree(NODE* Root){
   if(Root){
     DeleteTree(Root->Left );
     DeleteTree(Root->Right);
@@ -145,7 +145,7 @@ void Calculator::DeleteTree(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-Calculator::NODE* Calculator::CopyNode(NODE* Root){
+CALCULATOR::NODE* CALCULATOR::CopyNode(NODE* Root){
   NODE* N = new NODE;
   if(Root){
     N->Operation = Root->Operation;
@@ -161,7 +161,7 @@ Calculator::NODE* Calculator::CopyNode(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-Calculator::NODE* Calculator::NewNode(NODE* Root){
+CALCULATOR::NODE* CALCULATOR::NewNode(NODE* Root){
   NODE* N = new NODE;
   if(Root){
     N->Operation = Root->Operation;
@@ -175,7 +175,7 @@ Calculator::NODE* Calculator::NewNode(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::ConditionOp(NODE* Root){
+bool CALCULATOR::ConditionOp(NODE* Root){
   if(Buffer[Index] == '['){
     Index++;
     Root->Operation = Condition;
@@ -196,7 +196,7 @@ bool Calculator::ConditionOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::LogicOp(NODE* Root){
+bool CALCULATOR::LogicOp(NODE* Root){
   NODE* N;
 
   if(AddOp(Root)){
@@ -319,7 +319,7 @@ bool Calculator::LogicOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::AddOp(NODE* Root){
+bool CALCULATOR::AddOp(NODE* Root){
   NODE* N;
 
   if(MulOp(Root)){
@@ -352,7 +352,7 @@ bool Calculator::AddOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::MulOp(NODE* Root){
+bool CALCULATOR::MulOp(NODE* Root){
   NODE* N;
 
   if(PowerOp(Root)){
@@ -405,7 +405,7 @@ bool Calculator::MulOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::PowerOp(NODE* Root){
+bool CALCULATOR::PowerOp(NODE* Root){
   NODE* N;
 
   if(Function(Root)){
@@ -430,7 +430,7 @@ bool Calculator::PowerOp(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::FuncName(string* Name){
+void CALCULATOR::FuncName(string* Name){
   *Name = "";
 
   int i = Index;
@@ -444,7 +444,7 @@ void Calculator::FuncName(string* Name){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Function(NODE* Root){
+bool CALCULATOR::Function(NODE* Root){
   NODE*  N;
   string s;
   bool   Minus = false;
@@ -657,7 +657,7 @@ bool Calculator::Function(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Factorial(NODE* Root){
+bool CALCULATOR::Factorial(NODE* Root){
 NODE* N;
 if(Value(Root)){
   if(Buffer[Index] == '!'){
@@ -674,7 +674,7 @@ return true;
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Exponent(NODE* Root){
+bool CALCULATOR::Exponent(NODE* Root){
   int  s = 1;
   int  i;
   bool Binary;
@@ -705,7 +705,7 @@ bool Calculator::Exponent(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Value(NODE* Root){
+bool CALCULATOR::Value(NODE* Root){
   bool        Minus = false;
   string      s;
   NODE*       N;
@@ -798,7 +798,7 @@ bool Calculator::Value(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Float(long double* f){
+bool CALCULATOR::Float(long double* f){
   int s = 1;
   int i;
   long double temp;
@@ -824,7 +824,7 @@ bool Calculator::Float(long double* f){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::BuildTree(const char* Formula){
+void CALCULATOR::BuildTree(const char* Formula){
   DeleteTree(Tree);
   Tree = 0;
   int j, q;
@@ -861,7 +861,7 @@ bool comp(char* a, char* b){
 }
 //------------------------------------------------------------------------------
 
-long double Calculator::CalcTree(NODE* Root, const char* Variable,
+long double CALCULATOR::CalcTree(NODE* Root, const char* Variable,
 long double Value){
   long double A;
   long double B;
@@ -1255,12 +1255,12 @@ long double Value){
 }
 //------------------------------------------------------------------------------
 
-long double Calculator::CalculateTree(const char* Variable, long double Value){
+long double CALCULATOR::CalculateTree(const char* Variable, long double Value){
   return CalcTree(Tree, Variable, Value);
 }
 //------------------------------------------------------------------------------
 
-long double Calculator::Calculate(
+long double CALCULATOR::Calculate(
   const char* Formula,
   const char* Variable,
   long double Value
@@ -1270,7 +1270,7 @@ long double Calculator::Calculate(
 }
 //------------------------------------------------------------------------------
 
-bool Calculator::Simplify(NODE* Root){
+bool CALCULATOR::Simplify(NODE* Root){
   NODE* N;
   if(Root){
     while(Simplify(Root->Left ));
@@ -1449,7 +1449,7 @@ bool Calculator::Simplify(NODE* Root){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::Diff(NODE* Root, const char* Variable){
+void CALCULATOR::Diff(NODE* Root, const char* Variable){
   NODE* N;
   NODE* Temp;
   if(Root){
@@ -2308,7 +2308,7 @@ void Calculator::Diff(NODE* Root, const char* Variable){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::ViewTree(NODE* Root, string* Result){
+void CALCULATOR::ViewTree(NODE* Root, string* Result){
   string A, B;
 
   if(Root){
@@ -2812,7 +2812,7 @@ void Calculator::ViewTree(NODE* Root, string* Result){
 }
 //------------------------------------------------------------------------------
 
-void Calculator::ShowTree(string* Result){
+void CALCULATOR::ShowTree(string* Result){
   *Result = "";
   ViewTree(Tree, Result);
 }

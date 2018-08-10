@@ -12,20 +12,20 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
-FileWrapper::FileWrapper(){
+FILE_WRAPPER::FILE_WRAPPER(){
   Handle = INVALID_HANDLE_VALUE;
 }
 //------------------------------------------------------------------------------
 
-FileWrapper::~FileWrapper(){
+FILE_WRAPPER::~FILE_WRAPPER(){
   Close();
 }
 //------------------------------------------------------------------------------
 
-bool FileWrapper::Open(const char* Filename, ACCESS Access){
+bool FILE_WRAPPER::Open(const char* Filename, ACCESS Access){
   if(!Filename || !Filename[0]) return false;
 
-  UnicodeString Codec;
+  UNICODE_STRING Codec;
   Codec = Filename;
 
   Open((const wchar_t*)Codec.UTF16(), Access);
@@ -34,7 +34,7 @@ bool FileWrapper::Open(const char* Filename, ACCESS Access){
 }
 //------------------------------------------------------------------------------
 
-bool FileWrapper::Open(const wchar_t* Filename, ACCESS Access){
+bool FILE_WRAPPER::Open(const wchar_t* Filename, ACCESS Access){
   if(!Filename || !Filename[0]) return false;
 
   if(Handle != INVALID_HANDLE_VALUE) Close();
@@ -99,14 +99,14 @@ bool FileWrapper::Open(const wchar_t* Filename, ACCESS Access){
 }
 //------------------------------------------------------------------------------
 
-void FileWrapper::Close(){
+void FILE_WRAPPER::Close(){
   if(Handle == INVALID_HANDLE_VALUE) return;
   CloseHandle(Handle);
   Handle = INVALID_HANDLE_VALUE;
 }
 //------------------------------------------------------------------------------
 
-uint64_t FileWrapper::GetSize(){
+uint64_t FILE_WRAPPER::GetSize(){
   uint64_t result;
   DWORD    high = 0;
 
@@ -119,7 +119,7 @@ uint64_t FileWrapper::GetSize(){
 }
 //------------------------------------------------------------------------------
 
-unsigned FileWrapper::Read(char* Buffer, unsigned MustRead){
+unsigned FILE_WRAPPER::Read(char* Buffer, unsigned MustRead){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   DWORD Length;
@@ -128,14 +128,14 @@ unsigned FileWrapper::Read(char* Buffer, unsigned MustRead){
 }
 //------------------------------------------------------------------------------
 
-unsigned FileWrapper::Write(const char* Buffer){
+unsigned FILE_WRAPPER::Write(const char* Buffer){
   int j;
   for(j = 0; Buffer[j]; j++);
   return Write(Buffer, j);
 }
 //------------------------------------------------------------------------------
 
-unsigned FileWrapper::Write(const char* Buffer, unsigned MustWrite){
+unsigned FILE_WRAPPER::Write(const char* Buffer, unsigned MustWrite){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   DWORD Length;
@@ -144,14 +144,14 @@ unsigned FileWrapper::Write(const char* Buffer, unsigned MustWrite){
 }
 //------------------------------------------------------------------------------
 
-bool FileWrapper::Flush(){
+bool FILE_WRAPPER::Flush(){
   if(Handle == INVALID_HANDLE_VALUE) return false;
 
   return FlushFileBuffers(Handle);
 }
 //------------------------------------------------------------------------------
 
-void FileWrapper::GetTime(
+void FILE_WRAPPER::GetTime(
   FILETIME* Creation,
   FILETIME* Access,
   FILETIME* Modified
@@ -162,7 +162,7 @@ void FileWrapper::GetTime(
 }
 //------------------------------------------------------------------------------
 
-void FileWrapper::SetTime(
+void FILE_WRAPPER::SetTime(
   const FILETIME* Creation,
   const FILETIME* Access,
   const FILETIME* Modified

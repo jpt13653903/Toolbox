@@ -35,22 +35,22 @@
 class XML{
   public:
     struct ATTRIBUTE{
-      UnicodeString Name;
-      UnicodeString Value;
-      UnicodeString LegalValue;
+      UNICODE_STRING Name;
+      UNICODE_STRING Value;
+      UNICODE_STRING LegalValue;
 
       ATTRIBUTE(const char* Name, const char* Value);
      ~ATTRIBUTE();
     };
 
     struct ENTITY{
-      UnicodeString Name;
-      UnicodeString Comments;
-      UnicodeString Content;
-      UnicodeString LegalContent;
+      UNICODE_STRING Name;
+      UNICODE_STRING Comments;
+      UNICODE_STRING Content;
+      UNICODE_STRING LegalContent;
 
-      LLRBTree Children;   // Child entities, sorted by name
-      LLRBTree Attributes; // Sorted by name
+      LLRB_TREE Children;   // Child entities, sorted by name
+      LLRB_TREE Attributes; // Sorted by name
 
       ENTITY(const char* Name);
      ~ENTITY();
@@ -67,12 +67,12 @@ class XML{
     };
     NESTING* Nesting;
 
-    UnicodeString Buffer;
-    void GetLegalName   (const char   * Name   , UnicodeString* LegalName   );
-    void GetLegalContent(UnicodeString* Content, UnicodeString* LegalContent);
-    void SaveEntity     (ENTITY       * Entity , unsigned       Indent = 0  );
+    UNICODE_STRING Buffer;
+    void GetLegalName   (const char    * Name   , UNICODE_STRING* LegalName   );
+    void GetLegalContent(UNICODE_STRING* Content, UNICODE_STRING* LegalContent);
+    void SaveEntity     (ENTITY        * Entity , unsigned        Indent = 0  );
 
-    Calculator Calc;
+    CALCULATOR Calc;
 
     unsigned ReadSize;
     unsigned ReadIndex;
@@ -83,9 +83,9 @@ class XML{
     bool    ReadSpace    ();
     bool    ReadComment  ();
     bool    ReadSpecial  ();
-    bool    ReadName     (UnicodeString* Buffer);
-    bool    ReadContent  (UnicodeString* Buffer, char End = 0);
-    bool    ReadAttribute(LLRBTree     * Tree);
+    bool    ReadName     (UNICODE_STRING* Buffer);
+    bool    ReadContent  (UNICODE_STRING* Buffer, char End = 0);
+    bool    ReadAttribute(LLRB_TREE     * Tree);
     bool    ReadHeader   ();
     ENTITY* ReadEntity   ();
 
@@ -107,12 +107,12 @@ class XML{
     void Comment(const char* Comment);
 
     // Adds a new attribute to the current entity
-    void Attribute(const char* Name, int            Value); // Decimal
-    void Attribute(const char* Name, bool           Value);
-    void Attribute(const char* Name, double         Value);
-    void Attribute(const char* Name, unsigned       Value); // Hexadecimal
-    void Attribute(const char* Name, const char*    Value);
-    void Attribute(const char* Name, UnicodeString* Value);
+    void Attribute(const char* Name, int             Value); // Decimal
+    void Attribute(const char* Name, bool            Value);
+    void Attribute(const char* Name, double          Value);
+    void Attribute(const char* Name, unsigned        Value); // Hexadecimal
+    void Attribute(const char* Name, const char*     Value);
+    void Attribute(const char* Name, UNICODE_STRING* Value);
 
     // Adds to the existing content of the current entity
     void Content(int         Value);
@@ -140,12 +140,12 @@ class XML{
     ATTRIBUTE* FindAttribute(ENTITY* Entity, const char* Name);
 
     // Use these to read attributes directly
-    bool ReadAttribute(ENTITY* Entity, const char* Name, int*           Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*          Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, char*          Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, UnicodeString* Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, double*        Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*      Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, int*            Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*           Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, char*           Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, UNICODE_STRING* Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, double*         Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*       Value);
 };
 //------------------------------------------------------------------------------
 
