@@ -656,14 +656,16 @@ bool JSON::ReadValue(JSON* Value){
 }
 //------------------------------------------------------------------------------
 
-bool JSON::Parse(const char* json){
+bool JSON::Parse(const char* json, unsigned Length){
   Clear();
 
-  ReadSize   = strlen(json);
+  if(Length) ReadSize = Length;
+  else       ReadSize = strlen(json);
+
+  ReadLine   = 1;
+  ReadIndex  = 0;
   ReadBuffer = json;
 
-  ReadLine  = 1;
-  ReadIndex = 0;
   if(!ReadValue(this)){
     ReadError("Cannot parse JSON file");
     return false;

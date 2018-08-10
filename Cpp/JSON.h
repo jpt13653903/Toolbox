@@ -117,7 +117,8 @@ class JSON{
     JSON(bool        Value);
    ~JSON();
 
-    bool Parse(const char* json);
+    // If "Length" is 0, "strlen" is used to determine the length
+    bool Parse(const char* json, unsigned Length = 0);
 
     // This function makes a copy of the contents
     void operator=(JSON& json);
