@@ -480,13 +480,13 @@ bool XML::Save(const char* Filename){
 }
 //------------------------------------------------------------------------------
 
-void XML::PrintLineNumber(){
+void XML::PrintError(const char* Message){
   unsigned n = 0;
   int   Line = 1;
   for(n = 0; n < ReadIndex; n++){
     if(ReadBuffer[n] == '\n') Line++;
   }
-  printf("  Line: %d\n", Line);
+  error("XML Error\n  %s\n  Line: %d", Message, Line);
 }
 //------------------------------------------------------------------------------
 
@@ -678,8 +678,7 @@ bool XML::ReadAttribute(LLRB_TREE* Tree){
 
   if(ReadBuffer[ReadIndex] != '='){ // No assignment
     delete Temp;
-    printf("Error: %s\n  %s\n", "XML Error", "No Assignment");
-    PrintLineNumber();
+    PrintError("No Assignment");
     return false;
   }
   ReadIndex++;
@@ -691,8 +690,7 @@ bool XML::ReadAttribute(LLRB_TREE* Tree){
     ReadBuffer[ReadIndex] != '\''
   ){
     delete Temp;
-    printf("Error: %s\n  %s\n", "XML Error", "No Value");
-    PrintLineNumber();
+    PrintError("No Value");
     return false;
   }
 
@@ -702,16 +700,14 @@ bool XML::ReadAttribute(LLRB_TREE* Tree){
 
   if(ReadBuffer[ReadIndex] != End){ // Open string
     delete Temp;
-    printf("Error: %s\n  %s\n", "XML Error", "Open String");
-    PrintLineNumber();
+    PrintError("Open String");
     return false;
   }
   ReadIndex++;
 
   if(Tree->Find(Temp)){ // Duplicate entry
     delete Temp;
-    printf("Error: %s\n  %s\n", "XML Error", "Duplicate Attribute");
-    PrintLineNumber();
+    PrintError("Duplicate Attribute");
     return false;
   }
 
@@ -748,26 +744,24 @@ bool XML::ReadHeader(){
       ATTRIBUTE  Key("version", "");
       ATTRIBUTE* Attribute = (ATTRIBUTE*)Attributes.Find(&Key);
       if(!Attribute){
-        printf("Error: %s\n  %s\n", "XML Error", "No version");
-        PrintLineNumber();
+        PrintError("No version");
         return false;
       }
 
       Key.Name  = "encoding";
       Attribute = (ATTRIBUTE*)Attributes.Find(&Key);
       if(!Attribute){
-        printf("Warning: No encoding, assuming UTF-8\n");
+        warning("No encoding, assuming UTF-8");
         return true;
       }
       if(Attribute->Value != "UTF-8"){
-        printf("Error: %s\n  %s\n", "XML Error", "Encoding other than UTF-8");
-        PrintLineNumber();
+        PrintError("Encoding other than UTF-8");
         return false;
       }
       return true;
     }
   }
-  printf("Warning: No header, assuming defaults\n");
+  warning("No header, assuming defaults");
   return true;
 }
 //------------------------------------------------------------------------------
@@ -783,8 +777,7 @@ XML::ENTITY* XML::ReadEntity(){
 
   UNICODE_STRING Buffer;
   if(!ReadName(&Buffer)){
-    printf("Error: %s\n  %s\n", "XML Error", "Invalid tag");
-    PrintLineNumber();
+    PrintError("Invalid tag");
     return 0;
   }
 
@@ -802,8 +795,7 @@ XML::ENTITY* XML::ReadEntity(){
   }
 
   if(ReadBuffer[ReadIndex] != '>'){
-    printf("Error: %s\n  %s\n", "XML Error", "Invalid tag");
-    PrintLineNumber();
+    PrintError("Invalid tag");
     delete Entity;
     return 0;
   }
@@ -821,21 +813,18 @@ XML::ENTITY* XML::ReadEntity(){
       ReadIndex += 2;
       Buffer = "";
       if(!ReadName(&Buffer)){
-        printf("Error: %s\n  %s\n", "XML Error", "Invalid closing tag");
-        PrintLineNumber();
+        PrintError("Invalid closing tag");
         delete Entity;
         return 0;
       }
       if(ReadBuffer[ReadIndex] != '>'){
-        printf("Error: %s\n  %s\n", "XML Error", "Invalid closing tag");
-        PrintLineNumber();
+        PrintError("Invalid closing tag");
         delete Entity;
         return 0;
       }
       ReadIndex++;
       if(Buffer != Entity->Name){
-        printf("Error: %s\n  %s\n", "XML Error", "Closing tag does not match opening tag");
-        PrintLineNumber();
+        PrintError("Closing tag does not match opening tag");
         delete Entity;
         return 0;
       }
@@ -857,8 +846,7 @@ XML::ENTITY* XML::ReadEntity(){
     if(!FoundBody) break;
   }
 
-  printf("Error: %s\n  %s\n", "XML Error", "No closing tag");
-  PrintLineNumber();
+  PrintError("No closing tag");
   delete Entity;
   return 0;
 }
@@ -889,16 +877,14 @@ bool XML::Load(const char* Filename){
 
   ReadIndex = 0;
   if(!ReadHeader()){
-    printf("Error: %s\n  %s\n", "XML Error", "No header");
-    PrintLineNumber();
+    PrintError("No header");
     delete[] ReadBuffer;
     return   false;
   }
 
   Root = ReadEntity();
   if(!Root){
-    printf("Error: %s\n  %s\n", "XML Error", "No root entity");
-    PrintLineNumber();
+    PrintError("No root entity");
     delete[] ReadBuffer;
     return   false;
   }

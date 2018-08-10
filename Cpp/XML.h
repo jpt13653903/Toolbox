@@ -28,6 +28,7 @@
 #include <string.h>
 //------------------------------------------------------------------------------
 
+#include "General.h"
 #include "Calculator.h"
 #include "UnicodeString.h"
 //------------------------------------------------------------------------------
@@ -78,7 +79,7 @@ class XML{
     unsigned ReadIndex;
     char*    ReadBuffer;
 
-    void PrintLineNumber();
+    void PrintError(const char* Message);
 
     bool    ReadSpace    ();
     bool    ReadComment  ();
