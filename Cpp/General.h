@@ -65,7 +65,6 @@
 
   #define  Sleep(ms) usleep(1000*(ms))
   #define  GetLastError() errno
-  #define  GetErrorString(Code) strerror(Code)
   uint32_t GetTickCount();
   uint64_t GetTickCount64();
 #endif
