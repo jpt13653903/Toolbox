@@ -30,10 +30,10 @@ bool TestBuild(){
   *json["Number"] = 789.456;
   info("json[\"Number\"] = %s", json["Number"]->Stringify());
 
-  json.AddOrUpdate("MyArray");
+  JSON* MyArray = json.AddOrUpdate("MyArray");
   info("json[\"MyArray\"] = %s", json["MyArray"]->Stringify());
   for(int j = 0; j < 10; j++)    json["MyArray"]->Append(j);
-  info("json[\"MyArray\"] = %s", json["MyArray"]->Stringify());
+  info("json[\"MyArray\"] = %s", MyArray        ->Stringify());
 
   info("json = %s", json.Stringify());
 

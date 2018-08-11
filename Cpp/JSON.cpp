@@ -239,44 +239,48 @@ void JSON::operator=(bool Value){
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name, JSON& Value){
+JSON* JSON::AddOrUpdate(const char* Name, JSON& Value){
   Type = typeObject;
 
   JSON* json = operator[](Name);
   if(json){
     json->operator=(Value);
-    return;
+    return json;
   }
   OBJECT* Object = new OBJECT(Name);
   Object->Value->operator=(Value);
   if(LastObject) LastObject->Next = Object;
   else           Objects          = Object;
   LastObject = Object;
+
+  return Object->Value;
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name, const char* Value){
-  JSON json(Value); AddOrUpdate(Name, json);
+JSON* JSON::AddOrUpdate(const char* Name, const char* Value){
+  JSON json(Value); return AddOrUpdate(Name, json);
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name, int Value){
-  JSON json(Value); AddOrUpdate(Name, json);
+JSON* JSON::AddOrUpdate(const char* Name, int Value){
+  JSON json(Value); return AddOrUpdate(Name, json);
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name, double Value){
-  JSON json(Value); AddOrUpdate(Name, json);
+JSON* JSON::AddOrUpdate(const char* Name, double Value){
+  JSON json(Value); return AddOrUpdate(Name, json);
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name, bool Value){
-  JSON json(Value); AddOrUpdate(Name, json);
+JSON* JSON::AddOrUpdate(const char* Name, bool Value){
+  JSON json(Value); return AddOrUpdate(Name, json);
 }
 //------------------------------------------------------------------------------
 
-void JSON::AddOrUpdate(const char* Name){
-  JSON json; AddOrUpdate(Name, json);
+JSON* JSON::AddOrUpdate(const char* Name){
+  JSON* json = operator[](Name);
+  if(json)   return json;
+  JSON null; return AddOrUpdate(Name, null);
 }
 //------------------------------------------------------------------------------
 
@@ -566,8 +570,7 @@ bool JSON::ReadObject(JSON* ObjectList){
       ReadError("Incomplete object");
       return false;
     }
-    ObjectList->AddOrUpdate(Name.c_str());
-    if(!ReadValue((*ObjectList)[Name.c_str()])){
+    if(!ReadValue(ObjectList->AddOrUpdate(Name.c_str()))){
       ReadError("Value expected");
       return false;
     }

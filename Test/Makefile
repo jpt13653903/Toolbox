@@ -36,21 +36,24 @@ Headers = *.h \
 #-------------------------------------------------------------------------------
 
 .PHONY:    clean all
-.PRECIOUS: $(Objects)
+.PRECIOUS: $(Objects) bin/*
 
 all: bin/testDebugMessages.exe \
      bin/testFileWrapper.exe   \
      bin/testCalculator.exe    \
      bin/testJSON.exe
 
-test: all
-	bin/testDebugMessages.exe
-	bin/testFileWrapper.exe
-	bin/testCalculator.exe
-	bin/testJSON.exe
+test: testDebugMessages \
+      testFileWrapper   \
+      testCalculator    \
+      testJSON
+
+test%: bin/test%.exe
+	$<
 
 clean:
 	rm -rf obj
+	rm -rf bin
 #-------------------------------------------------------------------------------
 
 # Binaries

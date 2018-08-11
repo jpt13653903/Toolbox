@@ -51,13 +51,16 @@ class JSON{
     OBJECT* Objects;
     OBJECT* LastObject;
 
-    // These functions make copies of the value
-    void AddOrUpdate(const char* Name, JSON&       Value);
-    void AddOrUpdate(const char* Name, const char* Value);
-    void AddOrUpdate(const char* Name, int         Value);
-    void AddOrUpdate(const char* Name, double      Value);
-    void AddOrUpdate(const char* Name, bool        Value);
-    void AddOrUpdate(const char* Name); // Creates a null object
+    // These functions make copies of the value.
+    // Returns the JSON object containing the value.
+    // If no "Value" is provided, it either creates a new object with
+    // value "null", or returns the value of the current object.
+    JSON* AddOrUpdate(const char* Name, JSON&       Value);
+    JSON* AddOrUpdate(const char* Name, const char* Value);
+    JSON* AddOrUpdate(const char* Name, int         Value);
+    JSON* AddOrUpdate(const char* Name, double      Value);
+    JSON* AddOrUpdate(const char* Name, bool        Value);
+    JSON* AddOrUpdate(const char* Name);
 
     // Cannot return a reference, because it could be null (i.e. not in the list)
     JSON* operator[] (const char* Name);
@@ -76,7 +79,7 @@ class JSON{
 
     // These functions make copies of the value
     // If the type is not "null" and not "Array", the current value becomes
-    // the first item and the array and the provided "Value" the second
+    // the first item of the array and the provided "Value" the second.
     void Append(JSON&       Value);
     void Append(const char* Value);
     void Append(int         Value);
