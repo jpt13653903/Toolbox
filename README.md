@@ -11,6 +11,8 @@ General-purpose repository, intended as a submodule for others.
 
 - **Calculator.cpp**
     - The engine used in [EngCalc](https://sourceforge.net/p/alwaysontopcalc/wiki).
+- **Dictionary.cpp**
+    - A [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store key-value pairs: the key is a string and the value is a void-pointer.
 - **FileWrapper.cpp**
     - Abstraction for reading and writing files, as well as obtaining and modifying the various time-stamps.
 - **General.cpp**
@@ -22,7 +24,7 @@ General-purpose repository, intended as a submodule for others.
     - Abstraction for reading, manipulating and generating JSON strings.
     - The implementation is not time-optimal &ndash; do not use as a general-purpose dynamic data structure.
 - **LLRBTree.cpp**
-    - A general-purpose [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store dictionaries.
+    - A general-purpose [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store objects.
 - **UnicodeString.cpp**
     - _Deprecated - do not use for new designs_.
     - Abstraction that stores strings in UTF-32, with conversion to- and from UTF-16 and UTF-8.

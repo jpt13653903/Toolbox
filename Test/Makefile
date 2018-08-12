@@ -24,6 +24,7 @@ LibInclude =
 Version = -DMAJOR_VERSION=1 -DMINOR_VERSION=0
 
 Objects = obj/Calculator.o    \
+          obj/Dictionary.o    \
           obj/FileWrapper.o   \
           obj/JSON.o          \
           obj/LLRBTree.o      \
