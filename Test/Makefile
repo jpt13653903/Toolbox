@@ -40,11 +40,13 @@ Headers = *.h \
 .PRECIOUS: $(Objects) bin/*
 
 all: bin/testDebugMessages.exe \
+     bin/testDictionary.exe    \
      bin/testFileWrapper.exe   \
      bin/testCalculator.exe    \
      bin/testJSON.exe
 
 test: testDebugMessages \
+      testDictionary    \
       testFileWrapper   \
       testCalculator    \
       testJSON
