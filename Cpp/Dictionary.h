@@ -58,6 +58,7 @@ class DICTIONARY{
     // is to update to the new data, without calling "delete" or similar.
     DICTIONARY_DUPLICATE OnDuplicate;
 
+    void  Clear   ();
     void  Insert  (const char* Name, void* Data);
     void* Find    (const char* Name);
     int   GetCount();

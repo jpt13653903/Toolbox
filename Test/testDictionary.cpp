@@ -129,9 +129,11 @@ bool Test(){
   }
 
   info("The tree now contains %2d items", Dictionary.GetCount());
+  Assert(Dictionary.GetCount() == 160);
 
-  info("Finding \"Vestibulum\"...  It occurs %2d times.",
-        *((int*)Dictionary.Find("Vestibulum")));
+  int VestibulumCount = *((int*)Dictionary.Find("Vestibulum"));
+  info("Finding \"Vestibulum\"...  It occurs %2d times.", VestibulumCount);
+  Assert(VestibulumCount == 3);
 
   Dictionary.Action(DisplayAction);
   Dictionary.Action(CleanupAction);

@@ -36,6 +36,13 @@ bool TestBuild(){
   info("json[\"MyArray\"] = %s", MyArray        ->Stringify());
 
   info("json = %s", json.Stringify());
+  Assert(!strcmp(json.Stringify(),
+    "{"
+      "\"String\":\"MyString\","
+      "\"Number\":789.456,"
+      "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
+      "\"MyArray\":[0,1,2,3,4,5,6,7,8,9]"
+    "}"));
 
   Done(); return true;
 }
@@ -65,6 +72,26 @@ bool TestLoad(){
   delete[] Buffer;
 
   info("json = %s", json.Stringify());
+  Assert(!strcmp(json.Stringify(),
+    "{"
+      "\"string\":\"String with unicode...Ω...\","
+      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
+      "\"number\":123.456,"
+      "\"state1\":true,"
+      "\"state2\":false,"
+      "\"state3\":null,"
+      "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+      "\"object\":{"
+        "\"string\":\"String\","
+        "\"number\":123.456,"
+        "\"state1\":true,"
+        "\"state2\":false,"
+        "\"state3\":null,"
+        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+        "\"object\":{},"
+        "\"array2\":[]"
+      "}"
+    "}"));
 
   Done();
   Start("Testing recursive AddOrUpdate");
@@ -84,6 +111,27 @@ bool TestLoad(){
   info("Updating with: %s", NewJson.Stringify());
   json.AddOrUpdate(NewJson);
   info("After update: %s", json.Stringify());
+  Assert(!strcmp(json.Stringify(),
+    "{"
+      "\"string\":\"New String\","
+      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
+      "\"number\":123.456,"
+      "\"state1\":true,"
+      "\"state2\":false,"
+      "\"state3\":null,"
+      "\"array\":[1,2,3,4],"
+      "\"object\":{"
+        "\"string\":\"String\","
+        "\"number\":987.654,"
+        "\"state1\":true,"
+        "\"state2\":false,"
+        "\"state3\":null,"
+        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+        "\"object\":\"Changed the type to a string\","
+        "\"array2\":[8,7,6,5,4,3,2,1]"
+      "},"
+      "\"state4\":true"
+    "}"));
 
   Done(); return true;
 }

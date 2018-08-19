@@ -51,6 +51,11 @@ DICTIONARY::~DICTIONARY(){
 }
 //------------------------------------------------------------------------------
 
+void DICTIONARY::Clear(){
+  if(Root) delete Root;
+}
+//------------------------------------------------------------------------------
+
 bool DICTIONARY::IsRed(NODE* Node){
   if(!Node) return false;
   return Node->Red;
