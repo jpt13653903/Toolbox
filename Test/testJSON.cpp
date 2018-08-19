@@ -66,6 +66,25 @@ bool TestLoad(){
 
   info("json = %s", json.Stringify());
 
+  Done();
+  Start("Testing recursive AddOrUpdate");
+
+  JSON NewJson;
+  NewJson.Parse("{"
+                "  \"string\": \"New String\","
+                "  \"state4\": true,"
+                "  \"array\" : [ 1, 2, 3, 4 ],"
+                "  \"object\": {"
+                "    \"number\": 987.654,"
+                "    \"object\": \"Changed the type to a string\","
+                "    \"array2\": [ 8, 7, 6, 5, 4, 3, 2, 1 ]"
+                "  }"
+                "}");
+
+  info("Updating with: %s", NewJson.Stringify());
+  json.AddOrUpdate(NewJson);
+  info("After update: %s", json.Stringify());
+
   Done(); return true;
 }
 //------------------------------------------------------------------------------

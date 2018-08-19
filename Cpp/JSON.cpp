@@ -239,15 +239,32 @@ void JSON::operator=(bool Value){
 }
 //------------------------------------------------------------------------------
 
+JSON* JSON::AddOrUpdate(JSON& Value){
+  OBJECT* Object;
+
+  if(Value.Type == typeObject){
+    Object = Value.Objects;
+    while(Object){
+      AddOrUpdate(Object->Name.c_str(), *(Object->Value));
+      Object = Object->Next;
+    }
+  }else{
+    operator=(Value);
+  }
+  return this;
+}
+//------------------------------------------------------------------------------
+
 JSON* JSON::AddOrUpdate(const char* Name, JSON& Value){
+  OBJECT* Object;
+
   Type = typeObject;
 
   JSON* json = operator[](Name);
   if(json){
-    json->operator=(Value);
-    return json;
+    return json->AddOrUpdate(Value);
   }
-  OBJECT* Object = new OBJECT(Name);
+  Object = new OBJECT(Name);
   Object->Value->operator=(Value);
   if(LastObject) LastObject->Next = Object;
   else           Objects          = Object;

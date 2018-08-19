@@ -51,10 +51,15 @@ class JSON{
     OBJECT* Objects;
     OBJECT* LastObject;
 
-    // These functions make copies of the value.
-    // Returns the JSON object containing the value.
-    // If no "Value" is provided, it either creates a new object with
-    // value "null", or returns the value of the current object.
+    // Adds a new key-value pair, or updates the existing
+    // - If "Value" is "typeObject", the update is recursive (i.e. old
+    //   values are not deleted, while new ones are added or updated)
+    // - These functions make copies of the value.
+    // - Returns the JSON object containing the value.
+    // - If no "Value" is provided, it either creates a new object with
+    //   value "null", or returns the value of the current object.
+    // - If no "Name" is provided, the update operation is on the root object
+    JSON* AddOrUpdate(                  JSON&       Value);
     JSON* AddOrUpdate(const char* Name, JSON&       Value);
     JSON* AddOrUpdate(const char* Name, const char* Value);
     JSON* AddOrUpdate(const char* Name, int         Value);
