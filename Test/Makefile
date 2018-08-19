@@ -36,8 +36,8 @@ Headers = *.h \
           $(Toolbox)/*.h
 #-------------------------------------------------------------------------------
 
-.PHONY:    clean all
-.PRECIOUS: $(Objects) bin/*
+.PHONY: clean all
+.SECONDARY:
 
 all: bin/testDebugMessages.exe \
      bin/testDictionary.exe    \
