@@ -12,6 +12,49 @@
 #include "General.h"
 //------------------------------------------------------------------------------
 
+void SetupTerminal(){
+  #ifdef WINVER
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING 
+      #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+    #endif
+
+    HANDLE TerminalHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if(TerminalHandle == INVALID_HANDLE_VALUE){
+      error("Invalid terminal handle");
+      return;
+    }
+
+    // Set output mode to handle ANSI terminal sequences
+    DWORD dwMode = 0;
+    if(!GetConsoleMode(TerminalHandle, &dwMode)){
+      // This is OK, because the terminal in question is
+      // probably a MinTTY (or similar)
+      return;
+    }
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if(!SetConsoleMode(TerminalHandle, dwMode)){
+      error("Unable to set terminal mode");
+      return;
+    }
+
+    // Set the console encoding to UTF-8
+    if(!SetConsoleOutputCP(CP_UTF8)){
+      error("Unable to set terminal to UTF-8");
+      return;
+    }
+
+    // Make the console buffer as many lines as the system will allow
+    CONSOLE_SCREEN_BUFFER_INFO Info;
+    GetConsoleScreenBufferInfo(TerminalHandle, &Info);
+    Info.dwSize.Y = 0x7FFF;
+    while(!SetConsoleScreenBufferSize(TerminalHandle, Info.dwSize) &&
+          GetLastError() == ERROR_INVALID_PARAMETER){
+      Info.dwSize.Y--;
+    }
+  #endif
+}
+//------------------------------------------------------------------------------
+
 #ifdef WINVER
   static char ErrorString[0x1000];
   
