@@ -70,9 +70,9 @@
 #endif
 //------------------------------------------------------------------------------
 
-#define kiB 1024
-#define MiB 1048576
-#define GiB 1073741824
+#define kiB 0x400
+#define MiB 0x100000
+#define GiB 0x40000000
 //------------------------------------------------------------------------------
 
 typedef uint8_t  byte;
@@ -127,6 +127,7 @@ typedef uint16_t word;
     printf(ANSI_FG_GREEN "Debug: " ANSI_RESET __VA_ARGS__);        \
     printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"          \
            ANSI_RESET, __FILE__, __LINE__, __func__);              \
+    fflush(stdout);                                                \
   }while(0)
 #else
   #define debug(...)
@@ -137,6 +138,7 @@ typedef uint16_t word;
   printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
          ANSI_RESET, __FILE__, __LINE__, __func__);     \
+  fflush(stdout);                                       \
 }while(0)
 
 #define warning(...) do                                      \
@@ -144,6 +146,7 @@ typedef uint16_t word;
   printf(ANSI_FG_YELLOW "Warning: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"      \
          ANSI_RESET, __FILE__, __LINE__, __func__);          \
+  fflush(stdout);                                            \
 }while(0)
 
 #define error(...) do                                          \
@@ -151,6 +154,7 @@ typedef uint16_t word;
   printf(ANSI_FG_BRIGHT_RED "Error: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"        \
          ANSI_RESET, __FILE__, __LINE__, __func__);            \
+  fflush(stdout);                                              \
 }while(0)
 //------------------------------------------------------------------------------
 
