@@ -20,10 +20,10 @@ University, Princeton, NJ 08544
 #define Dictionary_h
 //------------------------------------------------------------------------------
 
-class DICTIONARY{
+class DICTIONARY_BASE{
   public:
-    typedef void  (*DICTIONARY_ACTION   )(const char* Name, void* Data);
-    typedef void* (*DICTIONARY_DUPLICATE)(const char* Name, void* Old, void* New);
+    typedef void  (*ACTION      )(const char* Name, void* Data);
+    typedef void* (*ON_DUPLICATE)(const char* Name, void* Old, void* New);
 
   private:
     struct NODE{
@@ -48,26 +48,60 @@ class DICTIONARY{
     NODE* RotateRight(NODE* Node);
 
     NODE* Insert(NODE* Node, const char* Name, void* Data);
-    void  Action(NODE* Node, DICTIONARY_ACTION Function);
+    void  Action(NODE* Node, ACTION Function);
 
     static void* DefaultOnDuplicate(const char* Name, void* Old, void* New);
 
+  protected:
+    void  Clear ();
+    void  Insert(const char* Name, void* Data);
+    void* Find  (const char* Name);
+
   public:
-             DICTIONARY();
-    virtual ~DICTIONARY();
+             DICTIONARY_BASE();
+    virtual ~DICTIONARY_BASE();
 
     // Callback function called upon duplicate insert.  The return value must
     // be the data that must be stored at that location.  The default behaviour
     // is to update to the new data, without calling "delete" or similar.
-    DICTIONARY_DUPLICATE OnDuplicate;
+    //
+    // NOTE: The template class below does call "delete"
+    ON_DUPLICATE OnDuplicate;
 
-    void  Clear   ();
-    void  Insert  (const char* Name, void* Data);
-    void* Find    (const char* Name);
-    int   GetCount();
+    int GetCount();
 
     // This calls the given function for every node, in order
-    void Action(DICTIONARY_ACTION Function);
+    void Action(ACTION Function);
+};
+//------------------------------------------------------------------------------
+
+template<class type> class DICTIONARY : public DICTIONARY_BASE{
+  private:
+    static type* DefaultOnDuplicate(const char* Name, type* Old, type* New){
+      delete Old;
+      return New;
+    }
+    static void CleanupAction(const char* Name, type* Data){
+      delete Data;
+    }
+
+  public:
+    DICTIONARY(){
+      OnDuplicate = (ON_DUPLICATE)DefaultOnDuplicate;
+    }
+    virtual ~DICTIONARY(){
+      Action((ACTION)CleanupAction);
+    }
+    void Clear(){
+      Action((ACTION)CleanupAction);
+      DICTIONARY_BASE::Clear();
+    }
+    void Insert(const char* Name, type* Data){
+      DICTIONARY_BASE::Insert(Name, Data);
+    }
+    type* Find(const char* Name){
+      return (type*)DICTIONARY_BASE::Find(Name);
+    }
 };
 //------------------------------------------------------------------------------
 

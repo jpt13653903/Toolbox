@@ -14,41 +14,20 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "Dictionary.h"
 //------------------------------------------------------------------------------
 
-// Use a derived class to specify the type (templates cannot compile to objects)
-class INT_DICTIONARY : public DICTIONARY{
-  private:
-    // The default duplicate-handler replaces the value, but we actually want to
-    // count the number of instances...
-    static int* OnDuplicate(const char* Name, int* Old, int* New){
-      delete New;
-      (*Old) ++;
-      return Old;
-    }
-    static void CleanupAction(const char* Name, int* Data){
-      delete Data;
-    }
-    static void DisplayAction(const char* Name, int* Data){
-      info("\"%s\" occurs %2d times", Name, *Data);
-    }
+DICTIONARY<int> Dictionary;
+//------------------------------------------------------------------------------
 
-  public:
-    INT_DICTIONARY(){
-      DICTIONARY::OnDuplicate = (DICTIONARY_DUPLICATE)OnDuplicate;
-    }
-   ~INT_DICTIONARY(){
-      Action((DICTIONARY_ACTION)CleanupAction);
-    }
-    void Clear(){
-      Action((DICTIONARY_ACTION)CleanupAction);
-      DICTIONARY::Clear();
-    }
-    int* Find(const char* Name){
-      return (int*)DICTIONARY::Find(Name);
-    }
-    void Display(){
-      Action((DICTIONARY_ACTION)DisplayAction);
-    }
-} Dictionary;
+// The default duplicate-handler replaces the value, but we actually want to
+// count the number of instances...
+static int* OnDuplicate(const char* Name, int* Old, int* New){
+  delete New;
+  (*Old) ++;
+  return Old;
+}
+static void DisplayAction(const char* Name, int* Data){
+  info("\"%s\" occurs %2d times", Name, *Data);
+}
+
 //------------------------------------------------------------------------------
 
 // Some random words from https://www.lipsum.com/
@@ -128,6 +107,8 @@ const char* LoremIpsum[] = {
 bool Test(){
   Start("Testing Dictionary");
 
+  Dictionary.OnDuplicate = (DICTIONARY_BASE::ON_DUPLICATE)OnDuplicate;
+
   int n;
   for(n = 0; LoremIpsum[n]; n++){
     int* Counter = new int;
@@ -142,7 +123,7 @@ bool Test(){
   info("Finding \"Vestibulum\"...  It occurs %2d times.", VestibulumCount);
   Assert(VestibulumCount == 3);
 
-  Dictionary.Display();
+  Dictionary.Action((DICTIONARY_BASE::ACTION)DisplayAction);
 
   Done(); return true;
 }

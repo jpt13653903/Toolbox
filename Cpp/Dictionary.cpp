@@ -14,7 +14,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "Dictionary.h"
 //------------------------------------------------------------------------------
 
-DICTIONARY::NODE::NODE(const char* Name, void* Data){
+DICTIONARY_BASE::NODE::NODE(const char* Name, void* Data){
   Red  = true;
   Left = Right = 0;
 
@@ -28,7 +28,7 @@ DICTIONARY::NODE::NODE(const char* Name, void* Data){
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::NODE::~NODE(){
+DICTIONARY_BASE::NODE::~NODE(){
   delete[] Name;
 
   if(Left ) delete Left;
@@ -36,42 +36,42 @@ DICTIONARY::NODE::~NODE(){
 }
 //------------------------------------------------------------------------------
 
-void* DICTIONARY::DefaultOnDuplicate(const char* Name, void* Old, void* New){
+void* DICTIONARY_BASE::DefaultOnDuplicate(const char* Name, void* Old, void* New){
   return New;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::DICTIONARY(){
+DICTIONARY_BASE::DICTIONARY_BASE(){
   Root        = 0;
   ItemCount   = 0;
   OnDuplicate = DefaultOnDuplicate;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::~DICTIONARY(){
+DICTIONARY_BASE::~DICTIONARY_BASE(){
   if(Root) delete Root;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY::Clear(){
+void DICTIONARY_BASE::Clear(){
   if(Root) delete Root;
 }
 //------------------------------------------------------------------------------
 
-bool DICTIONARY::IsRed(NODE* Node){
+bool DICTIONARY_BASE::IsRed(NODE* Node){
   if(!Node) return false;
   return Node->Red;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY::ColourFlip(NODE* Node){
+void DICTIONARY_BASE::ColourFlip(NODE* Node){
   Node       ->Red = !Node       ->Red;
   Node->Left ->Red = !Node->Left ->Red;
   Node->Right->Red = !Node->Right->Red;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::NODE* DICTIONARY::RotateLeft(NODE* Node){
+DICTIONARY_BASE::NODE* DICTIONARY_BASE::RotateLeft(NODE* Node){
   NODE* Temp  = Node->Right;
   Node->Right = Temp->Left;
   Temp->Left  = Node;
@@ -81,7 +81,7 @@ DICTIONARY::NODE* DICTIONARY::RotateLeft(NODE* Node){
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::NODE* DICTIONARY::RotateRight(NODE* Node){
+DICTIONARY_BASE::NODE* DICTIONARY_BASE::RotateRight(NODE* Node){
   NODE* Temp  = Node->Left;
   Node->Left  = Temp->Right;
   Temp->Right = Node;
@@ -91,12 +91,12 @@ DICTIONARY::NODE* DICTIONARY::RotateRight(NODE* Node){
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY::Insert(const char* Name, void* Data){
+void DICTIONARY_BASE::Insert(const char* Name, void* Data){
   Root = Insert(Root, Name, Data);
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY::NODE* DICTIONARY::Insert(NODE* Node, const char* Name, void* Data){
+DICTIONARY_BASE::NODE* DICTIONARY_BASE::Insert(NODE* Node, const char* Name, void* Data){
   if(!Node){
     ItemCount++;
     return new NODE(Name, Data);
@@ -130,7 +130,7 @@ DICTIONARY::NODE* DICTIONARY::Insert(NODE* Node, const char* Name, void* Data){
 }
 //------------------------------------------------------------------------------
 
-void* DICTIONARY::Find(const char* Name){
+void* DICTIONARY_BASE::Find(const char* Name){
   int   j;
   NODE* Node = Root;
 
@@ -162,17 +162,17 @@ void* DICTIONARY::Find(const char* Name){
 }
 //------------------------------------------------------------------------------
 
-int DICTIONARY::GetCount(){
+int DICTIONARY_BASE::GetCount(){
   return ItemCount;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY::Action(DICTIONARY_ACTION Function){
+void DICTIONARY_BASE::Action(ACTION Function){
   if(Root) Action(Root, Function);
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY::Action(NODE* Node, DICTIONARY_ACTION Function){
+void DICTIONARY_BASE::Action(NODE* Node, ACTION Function){
   if(Node->Left ) Action(Node->Left , Function);
   Function(Node->Name, Node->Data);
   if(Node->Right) Action(Node->Right, Function);
