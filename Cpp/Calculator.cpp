@@ -40,32 +40,7 @@ long double fix(long double x){
 }
 //------------------------------------------------------------------------------
 
-static LLRB_TREE* Constants;
-//------------------------------------------------------------------------------
-
-struct CONSTANT{
-  string      Name; // Including any leading '\'
-  long double Value;
-
-  CONSTANT(const char* Name){
-    this->Name = Name;
-    Value      = 0.0;
-  }
-};
-//------------------------------------------------------------------------------
-
-static int CONSTANT_Compare(void* Left, void* Right){
-  CONSTANT* left  = (CONSTANT*)Left;
-  CONSTANT* right = (CONSTANT*)Right;
-
-  return left->Name.compare(right->Name);
-}
-//------------------------------------------------------------------------------
-
-static void AddConstant(const char* Name, long double Value){
-  CONSTANT* Constant = new CONSTANT(Name); Constant->Value = Value;
-  Constants->Insert(Constant);
-}
+static map<string, long double> Constants;
 //------------------------------------------------------------------------------
 
 static int InstanceCount = 0;
@@ -76,35 +51,29 @@ CALCULATOR::CALCULATOR(){
   Measure = Radians;
 
   if(!InstanceCount){
-    // If the calculator is defined as a global variable, there is no
-    // guarantee that the Constants tree has been initialised before this
-    // constructor is called, if it is also a non-pointer global variable.
-    Constants          = new LLRB_TREE;
-    Constants->Compare = CONSTANT_Compare;
-
-    AddConstant("e"        , e                );
-    AddConstant("pi"       , pi               );
-    AddConstant("\\c"      , 2.99792458e8L    );
-    AddConstant("\\G"      , 6.67259e-11L     );
-    AddConstant("\\g"      , 9.80665L         );
-    AddConstant("\\me"     , 9.1093897e-31L   );
-    AddConstant("\\mp"     , 1.6726231e-27L   );
-    AddConstant("\\mn"     , 1.6749286e-27L   );
-    AddConstant("\\u"      , 1.6605402e-27L   );
-    AddConstant("\\e"      , 1.60217646e-19L  );
-    AddConstant("\\h"      , 6.6260689633e-34L);
-    AddConstant("\\k"      , 1.380650424e-23L );
-    AddConstant("\\mu"     , pi*4e-7L         );
-    AddConstant("\\epsilon", 8.854187817e-12L );
-    AddConstant("\\Phi"    , 2.06783461e-15L  );
-    AddConstant("\\NA"     , 6.0221417930e23L );
-    AddConstant("\\R"      , 8.31447215L      );
-    AddConstant("\\rhoAl"  , 26.53e-9L        );
-    AddConstant("\\rhoCu"  , 16.78e-9L        );
-    AddConstant("\\F"      , 9.6485304e4L     );
-    AddConstant("\\AU"     , 1.4959787e11L    );
-    AddConstant("\\pc"     , 3.0856776e16L    );
-    AddConstant("\\mil"    , 25.4e-6L         );
+    Constants["e"        ] = e;
+    Constants["pi"       ] = pi;
+    Constants["\\c"      ] = 2.99792458e8L;
+    Constants["\\G"      ] = 6.67259e-11L;
+    Constants["\\g"      ] = 9.80665L;
+    Constants["\\me"     ] = 9.1093897e-31L;
+    Constants["\\mp"     ] = 1.6726231e-27L;
+    Constants["\\mn"     ] = 1.6749286e-27L;
+    Constants["\\u"      ] = 1.6605402e-27L;
+    Constants["\\e"      ] = 1.60217646e-19L;
+    Constants["\\h"      ] = 6.6260689633e-34L;
+    Constants["\\k"      ] = 1.380650424e-23L;
+    Constants["\\mu"     ] = pi*4e-7L;
+    Constants["\\epsilon"] = 8.854187817e-12L;
+    Constants["\\Phi"    ] = 2.06783461e-15L;
+    Constants["\\NA"     ] = 6.0221417930e23L;
+    Constants["\\R"      ] = 8.31447215L;
+    Constants["\\rhoAl"  ] = 26.53e-9L;
+    Constants["\\rhoCu"  ] = 16.78e-9L;
+    Constants["\\F"      ] = 9.6485304e4L;
+    Constants["\\AU"     ] = 1.4959787e11L;
+    Constants["\\pc"     ] = 3.0856776e16L;
+    Constants["\\mil"    ] = 25.4e-6L;
   }
   InstanceCount++;
 }
@@ -112,16 +81,6 @@ CALCULATOR::CALCULATOR(){
 
 CALCULATOR::~CALCULATOR(){
   InstanceCount--;
-
-  if(!InstanceCount){
-    CONSTANT* Constant = (CONSTANT*)Constants->First();
-    while(Constant){
-      delete Constant;
-      Constant = (CONSTANT*)Constants->Next();
-    }
-    delete Constants;
-  }
-
   DeleteTree(Tree);
 }
 //------------------------------------------------------------------------------
@@ -770,12 +729,11 @@ bool CALCULATOR::Value(NODE* Root){
   }else{
     FuncName(&s);
     if(s.length()){
-      CONSTANT  Key(s.c_str());
-      CONSTANT* Constant = (CONSTANT*)Constants->Find(&Key);
-      if(Constant){
-        Index += Constant->Name.length();
+      map<string, long double>::iterator Constant = Constants.find(s);
+      if(Constant != Constants.end()){
+        Index += Constant->first.length();
         Root->Operation = Val;
-        Root->Value = Constant->Value;
+        Root->Value = Constant->second;
         if(Minus) Root->Value *= -1.;
 
       }else{
