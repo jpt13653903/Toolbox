@@ -44,72 +44,49 @@ void operator+= (string& S, uint32_t Char){
 void operator+= (string& S, uint16_t Char){ S += (uint32_t)Char; }
 //------------------------------------------------------------------------------
 
-JSON::ARRAY::ARRAY(){
-  this->Value = new JSON;
-  this->Next  = 0;
-}
-//------------------------------------------------------------------------------
-
-JSON::ARRAY::~ARRAY(){
-  delete Value;
-}
-//------------------------------------------------------------------------------
-
 JSON::JSON(){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type   = typeNull;
+  String = "";
+  Number = 0;
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(JSON& Value){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(const char* Value){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(int Value){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(double Value){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(bool Value){
-  Type     = typeNull;
-  String   = "";
-  Number   = 0;
-  Items    = 0;
-  LastItem = 0;
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
@@ -123,16 +100,10 @@ void JSON::Clear(){
   String = "";
   Number = 0;
 
-  // Objects.Clear();
+  Objects.Clear();
 
-  ARRAY* Item;
-
-  while(Items){
-    Item  = Items;
-    Items = Items->Next;
-    delete Item;
-  }
-  LastItem = 0;
+  for(size_t n = 0; n < Items.size(); n++) delete Items[n];
+  Items.clear();
 
   Type = typeNull;
 }
@@ -141,8 +112,6 @@ void JSON::Clear(){
 void JSON::operator=(JSON& Value){
   Clear();
   Type = Value.Type;
-
-  ARRAY* Item;
 
   const char* Name;
   JSON*       Object;
@@ -170,11 +139,7 @@ void JSON::operator=(JSON& Value){
       break;
 
     case typeArray:
-      Item = Value.Items;
-      while(Item){
-        Append(*(Item->Value));
-        Item = Item->Next;
-      }
+      for(size_t n = 0; n < Value.Items.size(); n++) Append(*(Value.Items[n]));
       break;
 
     default:
@@ -277,19 +242,14 @@ JSON* JSON::operator[] (const char* Name){
 
 void JSON::Append(JSON& Value){
   // If the array is empty, add any existing object as the first item in the array
-  if(Items == 0 && Type != typeNull && Type != typeArray){
-    ARRAY* Item = new ARRAY();
-    Item->Value->operator=(*this);
-    Items    = Item;
-    LastItem = Item;
+  if(Items.empty() && Type != typeNull && Type != typeArray){
+    JSON* Item = new JSON(*this);
+    Items.push_back(Item);
   }
   Type = typeArray;
 
-  ARRAY* Item = new ARRAY();
-  Item->Value->operator=(Value);
-  if(LastItem) LastItem->Next = Item;
-  else         Items          = Item;
-  LastItem = Item;
+  JSON* Item = new JSON(Value);
+  Items.push_back(Item);
 }
 //------------------------------------------------------------------------------
 
@@ -314,13 +274,8 @@ void JSON::Append(bool Value){
 //------------------------------------------------------------------------------
 
 JSON* JSON::operator[] (int Index){
-  ARRAY* Item = Items;
-  while(Item){
-    if(!Index) return Item->Value;
-    Index--;
-    Item = Item->Next;
-  }
-  return 0;
+  if(Index < 0 || (size_t)Index >= Items.size()) return 0;
+  return Items[Index];
 }
 //------------------------------------------------------------------------------
 
@@ -660,7 +615,6 @@ bool JSON::Parse(const char* json, unsigned Length){
 
 const char* JSON::Stringify(){
   char s[0x100];
-  ARRAY* Item;
 
   const char* Name;
   JSON*       Object;
@@ -718,11 +672,9 @@ const char* JSON::Stringify(){
 
     case typeArray:
       Stringification = "[";
-      Item = Items;
-      while(Item){
-        Stringification += Item->Value->Stringify();
-        if(Item->Next) Stringification += ",";
-        Item = Item->Next;
+      for(size_t n = 0; n < Items.size(); n++){
+        Stringification += Items[n]->Stringify();
+        if(n < Items.size()-1) Stringification += ",";
       }
       Stringification += "]";
       break;

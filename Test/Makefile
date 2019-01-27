@@ -39,16 +39,16 @@ Headers = *.h \
 .PHONY: clean all
 .SECONDARY:
 
-all: bin/testDebugMessages.exe \
+all: bin/testCalculator.exe    \
+     bin/testDebugMessages.exe \
      bin/testDictionary.exe    \
      bin/testFileWrapper.exe   \
-     bin/testCalculator.exe    \
      bin/testJSON.exe
 
-test: testDebugMessages \
+test: testCalculator    \
+      testDebugMessages \
       testDictionary    \
       testFileWrapper   \
-      testCalculator    \
       testJSON
 
 test%: bin/test%.exe

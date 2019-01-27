@@ -14,6 +14,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //------------------------------------------------------------------------------
 
 #include <string>
+#include <vector>
 //------------------------------------------------------------------------------
 
 #include "General.h"
@@ -64,15 +65,7 @@ class JSON{
 //------------------------------------------------------------------------------
 
   public: // Array-related functions
-    struct ARRAY{ // Linked list of objects, in order of insertion
-      JSON*  Value;
-      ARRAY* Next;
-
-      ARRAY();
-     ~ARRAY();
-    };
-    ARRAY* Items;
-    ARRAY* LastItem;
+    std::vector<JSON*> Items;
 
     // These functions make copies of the value
     // If the type is not "null" and not "Array", the current value becomes
