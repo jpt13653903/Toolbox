@@ -56,6 +56,8 @@ bool TestFileWrapper(){
 //------------------------------------------------------------------------------
 
 int main(){
+  SetupTerminal();
+
   printf("\n\n");
   if(!TestFileWrapper()) goto main_Error;
 

@@ -38,10 +38,10 @@ bool TestBuild(){
   info("json = %s", json.Stringify());
   Assert(!strcmp(json.Stringify(),
     "{"
-      "\"String\":\"MyString\","
+      "\"MyArray\":[0,1,2,3,4,5,6,7,8,9],"
       "\"Number\":789.456,"
-      "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
-      "\"MyArray\":[0,1,2,3,4,5,6,7,8,9]"
+      "\"String\":\"MyString\","
+      "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
     "}"));
 
   Done(); return true;
@@ -74,23 +74,23 @@ bool TestLoad(){
   info("json = %s", json.Stringify());
   Assert(!strcmp(json.Stringify(),
     "{"
-      "\"string\":\"String with unicode...Ω...\","
-      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
-      "\"number\":123.456,"
-      "\"state1\":true,"
-      "\"state2\":false,"
-      "\"state3\":null,"
       "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+      "\"number\":123.456,"
       "\"object\":{"
-        "\"string\":\"String\","
+        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+        "\"array2\":[],"
         "\"number\":123.456,"
+        "\"object\":{},"
         "\"state1\":true,"
         "\"state2\":false,"
         "\"state3\":null,"
-        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-        "\"object\":{},"
-        "\"array2\":[]"
-      "}"
+        "\"string\":\"String\""
+      "},"
+      "\"state1\":true,"
+      "\"state2\":false,"
+      "\"state3\":null,"
+      "\"string\":\"String with unicode...Ω...\","
+      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
     "}"));
 
   Done();
@@ -113,24 +113,24 @@ bool TestLoad(){
   info("After update: %s", json.Stringify());
   Assert(!strcmp(json.Stringify(),
     "{"
-      "\"string\":\"New String\","
-      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\","
-      "\"number\":123.456,"
-      "\"state1\":true,"
-      "\"state2\":false,"
-      "\"state3\":null,"
       "\"array\":[1,2,3,4],"
+      "\"number\":123.456,"
       "\"object\":{"
-        "\"string\":\"String\","
+        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+        "\"array2\":[8,7,6,5,4,3,2,1],"
         "\"number\":987.654,"
+        "\"object\":\"Changed the type to a string\","
         "\"state1\":true,"
         "\"state2\":false,"
         "\"state3\":null,"
-        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-        "\"object\":\"Changed the type to a string\","
-        "\"array2\":[8,7,6,5,4,3,2,1]"
+        "\"string\":\"String\""
       "},"
-      "\"state4\":true"
+      "\"state1\":true,"
+      "\"state2\":false,"
+      "\"state3\":null,"
+      "\"state4\":true,"
+      "\"string\":\"New String\","
+      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
     "}"));
 
   Done(); return true;
@@ -138,6 +138,8 @@ bool TestLoad(){
 //------------------------------------------------------------------------------
 
 int main(){
+  SetupTerminal();
+
   printf("\n\n");
   if(!TestBuild()) goto main_Error;
   if(!TestLoad ()) goto main_Error;
@@ -146,6 +148,8 @@ int main(){
   return 0;
 
   main_Error:
+    fflush(stdout);
+    Sleep(100);
     Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
     return -1;
 }

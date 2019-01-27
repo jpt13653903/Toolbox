@@ -33,11 +33,11 @@ LLRB_TREE::Node::Node(void* Data, Node* Next, Node* Prev, int Tag){
 //------------------------------------------------------------------------------
 
 LLRB_TREE::Node::~Node(){
-  if(Left ) delete Left;
-  if(Right) delete Right;
-
   if(Next) Next->Prev = Prev;
   if(Prev) Prev->Next = Next;
+
+  if(Left ) delete Left;
+  if(Right) delete Right;
 }
 //------------------------------------------------------------------------------
 

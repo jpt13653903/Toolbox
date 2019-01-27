@@ -27,6 +27,8 @@ bool TestDebugMessages(){
 //------------------------------------------------------------------------------
 
 int main(){
+  SetupTerminal();
+
   printf("\n\n");
   if(!TestDebugMessages()) goto main_Error;
 

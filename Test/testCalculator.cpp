@@ -87,6 +87,8 @@ bool TestTreeView(){
 //------------------------------------------------------------------------------
 
 int main(){
+  SetupTerminal();
+
   printf("\n\n");
   if(!TestConstants  ()) goto main_Error;
   if(!TestExpressions()) goto main_Error;

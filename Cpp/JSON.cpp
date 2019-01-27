@@ -1,13 +1,14 @@
-//==============================================================================
-// Copyright (C) John-Philip Taylor
-// jpt13653903@gmail.com
-//
-// This file is part of a library
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//==============================================================================
+/*==============================================================================
+
+Copyright (C) John-Philip Taylor
+jpt13653903@gmail.com
+
+This file is part of a library
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+==============================================================================*/
 
 #include "JSON.h"
 //------------------------------------------------------------------------------
@@ -43,18 +44,6 @@ void operator+= (string& S, uint32_t Char){
 void operator+= (string& S, uint16_t Char){ S += (uint32_t)Char; }
 //------------------------------------------------------------------------------
 
-JSON::OBJECT::OBJECT(const char* Name){
-  this->Name  = Name;
-  this->Value = new JSON;
-  this->Next  = 0;
-}
-//------------------------------------------------------------------------------
-
-JSON::OBJECT::~OBJECT(){
-  delete Value;
-}
-//------------------------------------------------------------------------------
-
 JSON::ARRAY::ARRAY(){
   this->Value = new JSON;
   this->Next  = 0;
@@ -67,72 +56,60 @@ JSON::ARRAY::~ARRAY(){
 //------------------------------------------------------------------------------
 
 JSON::JSON(){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(JSON& Value){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(const char* Value){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(int Value){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(double Value){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
 
 JSON::JSON(bool Value){
-  Type       = typeNull;
-  String     = "";
-  Number     = 0;
-  Objects    = 0;
-  LastObject = 0;
-  Items      = 0;
-  LastItem   = 0;
+  Type     = typeNull;
+  String   = "";
+  Number   = 0;
+  Items    = 0;
+  LastItem = 0;
   operator=(Value);
 }
 //------------------------------------------------------------------------------
@@ -146,14 +123,7 @@ void JSON::Clear(){
   String = "";
   Number = 0;
 
-  OBJECT* Object;
-
-  while(Objects){
-    Object  = Objects;
-    Objects = Objects->Next;
-    delete Object;
-  }
-  LastObject = 0;
+  // Objects.Clear();
 
   ARRAY* Item;
 
@@ -172,8 +142,10 @@ void JSON::operator=(JSON& Value){
   Clear();
   Type = Value.Type;
 
-  OBJECT* Object;
-  ARRAY * Item;
+  ARRAY* Item;
+
+  const char* Name;
+  JSON*       Object;
 
   switch(Value.Type){
     case typeNull:
@@ -190,10 +162,10 @@ void JSON::operator=(JSON& Value){
       break;
 
     case typeObject:
-      Object = Value.Objects;
+      Object = Value.Objects.First(&Name);
       while(Object){
-        AddOrUpdate(Object->Name.c_str(), *(Object->Value));
-        Object = Object->Next;
+        AddOrUpdate(Name, *Object);
+        Object = Value.Objects.Next(&Name);
       }
       break;
 
@@ -240,13 +212,14 @@ void JSON::operator=(bool Value){
 //------------------------------------------------------------------------------
 
 JSON* JSON::AddOrUpdate(JSON& Value){
-  OBJECT* Object;
+  const char* Name;
+  JSON*       Object;
 
   if(Value.Type == typeObject){
-    Object = Value.Objects;
+    Object = Value.Objects.First(&Name);
     while(Object){
-      AddOrUpdate(Object->Name.c_str(), *(Object->Value));
-      Object = Object->Next;
+      AddOrUpdate(Name, *Object);
+      Object = Value.Objects.Next(&Name);
     }
   }else{
     operator=(Value);
@@ -256,21 +229,17 @@ JSON* JSON::AddOrUpdate(JSON& Value){
 //------------------------------------------------------------------------------
 
 JSON* JSON::AddOrUpdate(const char* Name, JSON& Value){
-  OBJECT* Object;
-
   Type = typeObject;
 
   JSON* json = operator[](Name);
   if(json){
     return json->AddOrUpdate(Value);
   }
-  Object = new OBJECT(Name);
-  Object->Value->operator=(Value);
-  if(LastObject) LastObject->Next = Object;
-  else           Objects          = Object;
-  LastObject = Object;
 
-  return Object->Value;
+  JSON* Object = new JSON(Value);
+  Objects.Insert(Name, Object);
+
+  return Object;
 }
 //------------------------------------------------------------------------------
 
@@ -302,12 +271,7 @@ JSON* JSON::AddOrUpdate(const char* Name){
 //------------------------------------------------------------------------------
 
 JSON* JSON::operator[] (const char* Name){
-  OBJECT* Object = Objects;
-  while(Object){
-    if(Object->Name == Name) return Object->Value;
-    Object = Object->Next;
-  }
-  return 0;
+  return Objects.Find(Name);
 }
 //------------------------------------------------------------------------------
 
@@ -696,8 +660,10 @@ bool JSON::Parse(const char* json, unsigned Length){
 
 const char* JSON::Stringify(){
   char s[0x100];
-  OBJECT* Object;
-  ARRAY * Item;
+  ARRAY* Item;
+
+  const char* Name;
+  JSON*       Object;
 
   switch(Type){
     case typeNull:
@@ -736,18 +702,18 @@ const char* JSON::Stringify(){
       break;
 
     case typeObject:
-      Stringification = "{";
-      Object = Objects;
+      Stringification = '{';
+      Object = Objects.First(&Name);
       while(Object){
         Stringification += '"';
-        Stringification += Object->Name;
+        Stringification += Name;
         Stringification += '"';
-        Stringification += ":";
-        Stringification += Object->Value->Stringify();
-        if(Object->Next) Stringification += ",";
-        Object = Object->Next;
+        Stringification += ':';
+        Stringification += Object->Stringify();
+        Object = Objects.Next(&Name);
+        if(Object) Stringification += ",";
       }
-      Stringification += "}";
+      Stringification += '}';
       break;
 
     case typeArray:

@@ -14,7 +14,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "Dictionary.h"
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE::NODE(const char* Name, void* Data){
+DICTIONARY_BASE::NODE::NODE(const char* Name, void* Data, NODE* Prev, NODE* Next){
   Red  = true;
   Left = Right = 0;
 
@@ -25,10 +25,18 @@ DICTIONARY_BASE::NODE::NODE(const char* Name, void* Data){
   this->Name[j] = 0;
 
   this->Data = Data;
+  this->Prev = Prev;
+  this->Next = Next;
+
+  if(Prev) Prev->Next = this;
+  if(Next) Next->Prev = this;
 }
 //------------------------------------------------------------------------------
 
 DICTIONARY_BASE::NODE::~NODE(){
+  if(Prev) Prev->Next = Next;
+  if(Next) Next->Prev = Prev;
+
   delete[] Name;
 
   if(Left ) delete Left;
@@ -43,6 +51,7 @@ void* DICTIONARY_BASE::DefaultOnDuplicate(const char* Name, void* Old, void* New
 
 DICTIONARY_BASE::DICTIONARY_BASE(){
   Root        = 0;
+  Current     = 0;
   ItemCount   = 0;
   OnDuplicate = DefaultOnDuplicate;
 }
@@ -55,6 +64,7 @@ DICTIONARY_BASE::~DICTIONARY_BASE(){
 
 void DICTIONARY_BASE::Clear(){
   if(Root) delete Root;
+  Current = 0;
 }
 //------------------------------------------------------------------------------
 
@@ -92,23 +102,30 @@ DICTIONARY_BASE::NODE* DICTIONARY_BASE::RotateRight(NODE* Node){
 //------------------------------------------------------------------------------
 
 void DICTIONARY_BASE::Insert(const char* Name, void* Data){
+  TempPrev = TempNext = 0;
   Root = Insert(Root, Name, Data);
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE* DICTIONARY_BASE::Insert(NODE* Node, const char* Name, void* Data){
+DICTIONARY_BASE::NODE* DICTIONARY_BASE::Insert(
+  NODE*       Node,
+  const char* Name,
+  void*       Data
+){
   if(!Node){
     ItemCount++;
-    return new NODE(Name, Data);
+    return new NODE(Name, Data, TempPrev, TempNext);
   }
 
   int j;
   for(j = 0; Name[j]; j++){
     if(Name[j] < Node->Name[j]){
+      TempNext   = Node;
       Node->Left = Insert(Node->Left, Name, Data);
       break;
 
     }else if(Name[j] > Node->Name[j]){
+      TempPrev    = Node;
       Node->Right = Insert(Node->Right, Name, Data);
       break;
     }
@@ -118,6 +135,7 @@ DICTIONARY_BASE::NODE* DICTIONARY_BASE::Insert(NODE* Node, const char* Name, voi
       Node->Data = OnDuplicate(Name, Node->Data, Data);
       return Node;
     }else{
+      TempNext   = Node;
       Node->Left = Insert(Node->Left, Name, Data);
     }
   }
@@ -153,12 +171,34 @@ void* DICTIONARY_BASE::Find(const char* Name){
         }
       }
       if(!Name[j]){
-        if(!Node->Name[j]) return Node->Data;
-        else               Node = Node->Left;
+        if(!Node->Name[j]){
+          Current = Node;
+          return Node->Data;
+        }else{
+          Node = Node->Left;
+        }
       }
     }
   }
   return 0;
+}
+//------------------------------------------------------------------------------
+
+void* DICTIONARY_BASE::First(const char** Name){
+  Current = Root;
+  if(!Current) return 0;
+  while(Current->Left) Current = Current->Left;
+  if(Name) *Name = Current->Name;
+  return Current->Data;
+}
+//------------------------------------------------------------------------------
+
+void* DICTIONARY_BASE::Next(const char** Name){
+  if(!Current) return 0;
+  Current = Current->Next;
+  if(!Current) return 0;
+  if(Name) *Name = Current->Name;
+  return Current->Data;
 }
 //------------------------------------------------------------------------------
 

@@ -104,7 +104,7 @@ const char* LoremIpsum[] = {
 };
 //------------------------------------------------------------------------------
 
-bool Test(){
+bool TestBuild(){
   Start("Testing Dictionary");
 
   Dictionary.OnDuplicate = (DICTIONARY_BASE::ON_DUPLICATE)OnDuplicate;
@@ -123,15 +123,34 @@ bool Test(){
   info("Finding \"Vestibulum\"...  It occurs %2d times.", VestibulumCount);
   Assert(VestibulumCount == 3);
 
-  Dictionary.Action((DICTIONARY_BASE::ACTION)DisplayAction);
+  Done(); return true;
+}
+//------------------------------------------------------------------------------
+
+bool TestIteration(){
+  Start("Testing Dictionary Action");
+    Dictionary.Action((DICTIONARY_BASE::ACTION)DisplayAction);
+  Done();
+
+  Start("Testing Dictionary Iteration");
+
+  const char* Name;
+  int* Count = Dictionary.First(&Name);
+  while(Count){
+    info("\"%s\" occurs %2d times", Name, *Count);
+    Count = Dictionary.Next(&Name);
+  }
 
   Done(); return true;
 }
 //------------------------------------------------------------------------------
 
 int main(){
+  SetupTerminal();
+
   printf("\n\n");
-  if(!Test()) goto main_Error;
+  if(!TestBuild    ()) goto main_Error;
+  if(!TestIteration()) goto main_Error;
 
   info(ANSI_FG_GREEN "All OK"); Done();
   return 0;

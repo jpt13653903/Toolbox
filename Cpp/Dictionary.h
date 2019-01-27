@@ -32,14 +32,22 @@ class DICTIONARY_BASE{
       char* Name; ///< This memory is internally managed
       void* Data; ///< This is arbitrary data and not deleted by this structure
 
+      // Used to point to the children
       NODE* Left;
       NODE* Right;
+      
+      // Used to linearise the tree
+      NODE* Prev;
+      NODE* Next;
 
-      NODE(const char* Name, void* Data);
+      NODE(const char* Name, void* Data, NODE* Prev, NODE* Next);
      ~NODE();
     };
 
     NODE* Root;
+    NODE* Current; // Used in "First" and "Next" calls
+    NODE* TempPrev;
+    NODE* TempNext;
     int   ItemCount;
 
     bool  IsRed      (NODE* Node);
@@ -54,8 +62,10 @@ class DICTIONARY_BASE{
 
   protected:
     void  Clear ();
-    void  Insert(const char* Name, void* Data);
-    void* Find  (const char* Name);
+    void  Insert(const char*  Name, void* Data);
+    void* Find  (const char*  Name);
+    void* First (const char** Name = 0);
+    void* Next  (const char** Name = 0);
 
   public:
              DICTIONARY_BASE();
@@ -101,6 +111,12 @@ template<class type> class DICTIONARY : public DICTIONARY_BASE{
     }
     type* Find(const char* Name){
       return (type*)DICTIONARY_BASE::Find(Name);
+    }
+    type* First(const char** Name = 0){
+      return (type*)DICTIONARY_BASE::First(Name);
+    }
+    type* Next(const char** Name = 0){
+      return (type*)DICTIONARY_BASE::Next(Name);
     }
 };
 //------------------------------------------------------------------------------

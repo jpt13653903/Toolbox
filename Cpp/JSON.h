@@ -1,13 +1,13 @@
-//==============================================================================
-// Copyright (C) John-Philip Taylor
-// jpt13653903@gmail.com
-//
-// This file is part of a library
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//==============================================================================
+/*==============================================================================
+Copyright (C) John-Philip Taylor
+jpt13653903@gmail.com
+
+This file is part of a library
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+==============================================================================*/
 
 #ifndef JSON_h
 #define JSON_h
@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "General.h"
+#include "Dictionary.h"
 //------------------------------------------------------------------------------
 
 class JSON{
@@ -40,16 +41,7 @@ class JSON{
 //------------------------------------------------------------------------------
 
   public: // Object-related functions
-    struct OBJECT{ // Linked list of objects, in order of insertion
-      std::string Name;
-      JSON*       Value;
-      OBJECT*     Next;
-
-      OBJECT(const char* Name);
-     ~OBJECT();
-    };
-    OBJECT* Objects;
-    OBJECT* LastObject;
+    DICTIONARY<JSON> Objects;
 
     // Adds a new key-value pair, or updates the existing
     // - If "Value" is "typeObject", the update is recursive (i.e. old
