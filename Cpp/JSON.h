@@ -13,12 +13,12 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #define JSON_h
 //------------------------------------------------------------------------------
 
+#include <map>
 #include <string>
 #include <vector>
 //------------------------------------------------------------------------------
 
 #include "General.h"
-#include "Dictionary.h"
 //------------------------------------------------------------------------------
 
 class JSON{
@@ -42,7 +42,7 @@ class JSON{
 //------------------------------------------------------------------------------
 
   public: // Object-related functions
-    DICTIONARY<JSON> Objects;
+    std::map<std::string, JSON*> Objects;
 
     // Adds a new key-value pair, or updates the existing
     // - If "Value" is "typeObject", the update is recursive (i.e. old

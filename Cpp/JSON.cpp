@@ -100,7 +100,12 @@ void JSON::Clear(){
   String = "";
   Number = 0;
 
-  Objects.Clear();
+  for(
+    map<string, JSON*>::iterator Object = Objects.begin();
+    Object != Objects.end();
+    Object++
+  ) delete Object->second;
+  Objects.clear();
 
   for(size_t n = 0; n < Items.size(); n++) delete Items[n];
   Items.clear();
@@ -112,9 +117,6 @@ void JSON::Clear(){
 void JSON::operator=(JSON& Value){
   Clear();
   Type = Value.Type;
-
-  const char* Name;
-  JSON*       Object;
 
   switch(Value.Type){
     case typeNull:
@@ -131,11 +133,11 @@ void JSON::operator=(JSON& Value){
       break;
 
     case typeObject:
-      Object = Value.Objects.First(&Name);
-      while(Object){
-        AddOrUpdate(Name, *Object);
-        Object = Value.Objects.Next(&Name);
-      }
+      for(
+        map<string, JSON*>::iterator Object = Value.Objects.begin();
+        Object != Value.Objects.end();
+        Object++
+      ) AddOrUpdate(Object->first.c_str(), *(Object->second));
       break;
 
     case typeArray:
@@ -177,15 +179,12 @@ void JSON::operator=(bool Value){
 //------------------------------------------------------------------------------
 
 JSON* JSON::AddOrUpdate(JSON& Value){
-  const char* Name;
-  JSON*       Object;
-
   if(Value.Type == typeObject){
-    Object = Value.Objects.First(&Name);
-    while(Object){
-      AddOrUpdate(Name, *Object);
-      Object = Value.Objects.Next(&Name);
-    }
+    for(
+      map<string, JSON*>::iterator Object = Value.Objects.begin();
+      Object != Value.Objects.end();
+      Object++
+    ) AddOrUpdate(Object->first.c_str(), *(Object->second));
   }else{
     operator=(Value);
   }
@@ -197,12 +196,10 @@ JSON* JSON::AddOrUpdate(const char* Name, JSON& Value){
   Type = typeObject;
 
   JSON* json = operator[](Name);
-  if(json){
-    return json->AddOrUpdate(Value);
-  }
+  if(json) return json->AddOrUpdate(Value);
 
-  JSON* Object = new JSON(Value);
-  Objects.Insert(Name, Object);
+  JSON* Object  = new JSON(Value);
+  Objects[Name] = Object;
 
   return Object;
 }
@@ -236,7 +233,9 @@ JSON* JSON::AddOrUpdate(const char* Name){
 //------------------------------------------------------------------------------
 
 JSON* JSON::operator[] (const char* Name){
-  return Objects.Find(Name);
+  map<string, JSON*>::iterator Object = Objects.find(Name);
+  if(Object == Objects.end()) return 0;
+  return Object->second;
 }
 //------------------------------------------------------------------------------
 
@@ -614,10 +613,8 @@ bool JSON::Parse(const char* json, unsigned Length){
 //------------------------------------------------------------------------------
 
 const char* JSON::Stringify(){
+  int  n, N;
   char s[0x100];
-
-  const char* Name;
-  JSON*       Object;
 
   switch(Type){
     case typeNull:
@@ -634,7 +631,7 @@ const char* JSON::Stringify(){
 
     case typeString:
       Stringification  = '"';
-      for(int n = 0; String[n]; n++){
+      for(n = 0; String[n]; n++){
         switch(String[n]){
           case  '"': Stringification += "\\\""   ; break;
           case '\\': Stringification += "\\\\"   ; break;
@@ -657,15 +654,20 @@ const char* JSON::Stringify(){
 
     case typeObject:
       Stringification = '{';
-      Object = Objects.First(&Name);
-      while(Object){
+      n = 0;
+      N = Objects.size();
+      for(
+        map<string, JSON*>::iterator Object = Objects.begin();
+        Object != Objects.end();
+        Object++
+      ){
         Stringification += '"';
-        Stringification += Name;
+        Stringification += Object->first;
         Stringification += '"';
         Stringification += ':';
-        Stringification += Object->Stringify();
-        Object = Objects.Next(&Name);
-        if(Object) Stringification += ",";
+        Stringification += Object->second->Stringify();
+        n++;
+        if(n < N) Stringification += ",";
       }
       Stringification += '}';
       break;
