@@ -1,24 +1,58 @@
-//==============================================================================
-// Copyright (C) John-Philip Taylor
-// jpt13653903@gmail.com
-//
-// This file is part of a library
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//==============================================================================
+/*==============================================================================
+
+Copyright (C) John-Philip Taylor
+jpt13653903@gmail.com
+
+This file is part of a library
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+==============================================================================*/
 
 #include "test.h"
 #include "Dictionary.h"
 //------------------------------------------------------------------------------
 
-DICTIONARY Dictionary;
+// Use a derived class to specify the type (templates cannot compile to objects)
+class INT_DICTIONARY : public DICTIONARY{
+  private:
+    // The default duplicate-handler replaces the value, but we actually want to
+    // count the number of instances...
+    static int* OnDuplicate(const char* Name, int* Old, int* New){
+      delete New;
+      (*Old) ++;
+      return Old;
+    }
+    static void CleanupAction(const char* Name, int* Data){
+      delete Data;
+    }
+    static void DisplayAction(const char* Name, int* Data){
+      info("\"%s\" occurs %2d times", Name, *Data);
+    }
+
+  public:
+    INT_DICTIONARY(){
+      DICTIONARY::OnDuplicate = (DICTIONARY_DUPLICATE)OnDuplicate;
+    }
+   ~INT_DICTIONARY(){
+      Action((DICTIONARY_ACTION)CleanupAction);
+    }
+    void Clear(){
+      Action((DICTIONARY_ACTION)CleanupAction);
+      DICTIONARY::Clear();
+    }
+    int* Find(const char* Name){
+      return (int*)DICTIONARY::Find(Name);
+    }
+    void Display(){
+      Action((DICTIONARY_ACTION)DisplayAction);
+    }
+} Dictionary;
 //------------------------------------------------------------------------------
 
 // Some random words from https://www.lipsum.com/
-const char* LoremIpsum[] =
-{
+const char* LoremIpsum[] = {
   "Lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit",
   "Etiam", "vel", "eleifend", "dolor", "Quisque", "luctus", "eros", "mi", "et",
   "consectetur", "metus", "sodales", "vel", "Vestibulum", "ante", "ipsum",
@@ -91,35 +125,8 @@ const char* LoremIpsum[] =
 };
 //------------------------------------------------------------------------------
 
-// The default duplicate-handler replaces the value, but we actually want to
-// count the number of instances...
-void* OnDuplicate(const char* Name, void* Old, void* New)
-{
-  int* piOld = (int*)Old;
-  int* piNew = (int*)New;
-  delete piNew;
-  (*piOld) ++;
-  return piOld;
-}
-//------------------------------------------------------------------------------
-
-void DisplayAction(const char* Name, void* Data)
-{
-  info("\"%s\" occurs %2d times", Name, *((int*)Data));
-}
-//------------------------------------------------------------------------------
-
-void CleanupAction(const char* Name, void* Data)
-{
-  int* data = (int*)Data;
-  delete data;
-}
-//------------------------------------------------------------------------------
-
 bool Test(){
   Start("Testing Dictionary");
-
-  Dictionary.OnDuplicate = OnDuplicate;
 
   int n;
   for(n = 0; LoremIpsum[n]; n++){
@@ -131,12 +138,11 @@ bool Test(){
   info("The tree now contains %2d items", Dictionary.GetCount());
   Assert(Dictionary.GetCount() == 160);
 
-  int VestibulumCount = *((int*)Dictionary.Find("Vestibulum"));
+  int VestibulumCount = *Dictionary.Find("Vestibulum");
   info("Finding \"Vestibulum\"...  It occurs %2d times.", VestibulumCount);
   Assert(VestibulumCount == 3);
 
-  Dictionary.Action(DisplayAction);
-  Dictionary.Action(CleanupAction);
+  Dictionary.Display();
 
   Done(); return true;
 }

@@ -1,29 +1,30 @@
-//==============================================================================
-// Copyright (C) John-Philip Taylor
-// jpt13653903@gmail.com
-//
-// This file is part of a library
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//==============================================================================
+/*==============================================================================
 
-/**
-This is a dictionary to store arbitrary data with a string ID.  It is based
-on a left-leaning red-black tree, as described by Robert Sedgewick,
-Department of Computer Science, Princeton University, Princeton, NJ 08544     */
-//------------------------------------------------------------------------------
+Copyright (C) John-Philip Taylor
+jpt13653903@gmail.com
+
+This file is part of a library
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+--------------------------------------------------------------------------------
+
+This is a dictionary to store arbitrary data with a string ID (also known as 
+an associative array).  It is based on a left-leaning red-black tree, as 
+described by Robert Sedgewick, Department of Computer Science, Princeton 
+University, Princeton, NJ 08544
+==============================================================================*/
 
 #ifndef Dictionary_h
 #define Dictionary_h
 //------------------------------------------------------------------------------
 
-typedef void  (*DICTIONARY_ACTION   )(const char* Name, void* Data);
-typedef void* (*DICTIONARY_DUPLICATE)(const char* Name, void* Old, void* New);
-//------------------------------------------------------------------------------
-
 class DICTIONARY{
+  public:
+    typedef void  (*DICTIONARY_ACTION   )(const char* Name, void* Data);
+    typedef void* (*DICTIONARY_DUPLICATE)(const char* Name, void* Old, void* New);
+
   private:
     struct NODE{
       bool  Red;
@@ -49,9 +50,11 @@ class DICTIONARY{
     NODE* Insert(NODE* Node, const char* Name, void* Data);
     void  Action(NODE* Node, DICTIONARY_ACTION Function);
 
+    static void* DefaultOnDuplicate(const char* Name, void* Old, void* New);
+
   public:
-    DICTIONARY();
-   ~DICTIONARY();
+             DICTIONARY();
+    virtual ~DICTIONARY();
 
     // Callback function called upon duplicate insert.  The return value must
     // be the data that must be stored at that location.  The default behaviour

@@ -1,20 +1,17 @@
-//==============================================================================
-// Copyright (C) John-Philip Taylor
-// jpt13653903@gmail.com
-//
-// This file is part of a library
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-//==============================================================================
+/*==============================================================================
+
+Copyright (C) John-Philip Taylor
+jpt13653903@gmail.com
+
+This file is part of a library
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+==============================================================================*/
 
 #include "Dictionary.h"
-//------------------------------------------------------------------------------
-
-void* DefaultOnDuplicate(const char* Name, void* Old, void* New){
-  return New;
-}
 //------------------------------------------------------------------------------
 
 DICTIONARY::NODE::NODE(const char* Name, void* Data){
@@ -36,6 +33,11 @@ DICTIONARY::NODE::~NODE(){
 
   if(Left ) delete Left;
   if(Right) delete Right;
+}
+//------------------------------------------------------------------------------
+
+void* DICTIONARY::DefaultOnDuplicate(const char* Name, void* Old, void* New){
+  return New;
 }
 //------------------------------------------------------------------------------
 
