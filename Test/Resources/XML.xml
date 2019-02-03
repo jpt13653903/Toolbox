@@ -1,0 +1,53 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes" ?>
+<!-- Spider PCB global settings file -->
+<!-- Be wary when editing this file directly,
+     as no range-checking is performed. -->
+<!-- To restore defaults, delete the line(s), or delete this file. -->
+<Global_Settings>
+  <Font
+    File = "C:\Windows\Fonts\SegoeUI.ttf"
+    Size = "12"
+  />
+  <Graphics
+    Control_Transparency = "0.05"
+    Layer_Transparency   = "0.3"
+    Screen_Resolution    = "96"
+  />
+  <Interface
+    Active_Layer_Always_Visible = "0"
+    Pan_Factor                  = "3"
+    Select_Radius               = "6"
+    Zoom_Factor                 = "1.3"
+  />
+  <Layout>
+    <Colours
+      Board              = "0xFF000000"
+      Bottom_Glue        = "0xFF333333"
+      Bottom_Paste_Mask  = "0xFF666666"
+      Bottom_Silkscreen  = "0xFFFEFE00"
+      Bottom_Solder_Mask = "0xFF00FEA9"
+      DRC_Errors         = "0xFF007FFE"
+      Dril               = "0xFFFE7F00"
+      Grid               = "0xFFFE7F00"
+      Handle             = "0xFFFE0000"
+      Nets               = "0xFFFFFFFF"
+      Rat_Lines          = "0xFFFE00FE"
+      Top_Glue           = "0xFFCCCCCC"
+      Top_Paste_Mask     = "0xFF999999"
+      Top_Silkscreen     = "0xFF00FEFE"
+      Top_Solder_Mask    = "0xFFFE007F"
+    />
+  </Layout>
+  <Schematic>
+    <Colours
+      Artwork = "0xFF000000"
+      Grid    = "0xFFFF8000"
+      Handles = "0xFFFF0000"
+      Paper   = "0xFFFFFFFF"
+      Ports   = "0xFF0000FF"
+      Text    = "0xFF000000"
+      Wires   = "0xFF00A000"
+    />
+  </Schematic>
+</Global_Settings>
+

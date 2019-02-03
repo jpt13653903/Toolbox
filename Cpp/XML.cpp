@@ -12,6 +12,9 @@
 #include "XML.h"
 //------------------------------------------------------------------------------
 
+using namespace std;
+//------------------------------------------------------------------------------
+
 #define en_dash "\xE2\x80\x93"
 #define em_dash "\xE2\x80\x94"
 //------------------------------------------------------------------------------
@@ -20,7 +23,7 @@ static int ENTITY_Compare(void* Left, void* Right){
   XML::ENTITY* left  = (XML::ENTITY*)Left;
   XML::ENTITY* right = (XML::ENTITY*)Right;
 
-  return left->Name.Compare(right->Name);
+  return left->Name.compare(right->Name);
 }
 //------------------------------------------------------------------------------
 
@@ -28,7 +31,7 @@ static int ATTRIBUTE_Compare(void* Left, void* Right){
   XML::ATTRIBUTE* left  = (XML::ATTRIBUTE*)Left;
   XML::ATTRIBUTE* right = (XML::ATTRIBUTE*)Right;
 
-  return left->Name.Compare(right->Name);
+  return left->Name.compare(right->Name);
 }
 //------------------------------------------------------------------------------
 
@@ -100,10 +103,10 @@ void XML::Clear(){
 void XML::New(const char* Document){
   Clear();
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Document, &LegalName);
 
-  Nesting = new NESTING(LegalName.UTF8());
+  Nesting = new NESTING(LegalName.c_str());
   Root    = Nesting->Entity;
 }
 //------------------------------------------------------------------------------
@@ -111,10 +114,10 @@ void XML::New(const char* Document){
 void XML::Begin(const char* Entity){
   if(!Nesting) return;
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Entity, &LegalName);
 
-  NESTING* Temp = new NESTING(LegalName.UTF8());
+  NESTING* Temp = new NESTING(LegalName.c_str());
   Nesting->Entity->Children.Insert(Temp->Entity);
 
   Temp->Next = Nesting;
@@ -150,9 +153,9 @@ void XML::Comment(const char* Comment){
 void XML::Attribute(const char* Name, int Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = Value;
-  Attribute(Name, s.UTF8());
+  char s[0x100];
+  sprintf(s, "%d", Value);
+  Attribute(Name, s);
 }
 //------------------------------------------------------------------------------
 
@@ -167,44 +170,43 @@ void XML::Attribute(const char* Name, bool Value){
 void XML::Attribute(const char* Name, double Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = Value;
-  Attribute(Name, s.UTF8());
+  char s[0x100];
+  sprintf(s, "%lg", Value);
+  Attribute(Name, s);
 }
 //------------------------------------------------------------------------------
 
 void XML::Attribute(const char* Name, unsigned Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = "0x";
-  s.AppendHex(Value, 8);
-  Attribute(Name , s.UTF8());
+  char s[0x100];
+  sprintf(s, "0x%08X", Value);
+  Attribute(Name, s);
 }
 //------------------------------------------------------------------------------
 
 void XML::Attribute(const char* Name, const char* Value){
   if(!Nesting) return;
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Name, &LegalName);
 
-  ATTRIBUTE* Temp = new ATTRIBUTE(LegalName.UTF8(), Value);
+  ATTRIBUTE* Temp = new ATTRIBUTE(LegalName.c_str(), Value);
   Nesting->Entity->Attributes.Insert(Temp);
 }
 //------------------------------------------------------------------------------
 
-void XML::Attribute(const char* Name, UNICODE_STRING* Value){
-  Attribute(Name, Value->UTF8());
+void XML::Attribute(const char* Name, string* Value){
+  Attribute(Name, Value->c_str());
 }
 //------------------------------------------------------------------------------
 
 void XML::Content(int Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = Value;
-  Content(s.UTF8());
+  char s[0x100];
+  sprintf(s, "%d", Value);
+  Content(s);
 }
 //------------------------------------------------------------------------------
 
@@ -219,19 +221,18 @@ void XML::Content(bool Value){
 void XML::Content(double Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = Value;
-  Content(s.UTF8());
+  char s[0x100];
+  sprintf(s, "%lg", Value);
+  Content(s);
 }
 //------------------------------------------------------------------------------
 
 void XML::Content(unsigned Value){
   if(!Nesting) return;
 
-  UNICODE_STRING s;
-  s = "0x";
-  s.AppendHex(Value, 8);
-  Content (s.UTF8());
+  char s[0x100];
+  sprintf(s, "0x%08X", Value);
+  Content(s);
 }
 //------------------------------------------------------------------------------
 
@@ -252,8 +253,8 @@ void XML::End(){
 }
 //------------------------------------------------------------------------------
 
-void XML::GetLegalName(const char* Name, UNICODE_STRING* LegalName){
-  UNICODE_STRING Temp;
+void XML::GetLegalName(const char* Name, string* LegalName){
+  string Temp;
   Temp = Name;
 
  *LegalName = "";
@@ -312,13 +313,13 @@ void XML::GetLegalName(const char* Name, UNICODE_STRING* LegalName){
 //------------------------------------------------------------------------------
 
 void XML::GetLegalContent(
-  UNICODE_STRING* Content, 
-  UNICODE_STRING* LegalContent
+  string* Content, 
+  string* LegalContent
 ){
   *LegalContent = "";
 
-  int   j;
-  char* Temp = Content->UTF8();
+  int         j;
+  const char* Temp = Content->c_str();
   for(j = 0; Temp[j]; j++){
     switch(Temp[j]){
       case '<':
@@ -352,19 +353,17 @@ void XML::GetLegalContent(
 void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
   unsigned j;
 
-  if(Entity->Comments.Length32()){
-    char*    s  = Entity->Comments.UTF8();
-    unsigned i1 = 0;
-    unsigned i2 = 0;
+  if(!Entity->Comments.empty()){
+    const char* s  = Entity->Comments.c_str();
+    unsigned    i1 = 0;
+    unsigned    i2 = 0;
 
     // Comments are "\n\0" terminated
     while(s[i2]){
       if(s[i2] == '\n'){
-        for(j = 0; j < Indent; j++) Buffer += ' ';
-        s[i2] = 0;
-        Buffer += s + i1;
-        s[i2] = '\n';
-        i1    = ++i2;
+        for(j = 0; j < Indent; j++) Buffer += "  ";
+        while(i1 < i2) Buffer += s[i1++];
+        i1      = ++i2;
         Buffer += '\n';
 
       }else{
@@ -373,7 +372,7 @@ void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
     }
   }
 
-  for(j = 0; j < Indent; j++) Buffer += ' ';
+  for(j = 0; j < Indent; j++) Buffer += "  ";
   Buffer += '<';
   Buffer += Entity->Name;
 
@@ -383,18 +382,18 @@ void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
     ATTRIBUTE* Temp     = (ATTRIBUTE*)Entity->Attributes.First();
     while(Temp){
       GetLegalContent(&Temp->Value, &Temp->LegalValue);
-      j = Temp->Name.Length8();
+      j = Temp->Name.length();
       if(EqualPos < j) EqualPos = j;
       Temp = (ATTRIBUTE*)Entity->Attributes.Next();
     }
 
     Temp = (ATTRIBUTE*)Entity->Attributes.First();
     while(Temp){
-      Buffer += "\n ";
-      for(j = 0; j < Indent; j++) Buffer += ' ';
+      Buffer += "\n  ";
+      for(j = 0; j < Indent; j++) Buffer += "  ";
       Buffer += Temp->Name;
 
-      j = Temp->Name.Length8();
+      j = Temp->Name.length();
       for(; j < EqualPos ; j++) Buffer += ' ';
       Buffer += " = \"";
 
@@ -403,31 +402,29 @@ void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
       Temp = (ATTRIBUTE*)Entity->Attributes.Next();
     }
     Buffer += '\n';
-    for(j = 0; j < Indent; j++) Buffer += ' ';
+    for(j = 0; j < Indent; j++) Buffer += "  ";
   }
 
   // Add children and then the content
-  if(Entity->Content.Length32() || Entity->Children.ItemCount()){
+  if(!Entity->Content.empty() || Entity->Children.ItemCount()){
     Buffer += ">\n";
 
-    if(Entity->Content.Length32()){
+    if(!Entity->Content.empty()){
       GetLegalContent(&Entity->Content, &Entity->LegalContent);
 
-      char*    s  = Entity->LegalContent.UTF8();
-      unsigned i1 = 0;
-      unsigned i2 = 0;
+      const char* s  = Entity->LegalContent.c_str();
+      unsigned    i1 = 0;
+      unsigned    i2 = 0;
 
       while(true){
         if(s[i2] == '\n'){
-          for(j = 0; j <= Indent; j++) Buffer += ' ';
-          s[i2] = 0;
-          Buffer += s + i1;
-          s[i2] = '\n';
-          i1    = ++i2;
+          for(j = 0; j <= Indent; j++) Buffer += "  ";
+          while(i1 < i2) Buffer += s[i1++];
+          i1      = ++i2;
           Buffer += '\n';
 
         }else if(s[i2] == 0){
-          for(j = 0; j <= Indent; j++) Buffer += ' ';
+          for(j = 0; j <= Indent; j++) Buffer += "  ";
           if(s[i1]) Buffer += s + i1;
           Buffer += '\n';
           break;
@@ -445,7 +442,7 @@ void XML::SaveEntity(ENTITY* Entity, unsigned Indent){
         Temp = (ENTITY*)Entity->Children.Next();
       }
     }
-    for(j = 0; j < Indent; j++) Buffer += ' ';
+    for(j = 0; j < Indent; j++) Buffer += "  ";
     Buffer += "</";
     Buffer += Entity->Name;
     Buffer += ">\n";
@@ -470,7 +467,7 @@ bool XML::Save(const char* Filename){
               "standalone " "= \"yes\" "
             "?>\n";
   SaveEntity(Root);
-  fwrite(Buffer.UTF8(), 1, Buffer.Length8(), File);
+  fwrite(Buffer.c_str(), 1, Buffer.length(), File);
   fclose(File);
 
   // Clear memory
@@ -581,7 +578,7 @@ bool XML::ReadSpecial(){
 }
 //------------------------------------------------------------------------------
 
-bool XML::ReadName(UNICODE_STRING* Buffer){
+bool XML::ReadName(string* Buffer){
  *Buffer = "";
 
   while(ReadSpace() || ReadComment());
@@ -601,11 +598,11 @@ bool XML::ReadName(UNICODE_STRING* Buffer){
     *Buffer += ReadBuffer[ReadIndex++];
   }
 
-  return Buffer->Length8();
+  return Buffer->length();
 }
 //------------------------------------------------------------------------------
 
-bool XML::ReadContent(UNICODE_STRING* Buffer, char End){
+bool XML::ReadContent(string* Buffer, char End){
   while(ReadIndex < ReadSize){
     if(
       ReadBuffer[ReadIndex] == '<' ||
@@ -662,7 +659,7 @@ bool XML::ReadContent(UNICODE_STRING* Buffer, char End){
     }
   }
 
-  return Buffer->Length8();
+  return Buffer->length();
 }
 //------------------------------------------------------------------------------
 
@@ -775,13 +772,13 @@ XML::ENTITY* XML::ReadEntity(){
   ) return 0;
   ReadIndex++;
 
-  UNICODE_STRING Buffer;
+  string Buffer;
   if(!ReadName(&Buffer)){
     PrintError("Invalid tag");
     return 0;
   }
 
-  ENTITY* Entity = new ENTITY(Buffer.UTF8());
+  ENTITY* Entity = new ENTITY(Buffer.c_str());
   while(ReadAttribute(&Entity->Attributes));
 
   while(ReadSpace() || ReadComment());
@@ -898,10 +895,10 @@ bool XML::Load(const char* Filename){
 XML::ENTITY* XML::FindChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Name, &LegalName);
 
-  ENTITY Key(LegalName.UTF8());
+  ENTITY Key(LegalName.c_str());
   return (ENTITY*)Entity->Children.Find(&Key);
 }
 //------------------------------------------------------------------------------
@@ -909,7 +906,7 @@ XML::ENTITY* XML::FindChild(ENTITY* Entity, const char* Name){
 XML::ENTITY* XML::NextChild(ENTITY* Entity, const char* Name){
   if(!Entity) return 0;
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Name, &LegalName);
 
   ENTITY* Result = (ENTITY*)Entity->Children.Next();
@@ -923,10 +920,10 @@ XML::ATTRIBUTE* XML::FindAttribute(
 ){
   if(!Entity) return 0;
 
-  UNICODE_STRING LegalName;
+  string LegalName;
   GetLegalName(Name, &LegalName);
 
-  ATTRIBUTE Key(LegalName.UTF8(), "");
+  ATTRIBUTE Key(LegalName.c_str(), "");
   return (ATTRIBUTE*)Entity->Attributes.Find(&Key);
 }
 //------------------------------------------------------------------------------
@@ -938,7 +935,7 @@ bool XML::ReadAttribute(
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
-    *Value = Calc.Calculate(A->Value.UTF8());
+    *Value = Calc.Calculate(A->Value.c_str());
     return true;
   }
   return false;
@@ -966,7 +963,7 @@ bool XML::ReadAttribute(
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
-    strcpy(Value, A->Value.UTF8());
+    strcpy(Value, A->Value.c_str());
     return true;
   }
   return false;
@@ -974,9 +971,9 @@ bool XML::ReadAttribute(
 //------------------------------------------------------------------------------
 
 bool XML::ReadAttribute(
-  ENTITY*         Entity,
-  const char*     Name,
-  UNICODE_STRING* Value
+  ENTITY*     Entity,
+  const char* Name,
+  string*     Value
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
@@ -994,7 +991,7 @@ bool XML::ReadAttribute(
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
-    *Value = Calc.Calculate(A->Value.UTF8());
+    *Value = Calc.Calculate(A->Value.c_str());
     return true;
   }
   return false;
@@ -1008,7 +1005,7 @@ bool XML::ReadAttribute(
 ){
   ATTRIBUTE* A = FindAttribute(Entity, Name);
   if(A){
-    *Value = Calc.Calculate(A->Value.UTF8());
+    *Value = Calc.Calculate(A->Value.c_str());
     return true;
   }
   return false;

@@ -25,7 +25,7 @@ General-purpose repository, intended as a submodule for others.
 - **LLRBTree.cpp**
     - A general-purpose [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store objects.
 - **UTF\_Converter.cpp**
-    - Utility used to convert between UTF-8 (std::string), UTF-16 (std::u16string) and UTF-32 (u32string).
+    - Utility used to convert between UTF-8 (std::string), UTF-16 (std::u16string) and UTF-32 (std::u32string).
 - **XML.cpp**
     - Abstraction for reading and writing XML files.
 

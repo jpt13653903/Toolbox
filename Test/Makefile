@@ -29,7 +29,6 @@ Objects = obj/Calculator.o    \
           obj/JSON.o          \
           obj/LLRBTree.o      \
           obj/General.o       \
-          obj/UnicodeString.o \
           obj/UTF_Converter.o \
           obj/XML.o
 
@@ -45,21 +44,25 @@ all: bin/testCalculator.exe    \
      bin/testDictionary.exe    \
      bin/testFileWrapper.exe   \
      bin/testJSON.exe          \
-     bin/testUTF_Converter.exe
+     bin/testUTF_Converter.exe \
+     bin/testXML.exe
 
 test: testCalculator    \
       testDebugMessages \
       testDictionary    \
       testFileWrapper   \
       testJSON          \
-      testUTF_Converter
+      testUTF_Converter \
+      testXML
 
 test%: bin/test%.exe
+	mkdir -p testOutput
 	$<
 
 clean:
 	rm -rf obj
 	rm -rf bin
+	rm -rf testOutput
 #-------------------------------------------------------------------------------
 
 # Binaries

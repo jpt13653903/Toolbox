@@ -31,25 +31,24 @@
 #include "General.h"
 #include "LLRBTree.h"
 #include "Calculator.h"
-#include "UnicodeString.h"
 //------------------------------------------------------------------------------
 
 class XML{
   public:
     struct ATTRIBUTE{
-      UNICODE_STRING Name;
-      UNICODE_STRING Value;
-      UNICODE_STRING LegalValue;
+      std::string Name;
+      std::string Value;
+      std::string LegalValue;
 
       ATTRIBUTE(const char* Name, const char* Value);
      ~ATTRIBUTE();
     };
 
     struct ENTITY{
-      UNICODE_STRING Name;
-      UNICODE_STRING Comments;
-      UNICODE_STRING Content;
-      UNICODE_STRING LegalContent;
+      std::string Name;
+      std::string Comments;
+      std::string Content;
+      std::string LegalContent;
 
       LLRB_TREE Children;   // Child entities, sorted by name
       LLRB_TREE Attributes; // Sorted by name
@@ -69,10 +68,10 @@ class XML{
     };
     NESTING* Nesting;
 
-    UNICODE_STRING Buffer;
-    void GetLegalName   (const char    * Name   , UNICODE_STRING* LegalName   );
-    void GetLegalContent(UNICODE_STRING* Content, UNICODE_STRING* LegalContent);
-    void SaveEntity     (ENTITY        * Entity , unsigned        Indent = 0  );
+    std::string Buffer;
+    void GetLegalName   (const char * Name   , std::string* LegalName   );
+    void GetLegalContent(std::string* Content, std::string* LegalContent);
+    void SaveEntity     (ENTITY     * Entity , unsigned     Indent = 0  );
 
     CALCULATOR Calc;
 
@@ -85,9 +84,9 @@ class XML{
     bool    ReadSpace    ();
     bool    ReadComment  ();
     bool    ReadSpecial  ();
-    bool    ReadName     (UNICODE_STRING* Buffer);
-    bool    ReadContent  (UNICODE_STRING* Buffer, char End = 0);
-    bool    ReadAttribute(LLRB_TREE     * Tree);
+    bool    ReadName     (std::string* Buffer);
+    bool    ReadContent  (std::string* Buffer, char End = 0);
+    bool    ReadAttribute(LLRB_TREE  * Tree);
     bool    ReadHeader   ();
     ENTITY* ReadEntity   ();
 
@@ -109,12 +108,12 @@ class XML{
     void Comment(const char* Comment);
 
     // Adds a new attribute to the current entity
-    void Attribute(const char* Name, int             Value); // Decimal
-    void Attribute(const char* Name, bool            Value);
-    void Attribute(const char* Name, double          Value);
-    void Attribute(const char* Name, unsigned        Value); // Hexadecimal
-    void Attribute(const char* Name, const char*     Value);
-    void Attribute(const char* Name, UNICODE_STRING* Value);
+    void Attribute(const char* Name, int          Value); // Decimal
+    void Attribute(const char* Name, bool         Value);
+    void Attribute(const char* Name, double       Value);
+    void Attribute(const char* Name, unsigned     Value); // Hexadecimal
+    void Attribute(const char* Name, const char*  Value);
+    void Attribute(const char* Name, std::string* Value);
 
     // Adds to the existing content of the current entity
     void Content(int         Value);
@@ -142,12 +141,12 @@ class XML{
     ATTRIBUTE* FindAttribute(ENTITY* Entity, const char* Name);
 
     // Use these to read attributes directly
-    bool ReadAttribute(ENTITY* Entity, const char* Name, int*            Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*           Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, char*           Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, UNICODE_STRING* Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, double*         Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*       Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, int*         Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*        Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, char*        Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, std::string* Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, double*      Value);
+    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*    Value);
 };
 //------------------------------------------------------------------------------
 

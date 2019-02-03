@@ -25,10 +25,7 @@ FILE_WRAPPER::~FILE_WRAPPER(){
 bool FILE_WRAPPER::Open(const char* Filename, ACCESS Access){
   if(!Filename || !Filename[0]) return false;
 
-  UNICODE_STRING Codec;
-  Codec = Filename;
-
-  Open((const wchar_t*)Codec.UTF16(), Access);
+  Open((const wchar_t*)UTF_Converter.UTF16(Filename).c_str(), Access);
 
   return Handle != INVALID_HANDLE_VALUE;
 }
