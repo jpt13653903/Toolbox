@@ -31,22 +31,6 @@ FILE_WRAPPER::~FILE_WRAPPER(){
 }
 //------------------------------------------------------------------------------
 
-void FILE_WRAPPER::GetLongName(const char* Filename, string& LongName){
-  #ifdef WINVER
-    // Extend the Path to use long names
-    if(Filename[1] == ':' && Filename[2] == '\\') LongName = "\\\\?\\";
-
-    for(int n = 0; Filename[n]; n++){
-      if(Filename[n] == '/') LongName += '\\';
-      else                   LongName += Filename[n];
-    }
-  #else
-    // Other operating systems don't have this problem
-    LongPath = Path;
-  #endif
-}
-//------------------------------------------------------------------------------
-
 void FILE_WRAPPER::GetLongName(const wchar_t* Filename, wstring& LongName){
   #ifdef WINVER
     // Extend the Path to use long names

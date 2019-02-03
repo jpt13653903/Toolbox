@@ -42,7 +42,6 @@ class FILE_WRAPPER{
       FILE*       Handle;
     #endif
 
-    void GetLongName(const char   * Filename, std::string & LongName);
     void GetLongName(const wchar_t* Filename, std::wstring& LongName);
     bool CreatePath (const char* Filename);
 
