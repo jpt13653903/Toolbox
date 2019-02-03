@@ -24,9 +24,8 @@ General-purpose repository, intended as a submodule for others.
     - Abstraction for reading, manipulating and generating JSON strings.
 - **LLRBTree.cpp**
     - A general-purpose [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store objects.
-- **UnicodeString.cpp**
-    - _Deprecated - do not use for new designs_.
-    - Abstraction that stores strings in UTF-32, with conversion to- and from UTF-16 and UTF-8.
+- **UTF\_Converter.cpp**
+    - Utility used to convert between UTF-8 (std::string), UTF-16 (std::u16string) and UTF-32 (u32string).
 - **XML.cpp**
     - Abstraction for reading and writing XML files.
 

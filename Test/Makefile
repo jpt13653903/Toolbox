@@ -10,7 +10,7 @@
 #===============================================================================
 
 CC      = g++
-Options = -Wall -fexceptions -O2 -DDEBUG
+Options = -std=c++11 -Wall -fexceptions -O2 -DDEBUG
 #-------------------------------------------------------------------------------
 
 Toolbox = ../Cpp
@@ -30,6 +30,7 @@ Objects = obj/Calculator.o    \
           obj/LLRBTree.o      \
           obj/General.o       \
           obj/UnicodeString.o \
+          obj/UTF_Converter.o \
           obj/XML.o
 
 Headers = *.h \
@@ -43,13 +44,15 @@ all: bin/testCalculator.exe    \
      bin/testDebugMessages.exe \
      bin/testDictionary.exe    \
      bin/testFileWrapper.exe   \
-     bin/testJSON.exe
+     bin/testJSON.exe          \
+     bin/testUTF_Converter.exe
 
 test: testCalculator    \
       testDebugMessages \
       testDictionary    \
       testFileWrapper   \
-      testJSON
+      testJSON          \
+      testUTF_Converter
 
 test%: bin/test%.exe
 	$<
