@@ -648,7 +648,7 @@ const char* JSON::Stringify(){
       break;
 
     case typeNumber:
-      sprintf(s, "%lg", Number);
+      sprintf(s, "%g", Number);
       Stringification = s;
       break;
 

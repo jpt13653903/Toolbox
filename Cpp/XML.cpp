@@ -171,7 +171,7 @@ void XML::Attribute(const char* Name, double Value){
   if(!Nesting) return;
 
   char s[0x100];
-  sprintf(s, "%lg", Value);
+  sprintf(s, "%g", Value);
   Attribute(Name, s);
 }
 //------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void XML::Content(double Value){
   if(!Nesting) return;
 
   char s[0x100];
-  sprintf(s, "%lg", Value);
+  sprintf(s, "%g", Value);
   Content(s);
 }
 //------------------------------------------------------------------------------

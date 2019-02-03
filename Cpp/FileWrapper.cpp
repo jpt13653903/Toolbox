@@ -12,6 +12,9 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
+using namespace std;
+//------------------------------------------------------------------------------
+
 #ifndef WINVER
   #define INVALID_HANDLE_VALUE 0
   #define FILETIME time_t
@@ -25,6 +28,38 @@ FILE_WRAPPER::FILE_WRAPPER(){
 
 FILE_WRAPPER::~FILE_WRAPPER(){
   Close();
+}
+//------------------------------------------------------------------------------
+
+void FILE_WRAPPER::GetLongName(const char* Filename, string& LongName){
+  #ifdef WINVER
+    // Extend the Path to use long names
+    if(Filename[1] == ':' && Filename[2] == '\\') LongName = "\\\\?\\";
+
+    for(int n = 0; Filename[n]; n++){
+      if(Filename[n] == '/') LongName += '\\';
+      else                   LongName += Filename[n];
+    }
+  #else
+    // Other operating systems don't have this problem
+    LongPath = Path;
+  #endif
+}
+//------------------------------------------------------------------------------
+
+void FILE_WRAPPER::GetLongName(const wchar_t* Filename, wstring& LongName){
+  #ifdef WINVER
+    // Extend the Path to use long names
+    if(Filename[1] == L':' && Filename[2] == L'\\') LongName = L"\\\\?\\";
+
+    for(int n = 0; Filename[n]; n++){
+      if(Filename[n] == L'/') LongName += L'\\';
+      else                    LongName += Filename[n];
+    }
+  #else
+    // Other operating systems don't have this problem
+    LongPath = Path;
+  #endif
 }
 //------------------------------------------------------------------------------
 
@@ -91,24 +126,11 @@ bool FILE_WRAPPER::Open(const wchar_t* Filename, ACCESS Access){
         break;
     }
 
-    int j, q;
-    for(j = 0; Filename[j]; j++);
-
-    wchar_t* LongFile = new wchar_t[j+5];
-
-    q = 0;
-
-    if(Filename[1] == ':'){
-      LongFile[q++] = '\\';
-      LongFile[q++] = '\\';
-      LongFile[q++] = '?';
-      LongFile[q++] = '\\';
-    }
-    for(j = 0; Filename[j]; j++) LongFile[q++] = Filename[j];
-    LongFile[q] = 0;
+    wstring LongName;
+    GetLongName(Filename, LongName);
 
     Handle = CreateFileW(
-      LongFile,
+      LongName.c_str(),
       DesiredAccess,
       ShareMode,
       0,
@@ -116,7 +138,6 @@ bool FILE_WRAPPER::Open(const wchar_t* Filename, ACCESS Access){
       FILE_ATTRIBUTE_NORMAL,
       0
     );
-    delete[] LongFile;
 
     if(Handle == INVALID_HANDLE_VALUE) return false;
 
@@ -163,7 +184,7 @@ uint64_t FILE_WRAPPER::GetSize(){
 }
 //------------------------------------------------------------------------------
 
-unsigned FILE_WRAPPER::Read(char* Buffer, unsigned MustRead){
+uint64_t FILE_WRAPPER::Read(char* Buffer, uint64_t MustRead){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   #ifdef WINVER
@@ -176,14 +197,14 @@ unsigned FILE_WRAPPER::Read(char* Buffer, unsigned MustRead){
 }
 //------------------------------------------------------------------------------
 
-unsigned FILE_WRAPPER::Write(const char* Buffer){
+uint64_t FILE_WRAPPER::Write(const char* Buffer){
   int j;
   for(j = 0; Buffer[j]; j++);
   return Write(Buffer, j);
 }
 //------------------------------------------------------------------------------
 
-unsigned FILE_WRAPPER::Write(const char* Buffer, unsigned MustWrite){
+uint64_t FILE_WRAPPER::Write(const char* Buffer, uint64_t MustWrite){
   if(Handle == INVALID_HANDLE_VALUE) return 0;
 
   #ifdef WINVER
@@ -204,6 +225,75 @@ bool FILE_WRAPPER::Flush(){
   #else
     return !fflush(Handle);
   #endif
+}
+//------------------------------------------------------------------------------
+
+byte* FILE_WRAPPER::ReadAll(const char* Filename, uint64_t* Filesize){
+  if(!Open(Filename, faRead)) return 0;
+  uint64_t Size = GetSize();
+  if(Filesize) *Filesize = Size;
+
+  byte* Buffer = new byte[Size+1];
+  if(!Buffer) return 0;
+
+  if(Read((char*)Buffer, Size) != Size){
+    delete[] Buffer;
+    Close();
+    return 0;
+  }
+  Buffer[Size] = 0;
+
+  Close();
+  return Buffer;
+}
+//------------------------------------------------------------------------------
+
+bool FILE_WRAPPER::CreatePath(const char* Filename){
+  #ifdef WINVER
+    wstring Path;
+    GetLongName((const wchar_t*)UTF_Converter.UTF16(Filename).c_str(), Path);
+
+    vector<int> Slashes;
+
+    int n;
+    for(n = 0; Path[n]; n++){
+      if(Path[n] == L'\\') Slashes.push_back(n);
+    }
+    if(Slashes.empty()) return true;
+
+    int  s;
+    bool Exists;
+
+    n = Slashes.size()-1;
+    while(0 <= n && n < (int)Slashes.size()){
+      s = Slashes[n];
+      Path[s] = 0;
+        Exists = CreateDirectory(Path.c_str(), 0);
+        if(!Exists) Exists = (GetLastError() == ERROR_ALREADY_EXISTS);
+      Path[s] = '\\';
+
+      if(Exists) n++;
+      else       n--;
+    }
+    return n >= 0;
+  
+  #else
+    #error "TODO -- Implement the linux equivalent"
+  #endif
+}
+//------------------------------------------------------------------------------
+
+bool FILE_WRAPPER::WriteAll(const char* Filename, const byte* Data, uint64_t Size){
+  if(!Filename || !Filename[0]) return false;
+  if(!CreatePath(Filename)    ) return false;
+  if(!Open(Filename, faCreate)) return false;
+
+  if(!Size) for(Size = 0; Data[Size]; Size++);
+
+  bool Result = (Write((const char*)Data, Size) == Size);
+
+  Close();
+  return Result;
 }
 //------------------------------------------------------------------------------
 

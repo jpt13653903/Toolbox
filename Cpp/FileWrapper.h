@@ -13,6 +13,9 @@
 #define FileWrapper_h
 //------------------------------------------------------------------------------
 
+#include <vector>
+//------------------------------------------------------------------------------
+
 #include "General.h"
 #include "UTF_Converter.h"
 //------------------------------------------------------------------------------
@@ -39,6 +42,10 @@ class FILE_WRAPPER{
       FILE*       Handle;
     #endif
 
+    void GetLongName(const char   * Filename, std::string & LongName);
+    void GetLongName(const wchar_t* Filename, std::wstring& LongName);
+    bool CreatePath (const char* Filename);
+
   public:
     FILE_WRAPPER();
    ~FILE_WRAPPER();
@@ -49,10 +56,20 @@ class FILE_WRAPPER{
 
     uint64_t GetSize();
 
-    unsigned Read (      char* Buffer, unsigned MustRead);
-    unsigned Write(const char* Buffer); // Null-terminated
-    unsigned Write(const char* Buffer, unsigned MustWrite);
+    uint64_t Read (      char* Buffer, uint64_t MustRead);
+    uint64_t Write(const char* Buffer); // Null-terminated
+    uint64_t Write(const char* Buffer, uint64_t MustWrite);
     bool     Flush();
+
+    // Opens, reads and closes the file
+    // UTF-8 name; returns null on error; null-terminates the buffer
+    // The caller must free the returned buffer with "delete[]"
+    byte* ReadAll(const char* Filename, uint64_t* Filesize = 0);
+
+    // Opens, writes and closes the file
+    // UTF-8 name; also creates the path if it does not exist
+    // If Size is 0, Data is assumed to be null-terminated
+    bool WriteAll(const char* Filename, const byte* Data, uint64_t Size = 0);
 
     #ifdef WINVER
       void GetTime(FILETIME* Creation, FILETIME* Access, FILETIME* Modified);

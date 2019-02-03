@@ -43,11 +43,13 @@ class UTF_CONVERTER{
     std::u32string& UTF32(const std::string&    UTF_8 );
     std::u32string& UTF32(const std::u16string& UTF_16);
 
+    std::u16string& UTF16(      char32_t        UTF_32);
     std::u16string& UTF16(const char*           UTF_8 );
     std::u16string& UTF16(const char32_t*       UTF_32);
     std::u16string& UTF16(const std::string&    UTF_8 );
     std::u16string& UTF16(const std::u32string& UTF_32);
 
+    std::string&    UTF8 (      char32_t        UTF_32);
     std::string&    UTF8 (const char16_t*       UTF_16);
     std::string&    UTF8 (const char32_t*       UTF_32);
     std::string&    UTF8 (const std::u16string& UTF_16);

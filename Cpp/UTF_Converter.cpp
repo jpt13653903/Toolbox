@@ -119,6 +119,12 @@ u32string& UTF_CONVERTER::UTF32(const u16string& UTF_16){
 }
 //------------------------------------------------------------------------------
 
+std::u16string& UTF_CONVERTER::UTF16(char32_t UTF_32){
+  char32_t s[2] = {UTF_32, 0};
+  return UTF16(s);
+}
+//------------------------------------------------------------------------------
+
 u16string& UTF_CONVERTER::UTF16(const char* UTF_8){
   return UTF16(UTF32(UTF_8));
 }
@@ -148,6 +154,12 @@ u16string& UTF_CONVERTER::UTF16(const string& UTF_8){
 
 u16string& UTF_CONVERTER::UTF16(const u32string& UTF_32){
   return UTF16(UTF_32.c_str());
+}
+//------------------------------------------------------------------------------
+
+std::string& UTF_CONVERTER::UTF8(char32_t UTF_32){
+  char32_t s[2] = {UTF_32, 0};
+  return UTF8(s);
 }
 //------------------------------------------------------------------------------
 
