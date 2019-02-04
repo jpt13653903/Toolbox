@@ -12,6 +12,11 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
+#ifdef __linux__
+  #include <utime.h>
+#endif
+//------------------------------------------------------------------------------
+
 using namespace std;
 //------------------------------------------------------------------------------
 
@@ -42,7 +47,7 @@ void FILE_WRAPPER::GetLongName(const wchar_t* Filename, wstring& LongName){
     }
   #else
     // Other operating systems don't have this problem
-    LongPath = Path;
+    LongName = Filename;
   #endif
 }
 //------------------------------------------------------------------------------
@@ -262,7 +267,31 @@ bool FILE_WRAPPER::CreatePath(const char* Filename){
     return n >= 0;
   
   #else
-    #error "TODO -- Implement the linux equivalent"
+    string Path = Filename;
+
+    vector<int> Slashes;
+
+    int n;
+    for(n = 0; Path[n]; n++){
+      if(Path[n] == '/') Slashes.push_back(n);
+    }
+    if(Slashes.empty()) return true;
+
+    int  s;
+    bool Exists;
+
+    n = Slashes.size()-1;
+    while(0 <= n && n < (int)Slashes.size()){
+      s = Slashes[n];
+      Path[s] = 0;
+        Exists = (mkdir(Path.c_str(), 0777) == 0);
+        if(!Exists) Exists = (errno == EEXIST);
+      Path[s] = '/';
+
+      if(Exists) n++;
+      else       n--;
+    }
+    return n >= 0;
   #endif
 }
 //------------------------------------------------------------------------------
@@ -311,7 +340,7 @@ void FILE_WRAPPER::SetTime(
   #ifdef WINVER
     SetFileTime(Handle, Creation, Access, Modified);
   #else
-    struct utimbuf Time;
+    utimbuf Time;
     Time.actime  = *Access;
     Time.modtime = *Modified;
     utime(Filename.c_str(), &Time);

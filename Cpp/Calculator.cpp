@@ -40,47 +40,37 @@ long double fix(long double x){
 }
 //------------------------------------------------------------------------------
 
-static map<string, long double> Constants;
-//------------------------------------------------------------------------------
-
-static int InstanceCount = 0;
-//------------------------------------------------------------------------------
-
 CALCULATOR::CALCULATOR(){
   Tree    = 0;
   Measure = Radians;
 
-  if(!InstanceCount){
-    Constants["e"        ] = e;
-    Constants["pi"       ] = pi;
-    Constants["\\c"      ] = 2.99792458e8L;
-    Constants["\\G"      ] = 6.67259e-11L;
-    Constants["\\g"      ] = 9.80665L;
-    Constants["\\me"     ] = 9.1093897e-31L;
-    Constants["\\mp"     ] = 1.6726231e-27L;
-    Constants["\\mn"     ] = 1.6749286e-27L;
-    Constants["\\u"      ] = 1.6605402e-27L;
-    Constants["\\e"      ] = 1.60217646e-19L;
-    Constants["\\h"      ] = 6.6260689633e-34L;
-    Constants["\\k"      ] = 1.380650424e-23L;
-    Constants["\\mu"     ] = pi*4e-7L;
-    Constants["\\epsilon"] = 8.854187817e-12L;
-    Constants["\\Phi"    ] = 2.06783461e-15L;
-    Constants["\\NA"     ] = 6.0221417930e23L;
-    Constants["\\R"      ] = 8.31447215L;
-    Constants["\\rhoAl"  ] = 26.53e-9L;
-    Constants["\\rhoCu"  ] = 16.78e-9L;
-    Constants["\\F"      ] = 9.6485304e4L;
-    Constants["\\AU"     ] = 1.4959787e11L;
-    Constants["\\pc"     ] = 3.0856776e16L;
-    Constants["\\mil"    ] = 25.4e-6L;
-  }
-  InstanceCount++;
+  Constants["e"        ] = e;
+  Constants["pi"       ] = pi;
+  Constants["\\c"      ] = 2.99792458e8L;
+  Constants["\\G"      ] = 6.67259e-11L;
+  Constants["\\g"      ] = 9.80665L;
+  Constants["\\me"     ] = 9.1093897e-31L;
+  Constants["\\mp"     ] = 1.6726231e-27L;
+  Constants["\\mn"     ] = 1.6749286e-27L;
+  Constants["\\u"      ] = 1.6605402e-27L;
+  Constants["\\e"      ] = 1.60217646e-19L;
+  Constants["\\h"      ] = 6.6260689633e-34L;
+  Constants["\\k"      ] = 1.380650424e-23L;
+  Constants["\\mu"     ] = pi*4e-7L;
+  Constants["\\epsilon"] = 8.854187817e-12L;
+  Constants["\\Phi"    ] = 2.06783461e-15L;
+  Constants["\\NA"     ] = 6.0221417930e23L;
+  Constants["\\R"      ] = 8.31447215L;
+  Constants["\\rhoAl"  ] = 26.53e-9L;
+  Constants["\\rhoCu"  ] = 16.78e-9L;
+  Constants["\\F"      ] = 9.6485304e4L;
+  Constants["\\AU"     ] = 1.4959787e11L;
+  Constants["\\pc"     ] = 3.0856776e16L;
+  Constants["\\mil"    ] = 25.4e-6L;
 }
 //------------------------------------------------------------------------------
 
 CALCULATOR::~CALCULATOR(){
-  InstanceCount--;
   DeleteTree(Tree);
 }
 //------------------------------------------------------------------------------

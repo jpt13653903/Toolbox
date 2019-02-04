@@ -69,7 +69,7 @@ clean:
 
 bin/%.exe: %.cpp $(Objects) $(Headers)
 	mkdir -p bin
-	$(CC) $(Options) $(Version) $(Includes) $< $(Objects) -s $(LibInclude) $(Libraries) -o $@
+	$(CC) $(Options) $(Version) $(Includes) $(Objects) $< -s $(LibInclude) $(Libraries) -o $@
 #-------------------------------------------------------------------------------
 
 # Objects

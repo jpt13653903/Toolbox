@@ -31,6 +31,8 @@ class CALCULATOR{
 //------------------------------------------------------------------------------
 
   private:
+    std::map<std::string, long double> Constants;
+
     enum OPERATION{
       Fact     , Power   , Multiply, Divide , Remainder   ,
       Add      , Subtract, Log     , Log2   , Ln          ,

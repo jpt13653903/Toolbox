@@ -16,8 +16,13 @@
 bool TestFileWrapper(){
   Start("FILE_WRAPPER Class");
 
-  const  char  * FileName_UTF8  =  "Resources/Lorem Ipsum.txt";
-  const wchar_t* FileName_UTF16 = L"Resources/Λορεμ Ιπσθμ.txt";
+  #ifdef WINVER
+    const  char  * FileName_UTF8  =  "Resources/Lorem Ipsum.txt";
+    const wchar_t* FileName_UTF16 = L"Resources/Λορεμ Ιπσθμ.txt";
+  #else
+    const char* FileName_UTF8  = "Resources/Lorem Ipsum.txt";
+    const char* FileName_Greek = "Resources/Λορεμ Ιπσθμ.txt";
+  #endif
 
   info("UTF-8 encoded file name...");
   FILE_WRAPPER File;
@@ -36,11 +41,19 @@ bool TestFileWrapper(){
   File.Close();
   Done();
 
-  info("UTF-16 encoded file name...");
-  if(!File.Open(FileName_UTF16, FILE_WRAPPER::faRead)){
-    error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
-    return false;
-  }
+  #ifdef WINVER
+    info("UTF-16 encoded file name...");
+    if(!File.Open(FileName_UTF16, FILE_WRAPPER::faRead)){
+      error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
+      return false;
+    }
+  #else
+    info("Greek file name...");
+    if(!File.Open(FileName_Greek, FILE_WRAPPER::faRead)){
+      error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
+      return false;
+    }
+  #endif
   Size = File.GetSize();
   info("File size = %u", (unsigned)Size);
   Buffer = new char[Size+1];
@@ -55,11 +68,23 @@ bool TestFileWrapper(){
 }
 //------------------------------------------------------------------------------
 
+bool TestPathCreation(){
+  Start("Path Creation");
+
+  FILE_WRAPPER File;
+
+  Assert(File.WriteAll("testOutput/A/B/C/D/E/File.txt", (const byte*)"Hello World!\n"));
+
+  Done(); return true;
+}
+//------------------------------------------------------------------------------
+
 int main(){
   SetupTerminal();
 
   printf("\n\n");
-  if(!TestFileWrapper()) goto main_Error;
+  if(!TestFileWrapper ()) goto main_Error;
+  if(!TestPathCreation()) goto main_Error;
 
   info(ANSI_FG_GREEN "All OK"); Done();
   return 0;
