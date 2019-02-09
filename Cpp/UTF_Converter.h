@@ -28,6 +28,8 @@
 
 class UTF_CONVERTER{
   private:
+    // The conversion functions return references to these objects.  For
+    // thread-safety, use multiple instances of this class.
     std::u32string UTF_32;
     std::u16string UTF_16;
     std::string    UTF_8;
