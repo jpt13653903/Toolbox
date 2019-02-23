@@ -719,7 +719,7 @@ bool CALCULATOR::Value(NODE* Root){
   }else{
     FuncName(&s);
     if(s.length()){
-      map<string, long double>::iterator Constant = Constants.find(s);
+      auto Constant = Constants.find(s);
       if(Constant != Constants.end()){
         Index += Constant->first.length();
         Root->Operation = Val;

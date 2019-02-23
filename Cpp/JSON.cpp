@@ -101,7 +101,7 @@ void JSON::Clear(){
   Number = 0;
 
   for(
-    map<string, JSON*>::iterator Object = Objects.begin();
+    auto Object = Objects.begin();
     Object != Objects.end();
     Object++
   ) delete Object->second;
@@ -134,7 +134,7 @@ void JSON::operator=(JSON& Value){
 
     case typeObject:
       for(
-        map<string, JSON*>::iterator Object = Value.Objects.begin();
+        auto Object = Value.Objects.begin();
         Object != Value.Objects.end();
         Object++
       ) AddOrUpdate(Object->first.c_str(), *(Object->second));
@@ -181,7 +181,7 @@ void JSON::operator=(bool Value){
 JSON* JSON::AddOrUpdate(JSON& Value){
   if(Value.Type == typeObject){
     for(
-      map<string, JSON*>::iterator Object = Value.Objects.begin();
+      auto Object = Value.Objects.begin();
       Object != Value.Objects.end();
       Object++
     ) AddOrUpdate(Object->first.c_str(), *(Object->second));
@@ -233,7 +233,7 @@ JSON* JSON::AddOrUpdate(const char* Name){
 //------------------------------------------------------------------------------
 
 JSON* JSON::operator[] (const char* Name){
-  map<string, JSON*>::iterator Object = Objects.find(Name);
+  auto Object = Objects.find(Name);
   if(Object == Objects.end()) return 0;
   return Object->second;
 }
@@ -657,7 +657,7 @@ const char* JSON::Stringify(){
       n = 0;
       N = Objects.size();
       for(
-        map<string, JSON*>::iterator Object = Objects.begin();
+        auto Object = Objects.begin();
         Object != Objects.end();
         Object++
       ){
