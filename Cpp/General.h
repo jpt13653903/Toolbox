@@ -77,13 +77,6 @@
 
 typedef uint8_t  byte;
 typedef uint16_t word;
-
-// Make uwchar_t portable between Windows and Linux systems
-#if WCHAR_MIN < 0
-  typedef unsigned wchar_t uwchar_t;
-#else
-  typedef wchar_t uwchar_t;
-#endif
 //------------------------------------------------------------------------------
 
 #define ANSI_RESET             "\e[0m"
