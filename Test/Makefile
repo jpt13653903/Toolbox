@@ -9,7 +9,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #===============================================================================
 
-CC      = g++
+CXX     = g++
 Options = -std=c++11 -Wall -fexceptions -O2 -DDEBUG
 #-------------------------------------------------------------------------------
 
@@ -69,13 +69,13 @@ clean:
 
 bin/%.exe: %.cpp $(Objects) $(Headers)
 	mkdir -p bin
-	$(CC) $(Options) $(Version) $(Includes) $(Objects) $< -s $(LibInclude) $(Libraries) -o $@
+	$(CXX) $(Options) $(Version) $(Includes) $(Objects) $< -s $(LibInclude) $(Libraries) -o $@
 #-------------------------------------------------------------------------------
 
 # Objects
 
 obj/%.o: $(Toolbox)/%.cpp $(Headers)
 	mkdir -p $(@D)
-	$(CC) $(Options) $(Version) -c $(Includes) $< -o $@
+	$(CXX) $(Options) $(Version) -c $(Includes) $< -o $@
 #-------------------------------------------------------------------------------
 
