@@ -90,15 +90,23 @@ class JSON{
     unsigned    ReadSize;
     unsigned    ReadIndex;
 
-    void ReadError (const char* Message);
-    void ReadSpace ();
+    void ReadError(const char* Message);
+    void ReadSpace();
+    void ReadLineComment();
+    void ReadBlockComment();
+
     bool ReadUnicodeSequence(std::string* String);
-    bool ReadString(std::string* Value);
-    bool ReadString(JSON* Value);
-    bool ReadNumber(JSON* Value);
-    bool ReadObject(JSON* ObjectList);
-    bool ReadArray (JSON* ObjectList);
-    bool ReadValue (JSON* Value);
+    bool ReadIdentifierStart(std::string* String);
+    bool ReadIdentifierPart (std::string* String);
+
+    bool ReadHexadecimal(JSON* Value, bool Sign);
+    bool ReadIdentifier (std::string* Value);
+    bool ReadString     (std::string* Value);
+    bool ReadString     (JSON* Value);
+    bool ReadNumber     (JSON* Value);
+    bool ReadObject     (JSON* ObjectList);
+    bool ReadArray      (JSON* ObjectList);
+    bool ReadValue      (JSON* Value);
 //------------------------------------------------------------------------------
 
   public:
