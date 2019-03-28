@@ -384,7 +384,10 @@ bool JSON::ReadString(string* Value){
   ReadSpace();
   if(ReadIndex >= ReadSize) return false;
 
-  if(ReadBuffer[ReadIndex] != '"') return false;
+  bool DoubleQuotes;
+  if     (ReadBuffer[ReadIndex] == '"' ) DoubleQuotes = true;
+  else if(ReadBuffer[ReadIndex] == '\'') DoubleQuotes = false;
+  else return false;
   ReadIndex++;
 
   *Value = "";
@@ -392,8 +395,20 @@ bool JSON::ReadString(string* Value){
   while(ReadIndex < ReadSize){
     switch(ReadBuffer[ReadIndex]){
       case '"':
-        ReadIndex++;
-        return true;
+        if(DoubleQuotes){
+          ReadIndex++;
+          return true;
+        }
+        *Value += ReadBuffer[ReadIndex];
+        break;
+
+      case '\'':
+        if(!DoubleQuotes){
+          ReadIndex++;
+          return true;
+        }
+        *Value += ReadBuffer[ReadIndex];
+        break;
 
       case '\\':
         ReadIndex++;
@@ -403,6 +418,7 @@ bool JSON::ReadString(string* Value){
         }
         switch(ReadBuffer[ReadIndex]){
           case '"' : *Value += '"' ; break;
+          case '\'': *Value += '\''; break;
           case '\\': *Value += '\\'; break;
           case '/' : *Value += '/' ; break;
           case 'b' : *Value += '\b'; break;
@@ -415,6 +431,14 @@ bool JSON::ReadString(string* Value){
               ReadError("Incomplete Unicode escape sequence");
               return false;
             }
+            break;
+          case '\n':
+            ReadLine++;
+            if(ReadBuffer[ReadIndex+1] == '\r') ReadIndex++;
+            break;
+          case '\r':
+            ReadLine++;
+            if(ReadBuffer[ReadIndex+1] == '\n') ReadIndex++;
             break;
             
           default:

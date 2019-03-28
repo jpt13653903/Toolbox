@@ -1,11 +1,12 @@
 {
-  string: "String with unicode...\u03A9...",
-  wierd : "\\\"/\b\f\n\r\t and some more...",
+  string: 'String with unicode...\u03A9...',
+  wierd : '\\"/\b\f\n\r\t and \
+some more...',
   number: 123.456,
   state1: true,
   state2: false,
   state3: null,
-  array : [ "one", "two", "three", "four" ],
+  array : [ "one", 'two', "three", 'four' ],
   object: {
     string: "String",
     number: 123.456,
