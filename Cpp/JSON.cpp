@@ -703,7 +703,7 @@ bool JSON::ReadObject(JSON* ObjectList){
   while(ReadIndex < ReadSize){
     if(!ReadString(&Name)){
       if(!ReadIdentifier(&Name)){
-        ReadError("String expected");
+        ReadError("String or Identifier expected");
         return false;
       }
     }
@@ -731,6 +731,11 @@ bool JSON::ReadObject(JSON* ObjectList){
       return false;
     }
     ReadIndex++;
+    ReadSpace();
+    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == '}'){
+      ReadIndex++;
+      return true;
+    }
   }
   ReadError("Incomplete object");
   return false;
@@ -772,6 +777,11 @@ bool JSON::ReadArray(JSON* ObjectList){
       return false;
     }
     ReadIndex++;
+    ReadSpace();
+    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == ']'){
+      ReadIndex++;
+      return true;
+    }
   }
   ReadError("Incomplete object");
   return false;

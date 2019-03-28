@@ -7,7 +7,7 @@ some more...',
   state2: false,
 // Testing more line comments
   state3: null,
-  array : [ "one", 'two', "three", 'four' ],
+  array : [ "one", 'two', "three", 'four', ],
   object: {
     string: "String",
     /* Testing a block comment
@@ -26,7 +26,7 @@ some more...',
     state3: null,
     array : [ "one", "two", "three", "four" ],
     object: { },
-    array2: [ ]
+    array2: [ ],
   }
 }
 
