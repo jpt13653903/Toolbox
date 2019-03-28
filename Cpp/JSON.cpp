@@ -303,6 +303,8 @@ void JSON::ReadSpace(){
 bool JSON::ReadUnicodeSequence(std::string* String){
   uint16_t Char = 0;
 
+  if(ReadBuffer[ReadIndex] != 'u') return false;
+
   for(int n = 0; n < 4; n++){
     ReadIndex++;
     if(ReadIndex >= ReadSize) return false;
@@ -318,6 +320,62 @@ bool JSON::ReadUnicodeSequence(std::string* String){
     }
   }
   *String += Char;
+  return true;
+}
+//------------------------------------------------------------------------------
+
+bool JSON::ReadIdentifierStart(string* String){
+  if('A' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'Z'){
+    *String += ReadBuffer[ReadIndex++];
+    return true;
+  }
+  if('a' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'z'){
+    *String += ReadBuffer[ReadIndex++];
+    return true;
+  }
+  if(ReadBuffer[ReadIndex] == '$' || ReadBuffer[ReadIndex] == '_'){
+    *String += ReadBuffer[ReadIndex++];
+    return true;
+  }
+  // This is actually wrong, but works when the input is assumed valid
+  if(ReadBuffer[ReadIndex] & 0xC0){
+    *String += ReadBuffer[ReadIndex++];
+    while((ReadBuffer[ReadIndex] & 0xC0) == 0x80) *String += ReadBuffer[ReadIndex++];
+    return true;
+  }
+  if(ReadBuffer[ReadIndex] == '\\'){
+    ReadIndex++;
+    if(!ReadUnicodeSequence(String)){
+      ReadError("Incomplete Unicode escape sequence");
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+//------------------------------------------------------------------------------
+
+bool JSON::ReadIdentifierPart(string* String){
+  if(ReadIdentifierStart(String)) return true;
+
+  if('0' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= '9'){
+    *String += ReadBuffer[ReadIndex++];
+    return true;
+  }
+  return false;
+}
+//------------------------------------------------------------------------------
+
+bool JSON::ReadIdentifier(string* String){
+  ReadSpace();
+  if(ReadIndex >= ReadSize) return false;
+
+  *String = "";
+
+  if(!ReadIdentifierStart(String)) return false;
+
+  while(ReadIdentifierPart(String));
+
   return true;
 }
 //------------------------------------------------------------------------------
@@ -492,8 +550,10 @@ bool JSON::ReadObject(JSON* ObjectList){
 
   while(ReadIndex < ReadSize){
     if(!ReadString(&Name)){
-      ReadError("String expected");
-      return false;
+      if(!ReadIdentifier(&Name)){
+        ReadError("String expected");
+        return false;
+      }
     }
     ReadSpace();
     if(ReadBuffer[ReadIndex] != ':'){

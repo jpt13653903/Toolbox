@@ -137,12 +137,62 @@ bool TestLoad(){
 }
 //------------------------------------------------------------------------------
 
+bool TestJSON5(){
+  Start("Testing JSON5 extensions");
+
+  FILE_WRAPPER File;
+  if(!File.Open("Resources/JSON5.json", FILE_WRAPPER::faRead)){
+    error("Cannot open \"Resources/JSON5.json\" for reading");
+    return false;
+  }
+
+  int   Size   = (int)File.GetSize();
+  char* Buffer = new char[Size + 1];
+  File.Read(Buffer, Size);
+  Buffer[Size] = 0;
+
+  info("Buffer = %s", Buffer);
+
+  JSON json;
+  if(!json.Parse(Buffer)){
+    error("Parse error");
+    return false;
+  }
+  delete[] Buffer;
+
+  info("json = %s", json.Stringify());
+  Assert(!strcmp(json.Stringify(),
+    "{"
+      "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+      "\"number\":123.456,"
+      "\"object\":{"
+        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+        "\"array2\":[],"
+        "\"number\":123.456,"
+        "\"object\":{},"
+        "\"state1\":true,"
+        "\"state2\":false,"
+        "\"state3\":null,"
+        "\"string\":\"String\""
+      "},"
+      "\"state1\":true,"
+      "\"state2\":false,"
+      "\"state3\":null,"
+      "\"string\":\"String with unicode...Ω...\","
+      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
+    "}"));
+
+  Done(); return true;
+}
+//------------------------------------------------------------------------------
+
 int main(){
   SetupTerminal();
 
   printf("\n\n");
   if(!TestBuild()) goto main_Error;
   if(!TestLoad ()) goto main_Error;
+  if(!TestJSON5()) goto main_Error;
 
   info(ANSI_FG_GREEN "All OK"); Done();
   return 0;
