@@ -21,7 +21,7 @@ General-purpose repository, intended as a submodule for others.
     - Defines macros for standard ANSI escape sequences related to changing the console text colour.
     - Defines `debug`, `info`, `warning` and `error` macros.  These are syntactically identical to `printf`, but automatically adds colours and more information relating to the current file, line number and function name.
 - **JSON.cpp**
-    - Abstraction for reading, manipulating and generating JSON strings.
+    - Abstraction for reading, manipulating and generating JSON strings.  It supports parsing of [JSON-5](https://json5.org/) strings, but stringifies to normal JSON.
 - **LLRBTree.cpp**
     - A general-purpose [left-leaning red-black tree](https://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf) used to store objects.
 - **UTF\_Converter.cpp**
