@@ -92,6 +92,8 @@ class JSON{
 
     void ReadError(const char* Message);
     void ReadSpace();
+    void ReadLineComment();
+    void ReadBlockComment();
 
     bool ReadUnicodeSequence(std::string* String);
     bool ReadIdentifierStart(std::string* String);

@@ -285,6 +285,62 @@ void JSON::ReadError(const char* Message){
 }
 //------------------------------------------------------------------------------
 
+void JSON::ReadLineComment(){
+  ReadIndex += 2;
+  while(ReadIndex < ReadSize){
+    switch(ReadBuffer[ReadIndex]){
+      case '\n':
+        ReadLine++;
+        ReadIndex++;
+        if(ReadBuffer[ReadIndex] == '\r') ReadIndex++;
+        return;
+
+      case '\r':
+        ReadLine++;
+        ReadIndex++;
+        if(ReadBuffer[ReadIndex] == '\n') ReadIndex++;
+        return;
+
+      default:
+        ReadIndex++;
+        break;
+    }
+  }
+}
+//------------------------------------------------------------------------------
+
+void JSON::ReadBlockComment(){
+  ReadIndex += 2;
+  while(ReadIndex < ReadSize){
+    switch(ReadBuffer[ReadIndex]){
+      case '\n':
+        ReadLine++;
+        ReadIndex++;
+        if(ReadBuffer[ReadIndex] == '\r') ReadIndex++;
+        break;
+
+      case '\r':
+        ReadLine++;
+        ReadIndex++;
+        if(ReadBuffer[ReadIndex] == '\n') ReadIndex++;
+        break;
+
+      case '*':
+        ReadIndex++;
+        if(ReadBuffer[ReadIndex] == '/'){
+          ReadIndex++;
+          return;
+        }
+        break;
+
+      default:
+        ReadIndex++;
+        break;
+    }
+  }
+}
+//------------------------------------------------------------------------------
+
 void JSON::ReadSpace(){
   while(ReadIndex < ReadSize){
     switch(ReadBuffer[ReadIndex]){
@@ -293,7 +349,22 @@ void JSON::ReadSpace(){
       case '\t':
       case '\v':
       case ' ' : break;
-      default  : return;
+
+      case '/':
+        switch(ReadBuffer[ReadIndex+1]){
+          case '/':
+            ReadLineComment();
+            break;
+          case '*':
+            ReadBlockComment();
+            break;
+          default:
+            return;
+        }
+        break;
+
+      default:
+        return;
     }
     ReadIndex++;
   }

@@ -3,12 +3,15 @@
   wierd : '\\"/\b\f\n\r\t and \
 some more...',
   number: 123.456,
-  state1: true,
+  state1: true, // Testing a line comment
   state2: false,
+// Testing more line comments
   state3: null,
   array : [ "one", 'two', "three", 'four' ],
   object: {
     string: "String",
+    /* Testing a block comment
+       of multiple lines */
     number: 123.456,
     state1: true,
     state2: false,
