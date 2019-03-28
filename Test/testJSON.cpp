@@ -178,7 +178,7 @@ bool TestJSON5(){
         "\"state3\":null,"
         "\"string\":\"String\","
         "\"withExponent\":0.0123,"
-        "\"withFractionPart\":123.456"
+        "\"withFractionPart\":-123.456"
       "},"
       "\"state1\":true,"
       "\"state2\":false,"
