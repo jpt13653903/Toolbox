@@ -99,13 +99,14 @@ class JSON{
     bool ReadIdentifierStart(std::string* String);
     bool ReadIdentifierPart (std::string* String);
 
-    bool ReadIdentifier(std::string* Value);
-    bool ReadString    (std::string* Value);
-    bool ReadString    (JSON* Value);
-    bool ReadNumber    (JSON* Value);
-    bool ReadObject    (JSON* ObjectList);
-    bool ReadArray     (JSON* ObjectList);
-    bool ReadValue     (JSON* Value);
+    bool ReadHexadecimal(JSON* Value, bool Sign);
+    bool ReadIdentifier (std::string* Value);
+    bool ReadString     (std::string* Value);
+    bool ReadString     (JSON* Value);
+    bool ReadNumber     (JSON* Value);
+    bool ReadObject     (JSON* ObjectList);
+    bool ReadArray      (JSON* ObjectList);
+    bool ReadValue      (JSON* Value);
 //------------------------------------------------------------------------------
 
   public:

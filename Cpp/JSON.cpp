@@ -545,9 +545,50 @@ bool JSON::ReadString(JSON* Value){
 }
 //------------------------------------------------------------------------------
 
+bool JSON::ReadHexadecimal(JSON* Value, bool Sign){
+  double Result = 0;
+
+  while(ReadIndex < ReadSize){
+    if      ('0' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= '9'){
+      Result *= 16.0;
+      Result += ReadBuffer[ReadIndex++] - '0';
+    }else if('a' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'f'){
+      Result *= 16.0;
+      Result += ReadBuffer[ReadIndex++] - 'a' + 10;
+    }else if('A' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'F'){
+      Result *= 16.0;
+      Result += ReadBuffer[ReadIndex++] - 'A' + 10;
+    }else{
+      break;
+    }
+  }
+  Value->Number = Sign ? -Result : Result;
+  return true;
+}
+//------------------------------------------------------------------------------
+
 bool JSON::ReadNumber(JSON* Value){
   ReadSpace();
   if(ReadIndex >= ReadSize) return false;
+
+  if(ReadIndex+8 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "Infinity", 8)){
+    ReadIndex += 8;
+    Value->Type   = typeNumber;
+    Value->Number = 1.0/0.0;
+    return true;
+  }
+  if(ReadIndex+9 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "-Infinity", 9)){
+    ReadIndex += 9;
+    Value->Type   = typeNumber;
+    Value->Number = -1.0/0.0;
+    return true;
+  }
+  if(ReadIndex+3 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "NaN", 3)){
+    ReadIndex += 3;
+    Value->Type   = typeNumber;
+    Value->Number = 0.0/0.0;
+    return true;
+  }
 
   bool Sign         = false;
   bool ExponentSign = false;
@@ -556,11 +597,27 @@ bool JSON::ReadNumber(JSON* Value){
     Sign = true;
     ReadIndex++;
     if(ReadIndex >= ReadSize) return false;    
+  }else if(ReadBuffer[ReadIndex] == '+'){
+    Sign = false;
+    ReadIndex++;
+    if(ReadIndex >= ReadSize) return false;    
   }
 
-  if(ReadBuffer[ReadIndex] < '0' || ReadBuffer[ReadIndex] > '9'){
+  if((ReadBuffer[ReadIndex] <  '0' || ReadBuffer[ReadIndex] > '9') &&
+      ReadBuffer[ReadIndex] != '.' ){
     if(Sign) ReadError("Incomplete number");
     return false;
+  }
+
+  if(ReadIndex+2 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "0x", 2)){
+    ReadIndex += 2;
+    Value->Type = typeNumber;
+    return ReadHexadecimal(Value, Sign);
+  }
+  if(ReadIndex+2 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "0X", 2)){
+    ReadIndex += 2;
+    Value->Type = typeNumber;
+    return ReadHexadecimal(Value, Sign);
   }
 
   *Value = 0;
@@ -803,7 +860,7 @@ const char* JSON::Stringify(){
       break;
 
     case typeNumber:
-      sprintf(s, "%g", Number);
+      sprintf(s, "%.14g", Number);
       Stringification = s;
       break;
 

@@ -12,7 +12,15 @@ some more...',
     string: "String",
     /* Testing a block comment
        of multiple lines */
-    number: 123.456,
+
+    number2: +0xdecaf,
+    number3: -0xC0FFEE,
+
+    integer:          123,
+    withFractionPart: 123.456,
+    onlyFractionPart: .456,
+    withExponent:     123e-4,
+
     state1: true,
     state2: false,
     state3: null,
