@@ -37,6 +37,7 @@ class JSON{
     // These functions make copies of the value
     void operator=(const char* Value);
     void operator=(int         Value);
+    void operator=(unsigned    Value);
     void operator=(double      Value);
     void operator=(bool        Value);
 //------------------------------------------------------------------------------
@@ -56,6 +57,7 @@ class JSON{
     JSON* AddOrUpdate(const char* Name, JSON&       Value);
     JSON* AddOrUpdate(const char* Name, const char* Value);
     JSON* AddOrUpdate(const char* Name, int         Value);
+    JSON* AddOrUpdate(const char* Name, unsigned    Value);
     JSON* AddOrUpdate(const char* Name, double      Value);
     JSON* AddOrUpdate(const char* Name, bool        Value);
     JSON* AddOrUpdate(const char* Name);
@@ -73,6 +75,7 @@ class JSON{
     void Append(JSON&       Value);
     void Append(const char* Value);
     void Append(int         Value);
+    void Append(unsigned    Value);
     void Append(double      Value);
     void Append(bool        Value);
 
@@ -114,6 +117,7 @@ class JSON{
     JSON(JSON&       Value);
     JSON(const char* Value);
     JSON(int         Value);
+    JSON(unsigned    Value);
     JSON(double      Value);
     JSON(bool        Value);
    ~JSON();

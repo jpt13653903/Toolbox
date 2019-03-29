@@ -75,6 +75,14 @@ JSON::JSON(int Value){
 }
 //------------------------------------------------------------------------------
 
+JSON::JSON(unsigned Value){
+  Type    = typeNull;
+  String  = "";
+  Number  = 0;
+  operator=(Value);
+}
+//------------------------------------------------------------------------------
+
 JSON::JSON(double Value){
   Type    = typeNull;
   String  = "";
@@ -164,6 +172,13 @@ void JSON::operator=(int Value){
 }
 //------------------------------------------------------------------------------
 
+void JSON::operator=(unsigned Value){
+  Clear();
+  Type   = typeNumber;
+  Number = Value;
+}
+//------------------------------------------------------------------------------
+
 void JSON::operator=(double Value){
   Clear();
   Type   = typeNumber;
@@ -215,6 +230,11 @@ JSON* JSON::AddOrUpdate(const char* Name, int Value){
 }
 //------------------------------------------------------------------------------
 
+JSON* JSON::AddOrUpdate(const char* Name, unsigned Value){
+  JSON json(Value); return AddOrUpdate(Name, json);
+}
+//------------------------------------------------------------------------------
+
 JSON* JSON::AddOrUpdate(const char* Name, double Value){
   JSON json(Value); return AddOrUpdate(Name, json);
 }
@@ -258,6 +278,11 @@ void JSON::Append(const char* Value){
 //------------------------------------------------------------------------------
 
 void JSON::Append(int Value){
+  JSON json(Value); Append(json);
+}
+//------------------------------------------------------------------------------
+
+void JSON::Append(unsigned Value){
   JSON json(Value); Append(json);
 }
 //------------------------------------------------------------------------------
