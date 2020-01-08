@@ -27,6 +27,7 @@ some more...',
     array : [ "one", "two", "three", "four" ],
     object: { },
     array2: [ ],
-  }
+  },
+  // Comment just before the end...
 }
 

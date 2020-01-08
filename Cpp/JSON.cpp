@@ -373,7 +373,9 @@ void JSON::ReadSpace(){
       case '\r':
       case '\t':
       case '\v':
-      case ' ' : break;
+      case ' ' :
+        ReadIndex++;
+        break;
 
       case '/':
         switch(ReadBuffer[ReadIndex+1]){
@@ -391,7 +393,6 @@ void JSON::ReadSpace(){
       default:
         return;
     }
-    ReadIndex++;
   }
 }
 //------------------------------------------------------------------------------
