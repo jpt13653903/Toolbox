@@ -265,7 +265,7 @@ bool FILE_WRAPPER::CreatePath(const char* Filename){
       else       n--;
     }
     return n >= 0;
-  
+
   #else
     string Path = Filename;
 

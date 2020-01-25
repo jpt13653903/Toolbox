@@ -537,7 +537,7 @@ bool JSON::ReadString(string* Value){
             ReadLine++;
             if(ReadBuffer[ReadIndex+1] == '\n') ReadIndex++;
             break;
-            
+
           default:
             ReadError("Unrecognised escape sequence");
             return false;
@@ -622,11 +622,11 @@ bool JSON::ReadNumber(JSON* Value){
   if(ReadBuffer[ReadIndex] == '-'){
     Sign = true;
     ReadIndex++;
-    if(ReadIndex >= ReadSize) return false;    
+    if(ReadIndex >= ReadSize) return false;
   }else if(ReadBuffer[ReadIndex] == '+'){
     Sign = false;
     ReadIndex++;
-    if(ReadIndex >= ReadSize) return false;    
+    if(ReadIndex >= ReadSize) return false;
   }
 
   if((ReadBuffer[ReadIndex] <  '0' || ReadBuffer[ReadIndex] > '9') &&

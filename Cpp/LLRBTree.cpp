@@ -105,7 +105,7 @@ LLRB_TREE::Node* LLRB_TREE::Insert(Node* N, void* Data, int Tag){
   }
 
   int result = Compare(Data, N->Data);
-  
+
   if(!result){ // Duplicate
     Tag = N->Tag + 1; // It is "larger" than the duplicate in the tree
     result = 1;       // and therefore to the right of it
@@ -119,7 +119,7 @@ LLRB_TREE::Node* LLRB_TREE::Insert(Node* N, void* Data, int Tag){
     TempPrev = N;
     N->Right = Insert(N->Right, Data, Tag);
   }
- 
+
   return FixUp(N);
 }
 //------------------------------------------------------------------------------
@@ -229,8 +229,8 @@ LLRB_TREE::Node* LLRB_TREE::Remove(Node* N, void* Key, int Tag){
 //------------------------------------------------------------------------------
 
 void LLRB_TREE::Remove(void* Key){
-  Node* Temp; 
-  Node* N; 
+  Node* Temp;
+  Node* N;
 
   // Find the first duplicate
   N = Find(Root, Key);

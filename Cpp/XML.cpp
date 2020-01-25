@@ -313,7 +313,7 @@ void XML::GetLegalName(const char* Name, string* LegalName){
 //------------------------------------------------------------------------------
 
 void XML::GetLegalContent(
-  string* Content, 
+  string* Content,
   string* LegalContent
 ){
   *LegalContent = "";

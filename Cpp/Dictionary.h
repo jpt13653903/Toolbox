@@ -10,9 +10,9 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 --------------------------------------------------------------------------------
 
-This is a dictionary to store arbitrary data with a string ID (also known as 
-an associative array).  It is based on a left-leaning red-black tree, as 
-described by Robert Sedgewick, Department of Computer Science, Princeton 
+This is a dictionary to store arbitrary data with a string ID (also known as
+an associative array).  It is based on a left-leaning red-black tree, as
+described by Robert Sedgewick, Department of Computer Science, Princeton
 University, Princeton, NJ 08544
 ==============================================================================*/
 
@@ -35,7 +35,7 @@ class DICTIONARY_BASE{
       // Used to point to the children
       NODE* Left;
       NODE* Right;
-      
+
       // Used to linearise the tree
       NODE* Prev;
       NODE* Next;

@@ -17,8 +17,8 @@ Toolbox = ../Cpp
 #-------------------------------------------------------------------------------
 
 Includes   = -I$(Toolbox)
-Libraries  = 
-LibInclude = 
+Libraries  =
+LibInclude =
 #-------------------------------------------------------------------------------
 
 Version = -DMAJOR_VERSION=1 -DMINOR_VERSION=0

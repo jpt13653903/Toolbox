@@ -14,7 +14,7 @@
 
 void SetupTerminal(){
   #ifdef WINVER
-    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING 
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
       #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
     #endif
 
@@ -57,7 +57,7 @@ void SetupTerminal(){
 
 #ifdef WINVER
   static char ErrorString[0x1000];
-  
+
   const char* GetErrorString(int Code){
     ErrorString[0] = 0;
 
@@ -92,5 +92,5 @@ void SetupTerminal(){
     return now.tv_sec * 1000LL + now.tv_nsec / 1000000LL;
   }
 #endif
-//------------------------------------------------------------------------------       
+//------------------------------------------------------------------------------
 
