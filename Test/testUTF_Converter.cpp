@@ -97,7 +97,7 @@ bool TestUTF8_to_UTF32(){
       error("Result[%02d] = 0x%08X (0x%08X expected)", n, Result[n], UTF32[n]);
     }
   }
-  Assert(Result == UTF32);
+  assert(Result == UTF32, return false);
 
   Done(); return true;
 }
@@ -115,7 +115,7 @@ bool TestUTF16_to_UTF32(){
       error("Result[%02d] = 0x%08X (0x%08X expected)", n, Result[n], UTF32[n]);
     }
   }
-  Assert(Result == UTF32);
+  assert(Result == UTF32, return false);
 
   Done(); return true;
 }
@@ -135,7 +135,7 @@ bool TestUTF32_to_UTF8(){
             (uint32_t)((unsigned char)UTF32[n]));
     }
   }
-  Assert(Result == UTF8);
+  assert(Result == UTF8, return false);
 
   Done(); return true;
 }
@@ -154,7 +154,7 @@ bool TestUTF32_to_UTF16(){
             (uint32_t)Result[n], (uint32_t)UTF32[n]);
     }
   }
-  Assert(Result == UTF16);
+  assert(Result == UTF16, return false);
 
   Done(); return true;
 }

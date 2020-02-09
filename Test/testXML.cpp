@@ -17,9 +17,9 @@ bool TestLoad(){
   Start("Testing loading XML files");
 
   XML xml;
-  Assert(xml.Load("Resources/XML.xml"));
+  assert(xml.Load("Resources/XML.xml"), return false);
 
-  Assert(xml.Save("testOutput/XML.xml"));
+  assert(xml.Save("testOutput/XML.xml"), return false);
 
   Done(); return true;
 }
@@ -85,8 +85,8 @@ bool TestBuild(){
     xml.End();
   xml.End();
 
-  Assert(xml.Save("testOutput/Build.xml"));
-  Assert(xml.Load("testOutput/Build.xml"));
+  assert(xml.Save("testOutput/Build.xml"), return false);
+  assert(xml.Load("testOutput/Build.xml"), return false);
 
   Done(); return true;
 }

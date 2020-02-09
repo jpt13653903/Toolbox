@@ -19,7 +19,7 @@ static CALCULATOR Calc;
 bool Calculate(const char* Expression, double Expected){
   double Result = Calc.Calculate(Expression);
   info("  %s = %g", Expression, Result);
-  Assert(Result == Expected);
+  assert(Result == Expected, return false);
   return true;
 }
 //------------------------------------------------------------------------------

@@ -36,13 +36,13 @@ bool TestBuild(){
   info("json[\"MyArray\"] = %s", MyArray        ->Stringify());
 
   info("json = %s", json.Stringify());
-  Assert(!strcmp(json.Stringify(),
+  assert(!strcmp(json.Stringify(),
     "{"
       "\"MyArray\":[0,1,2,3,4,5,6,7,8,9],"
       "\"Number\":789.456,"
       "\"String\":\"MyString\","
       "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"));
+    "}"), return false);
 
   Done(); return true;
 }
@@ -72,7 +72,7 @@ bool TestLoad(){
   delete[] Buffer;
 
   info("json = %s", json.Stringify());
-  Assert(!strcmp(json.Stringify(),
+  assert(!strcmp(json.Stringify(),
     "{"
       "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
       "\"number\":123.456,"
@@ -92,7 +92,7 @@ bool TestLoad(){
       "\"state3\":null,"
       "\"string\":\"String with unicode...Ω...\","
       "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"));
+    "}"), return false);
 
   Done();
   Start("Testing recursive AddOrUpdate");
@@ -112,7 +112,7 @@ bool TestLoad(){
   info("Updating with: %s", NewJson.Stringify());
   json.AddOrUpdate(NewJson);
   info("After update: %s", json.Stringify());
-  Assert(!strcmp(json.Stringify(),
+  assert(!strcmp(json.Stringify(),
     "{"
       "\"array\":[1,2,3,4],"
       "\"number\":123.456,"
@@ -133,7 +133,7 @@ bool TestLoad(){
       "\"state4\":true,"
       "\"string\":\"New String\","
       "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"));
+    "}"), return false);
 
   Done(); return true;
 }
@@ -163,7 +163,7 @@ bool TestJSON5(){
   delete[] Buffer;
 
   info("json = %s", json.Stringify());
-  Assert(!strcmp(json.Stringify(),
+  assert(!strcmp(json.Stringify(),
     "{"
       "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
       "\"number\":123.456,"
@@ -187,7 +187,7 @@ bool TestJSON5(){
       "\"state3\":null,"
       "\"string\":\"String with unicode...Ω...\","
       "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"));
+    "}"), return false);
 
   Done(); return true;
 }

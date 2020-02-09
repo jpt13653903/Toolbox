@@ -73,7 +73,7 @@ bool TestPathCreation(){
 
   FILE_WRAPPER File;
 
-  Assert(File.WriteAll("testOutput/A/B/C/D/E/File.txt", (const byte*)"Hello World!\n"));
+  assert(File.WriteAll("testOutput/A/B/C/D/E/File.txt", (const byte*)"Hello World!\n"), return false);
 
   Done(); return true;
 }
