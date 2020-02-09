@@ -148,7 +148,8 @@ typedef uint16_t word;
 
 #define assert(condition, ...) do {                       \
   if(!(condition)){                                       \
-    printf(ANSI_FG_BRIGHT_RED "Failed assertion");        \
+    printf(ANSI_FG_BRIGHT_RED "Failed assertion: ");      \
+    printf(ANSI_RESET "%s", #condition);                  \
     printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
            ANSI_RESET, __FILE__, __LINE__, __func__);     \
     fflush(stdout);                                       \

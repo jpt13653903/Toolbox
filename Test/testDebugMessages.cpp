@@ -22,7 +22,8 @@ bool TestDebugMessages(){
   assert (true );
   assert (true , printf("This should never print\n"));
   assert (false);
-  assert (false, printf("Do something about the error\n"));
+  assert (false, info("Do something about the failed assertion"));
+  assert (!strcmp("foo", "bar"));
 
   error("Testing GetErrorString(): \"%s\"", GetErrorString(123));
 
