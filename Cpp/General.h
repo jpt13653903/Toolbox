@@ -115,8 +115,7 @@ typedef uint16_t word;
 //------------------------------------------------------------------------------
 
 #if defined(DEBUG)
-  #define debug(...) do                                            \
-  {                                                                \
+  #define debug(...) do {                                          \
     printf(ANSI_FG_GREEN "Debug: " ANSI_RESET __VA_ARGS__);        \
     printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"          \
            ANSI_RESET, __FILE__, __LINE__, __func__);              \
@@ -126,28 +125,35 @@ typedef uint16_t word;
   #define debug(...)
 #endif
 
-#define info(...) do                                    \
-{                                                       \
+#define info(...) do {                                  \
   printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
          ANSI_RESET, __FILE__, __LINE__, __func__);     \
   fflush(stdout);                                       \
 }while(0)
 
-#define warning(...) do                                      \
-{                                                            \
+#define warning(...) do {                                    \
   printf(ANSI_FG_YELLOW "Warning: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"      \
          ANSI_RESET, __FILE__, __LINE__, __func__);          \
   fflush(stdout);                                            \
 }while(0)
 
-#define error(...) do                                          \
-{                                                              \
+#define error(...) do {                                        \
   printf(ANSI_FG_BRIGHT_RED "Error: " ANSI_RESET __VA_ARGS__); \
   printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"        \
          ANSI_RESET, __FILE__, __LINE__, __func__);            \
   fflush(stdout);                                              \
+}while(0)
+
+#define assert(condition, ...) do {                       \
+  if(!(condition)){                                       \
+    printf(ANSI_FG_BRIGHT_RED "Failed assertion");        \
+    printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
+           ANSI_RESET, __FILE__, __LINE__, __func__);     \
+    fflush(stdout);                                       \
+    __VA_ARGS__;                                          \
+  }                                                       \
 }while(0)
 //------------------------------------------------------------------------------
 

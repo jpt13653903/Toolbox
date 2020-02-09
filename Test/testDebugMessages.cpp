@@ -19,6 +19,10 @@ bool TestDebugMessages(){
   info   ("Testing info %d"   , 123);
   warning("Testing warning %d", 123);
   error  ("Testing error %d"  , 123);
+  assert (true );
+  assert (true , printf("This should never print\n"));
+  assert (false);
+  assert (false, printf("Do something about the error\n"));
 
   error("Testing GetErrorString(): \"%s\"", GetErrorString(123));
 
