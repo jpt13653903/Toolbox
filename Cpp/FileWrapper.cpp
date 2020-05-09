@@ -115,11 +115,14 @@ bool FILE_WRAPPER::Open(const wchar_t* Filename, ACCESS Access){
         break;
     }
 
-    wstring LongName;
-    GetLongName(Filename, LongName);
+    // TODO: Long names (i.e. prefixed with "\\?\" cannot have relative paths.
+    //       Relative paths should therefore be resolved if long names are
+    //       required.
+    // wstring LongName;
+    // GetLongName(Filename, LongName);
 
     Handle = CreateFileW(
-      LongName.c_str(),
+      Filename,
       DesiredAccess,
       ShareMode,
       0,
