@@ -56,6 +56,10 @@ class UTF_CONVERTER{
     std::string&    UTF8 (const char32_t*       UTF_32);
     std::string&    UTF8 (const std::u16string& UTF_16);
     std::string&    UTF8 (const std::u32string& UTF_32);
+
+    std::string&    UpperCase(const std::string&    String);
+    std::u16string& UpperCase(const std::u16string& String);
+    std::u32string& UpperCase(const std::u32string& String);
 };
 //------------------------------------------------------------------------------
 
