@@ -131,6 +131,19 @@ bool FILE_WRAPPER::Open(const wchar_t* Filename, ACCESS Access){
       0
     );
 
+    // Try again if failed with CREATE_ALWAYS -- This is a Windows 10 bug
+    if(Handle == INVALID_HANDLE_VALUE && Creation == CREATE_ALWAYS){
+      Handle = CreateFileW(
+        Filename,
+        DesiredAccess,
+        ShareMode,
+        0,
+        TRUNCATE_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        0
+      );
+    }
+
     if(Handle == INVALID_HANDLE_VALUE) return false;
 
     if(Access == faWrite) SetFilePointer(Handle, 0, 0, FILE_END);
