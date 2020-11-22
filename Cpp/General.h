@@ -13,13 +13,6 @@
 #define General_h
 //------------------------------------------------------------------------------
 
-#include <time.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
 #if (defined __WIN32 ) || \
     (defined __WIN64 ) || \
     (defined _WIN32  ) || \
@@ -41,7 +34,18 @@
   #ifndef UNICODE
     #define UNICODE
   #endif
+#endif
+//------------------------------------------------------------------------------
 
+#include <time.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+//------------------------------------------------------------------------------
+
+#ifdef WINVER
   #include <Windows.h>
 
   #ifndef errno
