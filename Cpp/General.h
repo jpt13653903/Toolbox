@@ -53,7 +53,10 @@
   #endif
 //------------------------------------------------------------------------------
 
-#else // Linux
+#else // Linux || macOS || other
+  #if defined(__linux__) || defined(__APPLE__)
+    #define NIX
+  #endif
   #include <errno.h>
   #include <fcntl.h>
   #include <unistd.h>
@@ -65,7 +68,10 @@
   #include <sys/types.h>
   #include <sys/time.h>
   #include <sys/ioctl.h>
-  #include <linux/string.h>
+
+  #ifndef __APPLE__
+    #include <linux/string.h>
+  #endif
 
   #define  Sleep(ms) usleep(1000*(ms))
   #define  GetLastError() errno

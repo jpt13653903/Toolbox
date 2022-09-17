@@ -12,7 +12,7 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
-#ifdef __linux__
+#ifdef NIX
   #include <utime.h>
 #endif
 //------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ uint64_t FILE_WRAPPER::GetSize(){
     result += ((uint64_t)high) << 32;
     return result;
 
-  #elif defined(__linux__)
+  #elif defined(NIX)
     long int position = ftell(Handle);
     fseek(Handle, 0, SEEK_END);
     long int size = ftell(Handle);
