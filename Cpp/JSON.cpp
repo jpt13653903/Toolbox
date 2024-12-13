@@ -13,7 +13,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "JSON.h"
 //------------------------------------------------------------------------------
 
-using namespace std;
+using std::string;
 //------------------------------------------------------------------------------
 
 bool operator== (string& A, const char* B){ return !(A.compare(B)); }

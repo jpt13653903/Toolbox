@@ -60,7 +60,7 @@ bool TestExpressions(){
 
   if(!Calculate(" 3 + 4  * 5", 23)) return false;
   if(!Calculate("(3 + 4) * 5", 35)) return false;
-  if(!Calculate("sin(log(e^pi))", 978.770937703933023e-3)) return false;
+  if(!Calculate("sin(log(e^pi))", 978.77093770393308603e-3)) return false;
 
   Done(); return true;
 }
