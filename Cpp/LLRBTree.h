@@ -22,7 +22,7 @@
 //  0 if Left key = Right key
 //  1 if Left key > Right key
 // For find and remove, Left is the key and Right the node
-typedef int (*LLRBTree_Compare)(void* Left, void* Right);
+typedef int (*LLRBTreeCompare)(void* left, void* right);
 //------------------------------------------------------------------------------
 
 /**
@@ -30,82 +30,82 @@ The data is stored in a Left-Leaning Red-Black Tree, as described by
 Robert Sedgewick, Department of Computer Science, Princeton University,
 Princeton, NJ 08544
 */
-class LLRB_TREE{
-  private:
-    struct Node{
-      Node* Left;
-      Node* Right;
-      bool  Colour; // true => Red
-      int   Tag;    // Keeps track of insertion order of duplicates
-      void* Data;
+class LLRBTree{
+    private:
+        struct Node{
+            Node* left;
+            Node* right;
+            bool  colour; // true => Red
+            int   tag;    // Keeps track of insertion order of duplicates
+            void* data;
 
-      // Double linked list maintained for quick Next() Prev() calls
-      Node* Next;
-      Node* Prev;
+            // Double linked list maintained for quick Next() Prev() calls
+            Node* next;
+            Node* prev;
 
-      Node(void* Data, Node* Next, Node* Prev, int Tag);
-     ~Node();
-    };
-    Node* Root;
-    Node* CurrentNode;
+            Node(void* data, Node* next, Node* prev, int tag);
+           ~Node();
+        };
+        Node* root;
+        Node* currentNode;
 
-    Node* TempNext; // Used while inserting to find the correct place
-    Node* TempPrev; // in the linked list to place the new item
+        Node* tempNext; // Used while inserting to find the correct place
+        Node* tempPrev; // in the linked list to place the new item
 
-    unsigned TheItemCount;
+        unsigned theItemCount;
 
-    inline bool  IsRed(Node* N);
-    inline Node* FixUp(Node* N);
+        inline bool  isRed(Node* node);
+        inline Node* fixUp(Node* node);
 
-    // Insert functions
-    Node* Insert     (Node* N, void* Data, int Tag = 0);
-    Node* RotateLeft (Node* N);
-    Node* RotateRight(Node* N);
-    void  FlipColours(Node* N);
+        // Insert functions
+        Node* insert     (Node* node, void* data, int tag = 0);
+        Node* rotateLeft (Node* node);
+        Node* rotateRight(Node* node);
+        void  flipColours(Node* node);
 
-    // Remove functions
-    int   RemoveCompare(void* Left, void* Right, int TagLeft, int TagRight);
-    Node* Remove       (Node* N, void* Key, int Tag);
-    Node* MoveRedLeft  (Node* N);
-    Node* MoveRedRight (Node* N);
-    Node* RemoveMin    (Node* N);
+        // Remove functions
+        int   removeCompare(void* left, void* right, int tagLeft, int tagRight);
+        Node* remove       (Node* node, void* key,   int tag);
+        Node* moveRedLeft  (Node* node);
+        Node* moveRedRight (Node* node);
+        Node* removeMin    (Node* node);
 
-    // Find function
-    Node* Find(Node* N, void* Key);
+        // Find function
+        Node* find(Node* node, void* key);
 //------------------------------------------------------------------------------
 
-  public:
-    LLRB_TREE();
-   ~LLRB_TREE();
+    public:
+        LLRBTree();
+       ~LLRBTree();
 
-    void  Insert(void* Data); // Adds "Data" to the tree. Duplicates are sorted
-                              // by order of insertion.
-    void  Remove(void* Key ); // Removes the item with the same key as "Key"
-                              // In the case of duplicates: if Key is in the tree
-                              // under the same pointer, removes that one,
-                              // otherwise removes the first duplicate found.
-    void* Find  (void* Key ); // Returns the item with the same key as "Key",
-                              // null if the item is not found.  Returns the
-                              // first of the list of duplicates.  Also updates
-                              // "Current"
-    void* Before(void* Key ); // Returns the item just before "Key" and
-                              // updates "Current"
-    void* After (void* Key ); // Returns the item just after "Key" and
-                              // updates "Current"
-    void* First(); // Returns the item with the smallest key and updates "Current"
-    void* Last (); // Returns the item with the largest key and updates "Current"
-    void* Next (); // Returns the next item and updates "Current";
-                   // null if "Current" is the last item (or null)
-    void* Previous(); // Returns the previous item and updates "Current";
-                      // null if "Current" is the first item (or null)
-    void* Current();  // Returns the current item, null if "Current" is null
-    void* RootItem(); // Returns the item at the root of the tree, which is
-                      // approximately the median, and updates "Current"
-    void  Clear();    // Clears the data;
+        void  insert(void* data); // Adds "Data" to the tree. Duplicates are sorted
+                                  // by order of insertion.
+        void  remove(void* key ); // Removes the item with the same key as "Key"
+                                  // In the case of duplicates: if Key is in the tree
+                                  // under the same pointer, removes that one,
+                                  // otherwise removes the first duplicate found.
+        void* find  (void* key ); // Returns the item with the same key as "Key",
+                                  // null if the item is not found.  Returns the
+                                  // first of the list of duplicates.  Also updates
+                                  // "Current"
+        void* before(void* key ); // Returns the item just before "Key" and
+                                  // updates "Current"
+        void* after (void* key ); // Returns the item just after "Key" and
+                                  // updates "Current"
+        void* first(); // Returns the item with the smallest key and updates "Current"
+        void* last (); // Returns the item with the largest key and updates "Current"
+        void* next (); // Returns the next item and updates "Current";
+                       // null if "Current" is the last item (or null)
+        void* previous(); // Returns the previous item and updates "Current";
+                          // null if "Current" is the first item (or null)
+        void* current();  // Returns the current item, null if "Current" is null
+        void* rootItem(); // Returns the item at the root of the tree, which is
+                          // approximately the median, and updates "Current"
+        void  clear();    // Clears the data;
 
-    unsigned ItemCount();
+        unsigned itemCount();
 
-    LLRBTree_Compare Compare;
+        LLRBTreeCompare compare;
 };
 //------------------------------------------------------------------------------
 

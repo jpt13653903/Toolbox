@@ -13,209 +13,226 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "Dictionary.h"
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE::NODE(const char* Name, void* Data, NODE* Prev, NODE* Next){
-  Red  = true;
-  Left = Right = 0;
+DictionaryBase::Node::Node(const char* name, void* data, Node* prev, Node* next)
+{
+    red  = true;
+    left = right = 0;
 
-  int j;
-  for(j = 0; Name[j]; j++);
-  this->Name = new char[j+1];
-  for(j = 0; Name[j]; j++) this->Name[j] = Name[j];
-  this->Name[j] = 0;
+    int j;
+    for(j = 0; name[j]; j++);
+    this->name = new char[j+1];
+    for(j = 0; name[j]; j++) this->name[j] = name[j];
+    this->name[j] = 0;
 
-  this->Data = Data;
-  this->Prev = Prev;
-  this->Next = Next;
+    this->data = data;
+    this->prev = prev;
+    this->next = next;
 
-  if(Prev) Prev->Next = this;
-  if(Next) Next->Prev = this;
+    if(prev) prev->next = this;
+    if(next) next->prev = this;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE::~NODE(){
-  if(Prev) Prev->Next = Next;
-  if(Next) Next->Prev = Prev;
+DictionaryBase::Node::~Node()
+{
+    if(prev) prev->next = next;
+    if(next) next->prev = prev;
 
-  delete[] Name;
+    delete[] name;
 
-  if(Left ) delete Left;
-  if(Right) delete Right;
+    if(left ) delete left;
+    if(right) delete right;
 }
 //------------------------------------------------------------------------------
 
-void* DICTIONARY_BASE::DefaultOnDuplicate(const char* Name, void* Old, void* New){
-  return New;
+void* DictionaryBase::defaultOnDuplicate(const char* name, void* oldNode, void* newNode)
+{
+    return newNode;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::DICTIONARY_BASE(){
-  Root        = 0;
-  Current     = 0;
-  ItemCount   = 0;
-  OnDuplicate = DefaultOnDuplicate;
+DictionaryBase::DictionaryBase()
+{
+    root        = 0;
+    current     = 0;
+    itemCount   = 0;
+    onDuplicate = defaultOnDuplicate;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::~DICTIONARY_BASE(){
-  if(Root) delete Root;
+DictionaryBase::~DictionaryBase()
+{
+    if(root) delete root;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY_BASE::Clear(){
-  if(Root) delete Root;
-  Root      = 0;
-  Current   = 0;
-  ItemCount = 0;
+void DictionaryBase::clear()
+{
+    if(root) delete root;
+    root      = 0;
+    current   = 0;
+    itemCount = 0;
 }
 //------------------------------------------------------------------------------
 
-bool DICTIONARY_BASE::IsRed(NODE* Node){
-  if(!Node) return false;
-  return Node->Red;
+bool DictionaryBase::isRed(Node* node)
+{
+    if(!node) return false;
+    return node->red;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY_BASE::ColourFlip(NODE* Node){
-  Node       ->Red = !Node       ->Red;
-  Node->Left ->Red = !Node->Left ->Red;
-  Node->Right->Red = !Node->Right->Red;
+void DictionaryBase::colourFlip(Node* node)
+{
+    node       ->red = !node       ->red;
+    node->left ->red = !node->left ->red;
+    node->right->red = !node->right->red;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE* DICTIONARY_BASE::RotateLeft(NODE* Node){
-  NODE* Temp  = Node->Right;
-  Node->Right = Temp->Left;
-  Temp->Left  = Node;
-  Temp->Red   = Node->Red;
-  Node->Red   = true;
-  return Temp;
+DictionaryBase::Node* DictionaryBase::rotateLeft(Node* node)
+{
+    Node* temp  = node->right;
+    node->right = temp->left;
+    temp->left  = node;
+    temp->red   = node->red;
+    node->red   = true;
+    return temp;
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE* DICTIONARY_BASE::RotateRight(NODE* Node){
-  NODE* Temp  = Node->Left;
-  Node->Left  = Temp->Right;
-  Temp->Right = Node;
-  Temp->Red   = Node->Red;
-  Node->Red   = true;
-  return Temp;
+DictionaryBase::Node* DictionaryBase::rotateRight(Node* node)
+{
+    Node* temp  = node->left;
+    node->left  = temp->right;
+    temp->right = node;
+    temp->red   = node->red;
+    node->red   = true;
+    return temp;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY_BASE::Insert(const char* Name, void* Data){
-  TempPrev = TempNext = 0;
-  Root = Insert(Root, Name, Data);
+void DictionaryBase::insert(const char* name, void* data)
+{
+    tempPrev = tempNext = 0;
+    root = insert(root, name, data);
 }
 //------------------------------------------------------------------------------
 
-DICTIONARY_BASE::NODE* DICTIONARY_BASE::Insert(
-  NODE*       Node,
-  const char* Name,
-  void*       Data
+DictionaryBase::Node* DictionaryBase::insert(
+    Node*       node,
+    const char* name,
+    void*       data
 ){
-  if(!Node){
-    ItemCount++;
-    return new NODE(Name, Data, TempPrev, TempNext);
-  }
-
-  int j;
-  for(j = 0; Name[j]; j++){
-    if(Name[j] < Node->Name[j]){
-      TempNext   = Node;
-      Node->Left = Insert(Node->Left, Name, Data);
-      break;
-
-    }else if(Name[j] > Node->Name[j]){
-      TempPrev    = Node;
-      Node->Right = Insert(Node->Right, Name, Data);
-      break;
+    if(!node){
+        itemCount++;
+        return new Node(name, data, tempPrev, tempNext);
     }
-  }
-  if(!Name[j]){
-    if(!Node->Name[j]){
-      Node->Data = OnDuplicate(Name, Node->Data, Data);
-      return Node;
-    }else{
-      TempNext   = Node;
-      Node->Left = Insert(Node->Left, Name, Data);
-    }
-  }
 
-  if(IsRed(Node->Right) && !IsRed(Node->Left      )) Node = RotateLeft (Node);
-  if(IsRed(Node->Left ) &&  IsRed(Node->Left->Left)) Node = RotateRight(Node);
-  if(IsRed(Node->Left ) &&  IsRed(Node->Right     ))        ColourFlip (Node);
+    int j;
+    for(j = 0; name[j]; j++){
+        if(name[j] < node->name[j]){
+            tempNext   = node;
+            node->left = insert(node->left, name, data);
+            break;
 
-  return Node;
-}
-//------------------------------------------------------------------------------
-
-void* DICTIONARY_BASE::Find(const char* Name){
-  int   j;
-  NODE* Node = Root;
-
-  while(Node){
-    if(Name[0] < Node->Name[0]){
-      Node = Node->Left;
-
-    }else if(Name[0] > Node->Name[0]){
-      Node = Node->Right;
-
-    }else{
-      for(j = 1; Name[j]; j++){
-        if(Name[j] < Node->Name[j]){
-          Node = Node->Left;
-          break;
-
-        }else if(Name[j] > Node->Name[j]){
-          Node = Node->Right;
-          break;
+        }else if(name[j] > node->name[j]){
+            tempPrev    = node;
+            node->right = insert(node->right, name, data);
+            break;
         }
-      }
-      if(!Name[j]){
-        if(!Node->Name[j]){
-          Current = Node;
-          return Node->Data;
+    }
+    if(!name[j]){
+        if(!node->name[j]){
+            node->data = onDuplicate(name, node->data, data);
+            return node;
         }else{
-          Node = Node->Left;
+            tempNext   = node;
+            node->left = insert(node->left, name, data);
         }
-      }
     }
-  }
-  return 0;
+
+    if(isRed(node->right) && !isRed(node->left      )) node = rotateLeft (node);
+    if(isRed(node->left ) &&  isRed(node->left->left)) node = rotateRight(node);
+    if(isRed(node->left ) &&  isRed(node->right     ))        colourFlip (node);
+
+    return node;
 }
 //------------------------------------------------------------------------------
 
-void* DICTIONARY_BASE::First(const char** Name){
-  Current = Root;
-  if(!Current) return 0;
-  while(Current->Left) Current = Current->Left;
-  if(Name) *Name = Current->Name;
-  return Current->Data;
+void* DictionaryBase::find(const char* name)
+{
+    int   j;
+    Node* node = root;
+
+    while(node){
+        if(name[0] < node->name[0]){
+            node = node->left;
+
+        }else if(name[0] > node->name[0]){
+            node = node->right;
+
+        }else{
+            for(j = 1; name[j]; j++){
+                if(name[j] < node->name[j]){
+                    node = node->left;
+                    break;
+
+                }else if(name[j] > node->name[j]){
+                    node = node->right;
+                    break;
+                }
+            }
+            if(!name[j]){
+                if(!node->name[j]){
+                    current = node;
+                    return node->data;
+                }else{
+                    node = node->left;
+                }
+            }
+        }
+    }
+    return 0;
 }
 //------------------------------------------------------------------------------
 
-void* DICTIONARY_BASE::Next(const char** Name){
-  if(!Current) return 0;
-  Current = Current->Next;
-  if(!Current) return 0;
-  if(Name) *Name = Current->Name;
-  return Current->Data;
+void* DictionaryBase::first(const char** name)
+{
+    current = root;
+    if(!current) return 0;
+    while(current->left) current = current->left;
+    if(name) *name = current->name;
+    return current->data;
 }
 //------------------------------------------------------------------------------
 
-int DICTIONARY_BASE::GetCount(){
-  return ItemCount;
+void* DictionaryBase::next(const char** name)
+{
+    if(!current) return 0;
+    current = current->next;
+    if(!current) return 0;
+    if(name) *name = current->name;
+    return current->data;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY_BASE::Action(ACTION Function){
-  if(Root) Action(Root, Function);
+int DictionaryBase::getCount()
+{
+    return itemCount;
 }
 //------------------------------------------------------------------------------
 
-void DICTIONARY_BASE::Action(NODE* Node, ACTION Function){
-  if(Node->Left ) Action(Node->Left , Function);
-  Function(Node->Name, Node->Data);
-  if(Node->Right) Action(Node->Right, Function);
+void DictionaryBase::action(Action function)
+{
+    if(root) action(root, function);
+}
+//------------------------------------------------------------------------------
+
+void DictionaryBase::action(Node* node, Action function)
+{
+    if(node->left ) action(node->left , function);
+    function(node->name, node->data);
+    if(node->right) action(node->right, function);
 }
 //------------------------------------------------------------------------------

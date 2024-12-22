@@ -19,21 +19,21 @@
     (defined _WIN64  ) || \
     (defined _MSC_VER)
 
-  #ifndef WINVER
-    #define  WINVER        0x0601 // Windows 7
-  #endif
-  #ifndef NTDDI_VERSION
-    #define  NTDDI_VERSION 0x06010000
-  #endif
-  #ifndef _WIN32_IE
-    #define  _WIN32_IE     WINVER
-  #endif
-  #ifndef _WIN32_WINNT
-    #define  _WIN32_WINNT  WINVER
-  #endif
-  #ifndef UNICODE
-    #define UNICODE
-  #endif
+    #ifndef WINVER
+        #define  WINVER        0x0601 // Windows 7
+    #endif
+    #ifndef NTDDI_VERSION
+        #define  NTDDI_VERSION 0x06010000
+    #endif
+    #ifndef _WIN32_IE
+        #define  _WIN32_IE     WINVER
+    #endif
+    #ifndef _WIN32_WINNT
+        #define  _WIN32_WINNT  WINVER
+    #endif
+    #ifndef UNICODE
+        #define UNICODE
+    #endif
 #endif
 //------------------------------------------------------------------------------
 
@@ -46,39 +46,39 @@
 //------------------------------------------------------------------------------
 
 #ifdef WINVER
-  #include <Windows.h>
+    #include <Windows.h>
 
-  #ifndef errno
-    #define errno GetLastError()
-  #endif
+    #ifndef errno
+        #define errno GetLastError()
+    #endif
 //------------------------------------------------------------------------------
 
 #else // Linux || macOS || other
-  #if defined(__linux__) || defined(__APPLE__)
-    #ifndef NIX
-      #define NIX
+    #if defined(__linux__) || defined(__APPLE__)
+        #ifndef NIX
+            #define NIX
+        #endif
     #endif
-  #endif
-  #include <errno.h>
-  #include <fcntl.h>
-  #include <unistd.h>
-  #include <signal.h>
-  #include <pthread.h>
-  #include <semaphore.h>
-  #include <sys/mman.h>
-  #include <sys/stat.h>
-  #include <sys/types.h>
-  #include <sys/time.h>
-  #include <sys/ioctl.h>
+    #include <errno.h>
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <signal.h>
+    #include <pthread.h>
+    #include <semaphore.h>
+    #include <sys/mman.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <sys/time.h>
+    #include <sys/ioctl.h>
 
-  #ifndef __APPLE__
-    #include <linux/string.h>
-  #endif
+    #ifndef __APPLE__
+        #include <linux/string.h>
+    #endif
 
-  #define  Sleep(ms) usleep(1000*(ms))
-  #define  GetLastError() errno
-  uint32_t GetTickCount();
-  uint64_t GetTickCount64();
+    #define  Sleep(ms) usleep(1000*(ms))
+    #define  GetLastError() errno
+    uint32_t GetTickCount();
+    uint64_t GetTickCount64();
 #endif
 //------------------------------------------------------------------------------
 
@@ -132,55 +132,55 @@ typedef uint16_t word;
 //------------------------------------------------------------------------------
 
 #if defined(DEBUG)
-  #define debug(...) do {                                          \
-    printf(ANSI_FG_GREEN "Debug: " ANSI_RESET __VA_ARGS__);        \
-    printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"          \
-           ANSI_RESET, __FILE__, __LINE__, __func__);              \
-    fflush(stdout);                                                \
-  }while(0)
+    #define debug(...) do {                                          \
+        printf(ANSI_FG_GREEN "Debug: " ANSI_RESET __VA_ARGS__);      \
+        printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"        \
+               ANSI_RESET, __FILE__, __LINE__, __func__);            \
+        fflush(stdout);                                              \
+    }while(0)
 #else
-  #define debug(...)
+    #define debug(...)
 #endif
 
-#define info(...) do {                                  \
-  printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
-  printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
-         ANSI_RESET, __FILE__, __LINE__, __func__);     \
-  fflush(stdout);                                       \
-}while(0)
-
-#define warning(...) do {                                    \
-  printf(ANSI_FG_YELLOW "Warning: " ANSI_RESET __VA_ARGS__); \
-  printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"      \
-         ANSI_RESET, __FILE__, __LINE__, __func__);          \
-  fflush(stdout);                                            \
-}while(0)
-
-#define error(...) do {                                        \
-  printf(ANSI_FG_BRIGHT_RED "Error: " ANSI_RESET __VA_ARGS__); \
-  printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"        \
-         ANSI_RESET, __FILE__, __LINE__, __func__);            \
-  fflush(stdout);                                              \
-}while(0)
-
-#define assert(condition, ...) do {                       \
-  if(!(condition)){                                       \
-    printf(ANSI_FG_BRIGHT_RED "Failed assertion: ");      \
-    printf(ANSI_RESET "%s", #condition);                  \
+#define info(...) do {                                    \
+    printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
     printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
            ANSI_RESET, __FILE__, __LINE__, __func__);     \
     fflush(stdout);                                       \
-    __VA_ARGS__;                                          \
-  }                                                       \
+}while(0)
+
+#define warning(...) do {                                      \
+    printf(ANSI_FG_YELLOW "Warning: " ANSI_RESET __VA_ARGS__); \
+    printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"      \
+           ANSI_RESET, __FILE__, __LINE__, __func__);          \
+    fflush(stdout);                                            \
+}while(0)
+
+#define error(...) do {                                          \
+    printf(ANSI_FG_BRIGHT_RED "Error: " ANSI_RESET __VA_ARGS__); \
+    printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n"        \
+           ANSI_RESET, __FILE__, __LINE__, __func__);            \
+    fflush(stdout);                                              \
+}while(0)
+
+#define assert(condition, ...) do {                           \
+    if(!(condition)){                                         \
+        printf(ANSI_FG_BRIGHT_RED "Failed assertion: ");      \
+        printf(ANSI_RESET "%s", #condition);                  \
+        printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
+               ANSI_RESET, __FILE__, __LINE__, __func__);     \
+        fflush(stdout);                                       \
+        __VA_ARGS__;                                          \
+    }                                                         \
 }while(0)
 //------------------------------------------------------------------------------
 
 // Setup the Windows terminal to handle ANSI escape sequences,
 // use UTF-8 encoding, have a longer history, etc.
-void SetupTerminal();
+void setupTerminal();
 
 // Static allocation: do not free
-const char* GetErrorString(int Code);
+const char* getErrorString(int Code);
 //------------------------------------------------------------------------------
 
 #endif

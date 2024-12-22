@@ -21,118 +21,118 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "General.h"
 //------------------------------------------------------------------------------
 
-class JSON{
-  public: // Object type
-    enum TYPE{
-      typeNull  , typeTrue, typeFalse,
-      typeString, typeNumber,
-      typeObject, typeArray,
-    } Type;
+class Json{
+    public: // Object type
+        enum Type{
+            typeNull  , typeTrue, typeFalse,
+            typeString, typeNumber,
+            typeObject, typeArray,
+        } type;
 //------------------------------------------------------------------------------
 
-  public: // Base types
-    std::string String;
-    double      Number;
+    public: // Base types
+        std::string string;
+        double      number;
 
-    // These functions make copies of the value
-    void operator=(const char* Value);
-    void operator=(int         Value);
-    void operator=(unsigned    Value);
-    void operator=(double      Value);
-    void operator=(bool        Value);
+        // These functions make copies of the value
+        void operator= (const char* value);
+        void operator= (int         value);
+        void operator= (unsigned    value);
+        void operator= (double      value);
+        void operator= (bool        value);
 //------------------------------------------------------------------------------
 
-  public: // Object-related functions
-    std::map<std::string, JSON*> Objects;
+    public: // Object-related functions
+        std::map<std::string, Json*> objects;
 
-    // Adds a new key-value pair, or updates the existing
-    // - If "Value" is "typeObject", the update is recursive (i.e. old
-    //   values are not deleted, while new ones are added or updated)
-    // - These functions make copies of the value.
-    // - Returns the JSON object containing the value.
-    // - If no "Value" is provided, it either creates a new object with
-    //   value "null", or returns the value of the current object.
-    // - If no "Name" is provided, the update operation is on the root object
-    JSON* AddOrUpdate(                  JSON&       Value);
-    JSON* AddOrUpdate(const char* Name, JSON&       Value);
-    JSON* AddOrUpdate(const char* Name, const char* Value);
-    JSON* AddOrUpdate(const char* Name, int         Value);
-    JSON* AddOrUpdate(const char* Name, unsigned    Value);
-    JSON* AddOrUpdate(const char* Name, double      Value);
-    JSON* AddOrUpdate(const char* Name, bool        Value);
-    JSON* AddOrUpdate(const char* Name);
+        // Adds a new key-value pair, or updates the existing
+        // - If "Value" is "typeObject", the update is recursive (i.e. old
+        //   values are not deleted, while new ones are added or updated)
+        // - These functions make copies of the value.
+        // - Returns the JSON object containing the value.
+        // - If no "Value" is provided, it either creates a new object with
+        //   value "null", or returns the value of the current object.
+        // - If no "Name" is provided, the update operation is on the root object
+        Json* addOrUpdate(                  Json&       value);
+        Json* addOrUpdate(const char* name, Json&       value);
+        Json* addOrUpdate(const char* name, const char* value);
+        Json* addOrUpdate(const char* name, int         value);
+        Json* addOrUpdate(const char* name, unsigned    value);
+        Json* addOrUpdate(const char* name, double      value);
+        Json* addOrUpdate(const char* name, bool        value);
+        Json* addOrUpdate(const char* name);
 
-    // Cannot return a reference, because it could be null (i.e. not in the list)
-    JSON* operator[] (const char* Name);
+        // Cannot return a reference, because it could be null (i.e. not in the list)
+        Json* operator[] (const char* name);
 //------------------------------------------------------------------------------
 
-  public: // Array-related functions
-    std::vector<JSON*> Items;
+    public: // Array-related functions
+        std::vector<Json*> items;
 
-    // These functions make copies of the value
-    // If the type is not "null" and not "Array", the current value becomes
-    // the first item of the array and the provided "Value" the second.
-    void Append(JSON&       Value);
-    void Append(const char* Value);
-    void Append(int         Value);
-    void Append(unsigned    Value);
-    void Append(double      Value);
-    void Append(bool        Value);
+        // These functions make copies of the value
+        // If the type is not "null" and not "Array", the current value becomes
+        // the first item of the array and the provided "Value" the second.
+        void append(Json&       value);
+        void append(const char* value);
+        void append(int         value);
+        void append(unsigned    value);
+        void append(double      value);
+        void append(bool        value);
 
-    // Cannot return a reference, because it could be null (i.e. not in the array)
-    JSON* operator[] (int Index);
+        // Cannot return a reference, because it could be null (i.e. not in the array)
+        Json* operator[] (int index);
 //------------------------------------------------------------------------------
 
-  private: // Private stuff
-    std::string Stringification; // Used to return from Stringify()
+    private: // Private stuff
+        std::string stringification; // Used to return from Stringify()
 //------------------------------------------------------------------------------
 
-  private: // Parser
-    const char* ReadBuffer;
-    unsigned    ReadLine;
-    unsigned    ReadSize;
-    unsigned    ReadIndex;
+    private: // Parser
+        const char* readBuffer;
+        unsigned    readLine;
+        unsigned    readSize;
+        unsigned    readIndex;
 
-    void ReadError(const char* Message);
-    void ReadSpace();
-    void ReadLineComment();
-    void ReadBlockComment();
+        void readError(const char* message);
+        void readSpace();
+        void readLineComment();
+        void readBlockComment();
 
-    bool ReadUnicodeSequence(std::string* String);
-    bool ReadIdentifierStart(std::string* String);
-    bool ReadIdentifierPart (std::string* String);
+        bool readUnicodeSequence(std::string* string);
+        bool readIdentifierStart(std::string* string);
+        bool readIdentifierPart (std::string* string);
 
-    bool ReadHexadecimal(JSON* Value, bool Sign);
-    bool ReadIdentifier (std::string* Value);
-    bool ReadString     (std::string* Value);
-    bool ReadString     (JSON* Value);
-    bool ReadNumber     (JSON* Value);
-    bool ReadObject     (JSON* ObjectList);
-    bool ReadArray      (JSON* ObjectList);
-    bool ReadValue      (JSON* Value);
+        bool readHexadecimal(Json* value, bool sign);
+        bool readIdentifier (std::string* value);
+        bool readString     (std::string* value);
+        bool readString     (Json* value);
+        bool readNumber     (Json* value);
+        bool readObject     (Json* objectList);
+        bool readArray      (Json* objectList);
+        bool readValue      (Json* value);
 //------------------------------------------------------------------------------
 
-  public:
-    JSON();
-    JSON(JSON&       Value);
-    JSON(const char* Value);
-    JSON(int         Value);
-    JSON(unsigned    Value);
-    JSON(double      Value);
-    JSON(bool        Value);
-   ~JSON();
+    public:
+        Json();
+        Json(Json&       value);
+        Json(const char* value);
+        Json(int         value);
+        Json(unsigned    value);
+        Json(double      value);
+        Json(bool        value);
+       ~Json();
 
-    // If "Length" is 0, "strlen" is used to determine the length
-    bool Parse(const char* json, unsigned Length = 0);
+        // If "length" is 0, "strlen" is used to determine the length
+        bool parse(const char* json, unsigned length = 0);
 
-    // This function makes a copy of the contents
-    void operator=(JSON& json);
+        // This function makes a copy of the contents
+        void operator=(Json& json);
 
-    // Discard all previous data
-    void Clear();
+        // Discard all previous data
+        void clear();
 
-    // Converts to a JSON string (internal allocation, do not free)
-    const char* Stringify();
+        // Converts to a JSON string (internal allocation, do not free)
+        const char* stringify();
 };
 //------------------------------------------------------------------------------
 

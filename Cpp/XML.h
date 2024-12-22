@@ -33,120 +33,120 @@
 #include "Calculator.h"
 //------------------------------------------------------------------------------
 
-class XML{
-  public:
-    struct ATTRIBUTE{
-      std::string Name;
-      std::string Value;
-      std::string LegalValue;
+class Xml{
+    public:
+        struct Attribute{
+            std::string name;
+            std::string value;
+            std::string legalValue;
 
-      ATTRIBUTE(const char* Name, const char* Value);
-     ~ATTRIBUTE();
-    };
+            Attribute(const char* name, const char* value);
+           ~Attribute();
+        };
 
-    struct ENTITY{
-      std::string Name;
-      std::string Comments;
-      std::string Content;
-      std::string LegalContent;
+        struct Entity{
+            std::string name;
+            std::string comments;
+            std::string content;
+            std::string legalContent;
 
-      LLRB_TREE Children;   // Child entities, sorted by name
-      LLRB_TREE Attributes; // Sorted by name
+            LLRBTree children;   // Child entities, sorted by name
+            LLRBTree attributes; // Sorted by name
 
-      ENTITY(const char* Name);
-     ~ENTITY();
-    };
-    ENTITY* Root; // When changing externally, call Clear() first
+            Entity(const char* name);
+           ~Entity();
+        };
+        Entity* root; // When changing externally, call Clear() first
 
-  private:
-    struct NESTING{
-      ENTITY*  Entity;
-      NESTING* Next;
+    private:
+        struct Nesting{
+            Entity*  entity;
+            Nesting* next;
 
-      NESTING(const char* EntityName);
-     ~NESTING();
-    };
-    NESTING* Nesting;
+            Nesting(const char* EntityName);
+           ~Nesting();
+        };
+        Nesting* nesting;
 
-    std::string Buffer;
-    void GetLegalName   (const char * Name   , std::string* LegalName   );
-    void GetLegalContent(std::string* Content, std::string* LegalContent);
-    void SaveEntity     (ENTITY     * Entity , unsigned     Indent = 0  );
+        std::string buffer;
+        void getLegalName   (const char * name   , std::string* legalName   );
+        void getLegalContent(std::string* content, std::string* legalContent);
+        void saveEntity     (Entity     * entity , unsigned     indent = 0  );
 
-    CALCULATOR Calc;
+        Calculator calc;
 
-    unsigned ReadSize;
-    unsigned ReadIndex;
-    char*    ReadBuffer;
+        unsigned readSize;
+        unsigned readIndex;
+        char*    readBuffer;
 
-    void PrintError(const char* Message);
+        void printError(const char* message);
 
-    bool    ReadSpace    ();
-    bool    ReadComment  ();
-    bool    ReadSpecial  ();
-    bool    ReadName     (std::string* Buffer);
-    bool    ReadContent  (std::string* Buffer, char End = 0);
-    bool    ReadAttribute(LLRB_TREE  * Tree);
-    bool    ReadHeader   ();
-    ENTITY* ReadEntity   ();
+        bool    readSpace    ();
+        bool    readComment  ();
+        bool    readSpecial  ();
+        bool    readName     (std::string* buffer);
+        bool    readContent  (std::string* buffer, char end = 0);
+        bool    readAttribute(LLRBTree   * tree);
+        bool    readHeader   ();
+        Entity* readEntity   ();
 
-  public:
-    XML();
-   ~XML();
+    public:
+        Xml();
+       ~Xml();
 
-    // Discard all previous data
-    void Clear();
+        // Discard all previous data
+        void clear();
 
-    // Discard all previous data and creates a new document,
-    // with a top entity named Document
-    void New(const char* Document);
+        // Discard all previous data and creates a new document,
+        // with a top entity named Document
+        void newDocument(const char* document);
 
-    // Nests a new entity under the current one
-    void Begin(const char* Entity);
+        // Nests a new entity under the current one
+        void begin(const char* entity);
 
-    // Adds a new comment to the current entity
-    void Comment(const char* Comment);
+        // Adds a new comment to the current entity
+        void comment(const char* comment);
 
-    // Adds a new attribute to the current entity
-    void Attribute(const char* Name, int          Value); // Decimal
-    void Attribute(const char* Name, bool         Value);
-    void Attribute(const char* Name, double       Value);
-    void Attribute(const char* Name, unsigned     Value); // Hexadecimal
-    void Attribute(const char* Name, const char*  Value);
-    void Attribute(const char* Name, std::string* Value);
+        // Adds a new attribute to the current entity
+        void attribute(const char* name, int          value); // Decimal
+        void attribute(const char* name, bool         value);
+        void attribute(const char* name, double       value);
+        void attribute(const char* name, unsigned     value); // Hexadecimal
+        void attribute(const char* name, const char*  value);
+        void attribute(const char* name, std::string* value);
 
-    // Adds to the existing content of the current entity
-    void Content(int         Value);
-    void Content(bool        Value);
-    void Content(double      Value);
-    void Content(unsigned    Value);
-    void Content(const char* Value);
+        // Adds to the existing content of the current entity
+        void content(int         value);
+        void content(bool        value);
+        void content(double      value);
+        void content(unsigned    value);
+        void content(const char* value);
 
-    // Closes the current entity and goes up one nesting level
-    // Once the top level entity is closed, no other operations are possible
-    void End();
+        // Closes the current entity and goes up one nesting level
+        // Once the top level entity is closed, no other operations are possible
+        void end();
 
-    // Closes all entities on the nesting stack and saves the document to a file
-    bool Save(const char* Filename);
+        // Closes all entities on the nesting stack and saves the document to a file
+        bool save(const char* filename);
 
-    // Discards all previous data and loads the file into the current document
-    bool Load(const char* Filename);
+        // Discards all previous data and loads the file into the current document
+        bool load(const char* filename);
 
-    // Finds the entity with name Name (Memory managed by this class)
-    ENTITY* FindChild(ENTITY* Entity, const char* Name);
-    // After calling FindChild, call this to get the next duplicate
-    ENTITY* NextChild(ENTITY* Entity, const char* Name);
+        // Finds the entity with name Name (Memory managed by this class)
+        Entity* findChild(Entity* entity, const char* name);
+        // After calling FindChild, call this to get the next duplicate
+        Entity* nextChild(Entity* entity, const char* name);
 
-    // Finds the attribute with name Name (Memory managed by this class)
-    ATTRIBUTE* FindAttribute(ENTITY* Entity, const char* Name);
+        // Finds the attribute with name Name (Memory managed by this class)
+        Attribute* findAttribute(Entity* entity, const char* name);
 
-    // Use these to read attributes directly
-    bool ReadAttribute(ENTITY* Entity, const char* Name, int*         Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, bool*        Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, char*        Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, std::string* Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, double*      Value);
-    bool ReadAttribute(ENTITY* Entity, const char* Name, unsigned*    Value);
+        // Use these to read attributes directly
+        bool readAttribute(Entity* entity, const char* name, int*         value);
+        bool readAttribute(Entity* entity, const char* name, bool*        value);
+        bool readAttribute(Entity* entity, const char* name, char*        value);
+        bool readAttribute(Entity* entity, const char* name, std::string* value);
+        bool readAttribute(Entity* entity, const char* name, double*      value);
+        bool readAttribute(Entity* entity, const char* name, unsigned*    value);
 };
 //------------------------------------------------------------------------------
 

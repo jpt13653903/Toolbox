@@ -22,80 +22,80 @@
 #include <string>
 //------------------------------------------------------------------------------
 
-class CALCULATOR{
-  public:
-    enum MEASURE{
-      Degrees = 1,
-      Radians = 0
-    };
-//------------------------------------------------------------------------------
+class Calculator{
+    public:
+        enum Measure{
+            Degrees = 1,
+            Radians = 0
+        };
+    //--------------------------------------------------------------------------
 
-  private:
-    std::map<std::string, long double> Constants;
+    private:
+        std::map<std::string, long double> constants;
 
-    enum OPERATION{
-      Fact     , Power   , Multiply, Divide , Remainder   ,
-      Add      , Subtract, Log     , Log2   , Ln          ,
-      Abs      , Round   , Fix     , Floor  , Ceil        , Rand     ,
-      Sin      , ASin    , Cos     , ACos   , Tan         , ATan     ,
-      Sec      , ASec    , Cosec   , ACosec , Cot         , ACot     ,
-      Sinh     , ASinh   , Cosh    , ACosh  , Tanh        , ATanh    ,
-      Sech     , ASech   , Cosech  , ACosech, Coth        , ACoth    ,
-      Condition, Greater , Less    , Equal  , GreaterEqual, LessEqual,
-      NotEqual , Not     ,
-      And      , Or      , Xor     ,
-      bAnd     , bOr     , bXor    , bNot   ,
-      Var      , Val
-    };
+        enum Operation{
+            Fact     , Power   , Multiply, Divide , Remainder   ,
+            Add      , Subtract, Log     , Log2   , Ln          ,
+            Abs      , Round   , Fix     , Floor  , Ceil        , Rand     ,
+            Sin      , ASin    , Cos     , ACos   , Tan         , ATan     ,
+            Sec      , ASec    , Cosec   , ACosec , Cot         , ACot     ,
+            Sinh     , ASinh   , Cosh    , ACosh  , Tanh        , ATanh    ,
+            Sech     , ASech   , Cosech  , ACosech, Coth        , ACoth    ,
+            Condition, Greater , Less    , Equal  , GreaterEqual, LessEqual,
+            NotEqual , Not     ,
+            And      , Or      , Xor     ,
+            bAnd     , bOr     , bXor    , bNot   ,
+            Var      , Val
+        };
 
-    struct NODE{
-      OPERATION   Operation;
-      long double Value;
-      std::string Name;
-      NODE*       Left;
-      NODE*       Right;
-      NODE*       Other;
+        struct Node{
+            Operation   operation;
+            long double value;
+            std::string name;
+            Node*       left;
+            Node*       right;
+            Node*       other;
 
-      NODE();
-    };
+            Node();
+        };
 
-    NODE* Tree;
-    char* Buffer;
-    int   Index;
+        Node* tree;
+        char* buffer;
+        int   index;
 
-    NODE* NewNode (NODE* Root = 0);
-    NODE* CopyNode(NODE* Root);
+        Node* newNode (Node* root = 0);
+        Node* copyNode(Node* root);
 
-    void FuncName(std::string* Name);
+        void funcName(std::string* name);
 
-    bool ConditionOp(NODE* Root);
-    bool LogicOp    (NODE* Root);
-    bool AddOp      (NODE* Root);
-    bool MulOp      (NODE* Root);
-    bool PowerOp    (NODE* Root);
-    bool Function   (NODE* Root);
-    bool Factorial  (NODE* Root);
-    bool Exponent   (NODE* Root);
-    bool Value      (NODE* Root);
-    bool Float      (long double* f);
+        bool conditionOp(Node* root);
+        bool logicOp    (Node* root);
+        bool addOp      (Node* root);
+        bool mulOp      (Node* root);
+        bool powerOp    (Node* root);
+        bool function   (Node* root);
+        bool Factorial  (Node* root);
+        bool Exponent   (Node* root);
+        bool value      (Node* root);
+        bool parseFloat (long double* f);
 
-    void        ViewTree  (NODE* Root, std::string* Result);
-    long double CalcTree  (NODE* Root, const char* Variable, long double Value);
-    void        DeleteTree(NODE* Root);
-    bool        Simplify  (NODE* Root);
-    void        Diff      (NODE* Root, const char* Variable);
-//------------------------------------------------------------------------------
+        void        viewTree  (Node* root, std::string* result);
+        long double calcTree  (Node* root, const char* variable, long double value);
+        void        deleteTree(Node* root);
+        bool        simplify  (Node* root);
+        void        diff      (Node* root, const char* variable);
+    //--------------------------------------------------------------------------
 
-  public:
-    MEASURE Measure;
-    CALCULATOR();
-   ~CALCULATOR();
+    public:
+        Measure measure;
+        Calculator();
+       ~Calculator();
 
-    void        BuildTree    (const char * Formula);
-    long double CalculateTree(const char * Variable = "", long double Value = 0.);
-    void        ShowTree     (std::string* Result);
-    long double Calculate    (const char * Formula, const char* Variable = "",
-                              long double  Value = 0.);
+        void        buildTree    (const char * formula);
+        long double calculateTree(const char * variable = "", long double value = 0.);
+        void        showTree     (std::string* result);
+        long double calculate    (const char * formula, const char* variable = "",
+                                  long double  value = 0.);
 };
 //------------------------------------------------------------------------------
 

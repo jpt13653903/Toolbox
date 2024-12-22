@@ -13,85 +13,88 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
-bool TestFileWrapper(){
-  Start("FILE_WRAPPER Class");
+bool testFileWrapper()
+{
+    start("FileWrapper Class");
 
-  #ifdef WINVER
-    const  char  * FileName_UTF8  =  "Resources/Lorem Ipsum.txt";
-    const wchar_t* FileName_UTF16 = L"Resources/Λορεμ Ιπσθμ.txt";
-  #else
-    const char* FileName_UTF8  = "Resources/Lorem Ipsum.txt";
-    const char* FileName_Greek = "Resources/Λορεμ Ιπσθμ.txt";
-  #endif
+    #ifdef WINVER
+        const  char  * fileNameUtf8  =  "Resources/Lorem Ipsum.txt";
+        const wchar_t* fileNameUtf16 = L"Resources/Λορεμ Ιπσθμ.txt";
+    #else
+        const char* fileNameUtf8  = "Resources/Lorem Ipsum.txt";
+        const char* fileNameGreek = "Resources/Λορεμ Ιπσθμ.txt";
+    #endif
 
-  info("UTF-8 encoded file name...");
-  FILE_WRAPPER File;
-  if(!File.Open(FileName_UTF8, FILE_WRAPPER::faRead)){
-    error("Cannot open file \"%s\"", FileName_UTF8);
-    return false;
-  }
-  uint64_t Size = File.GetSize();
-  info("File size = %u", (unsigned)Size);
-  char* Buffer = new char[Size+1];
-
-  File.Read(Buffer, Size); Buffer[Size] = 0;
-  info("File contents:\n\"\"\"\n%s\n\"\"\"", Buffer);
-
-  delete[] Buffer;
-  File.Close();
-  Done();
-
-  #ifdef WINVER
-    info("UTF-16 encoded file name...");
-    if(!File.Open(FileName_UTF16, FILE_WRAPPER::faRead)){
-      error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
-      return false;
+    info("UTF-8 encoded file name...");
+    FileWrapper file;
+    if(!file.open(fileNameUtf8, FileWrapper::Access::Read)){
+        error("Cannot open file \"%s\"", fileNameUtf8);
+        return false;
     }
-  #else
-    info("Greek file name...");
-    if(!File.Open(FileName_Greek, FILE_WRAPPER::faRead)){
-      error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
-      return false;
-    }
-  #endif
-  Size = File.GetSize();
-  info("File size = %u", (unsigned)Size);
-  Buffer = new char[Size+1];
+    uint64_t size = file.getSize();
+    info("file size = %u", (unsigned)size);
+    char* buffer = new char[size+1];
 
-  File.Read(Buffer, Size); Buffer[Size] = 0;
-  info("File contents:\n\"\"\"\n%s\n\"\"\"", Buffer);
+    file.read(buffer, size); buffer[size] = 0;
+    info("file contents:\n\"\"\"\n%s\n\"\"\"", buffer);
 
-  delete[] Buffer;
-  File.Close();
+    delete[] buffer;
+    file.close();
+    done();
 
-  Done(); return true;
+    #ifdef WINVER
+        info("UTF-16 encoded file name...");
+        if(!file.open(fileNameUtf16, FileWrapper::Access::Read)){
+            error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
+            return false;
+        }
+    #else
+        info("Greek file name...");
+        if(!file.open(fileNameGreek, FileWrapper::Access::Read)){
+            error("Cannot open file \"%s\"", "Resources/Λορεμ Ιπσθμ.txt");
+            return false;
+        }
+    #endif
+    size = file.getSize();
+    info("file size = %u", (unsigned)size);
+    buffer = new char[size+1];
+
+    file.read(buffer, size); buffer[size] = 0;
+    info("file contents:\n\"\"\"\n%s\n\"\"\"", buffer);
+
+    delete[] buffer;
+    file.close();
+
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-bool TestPathCreation(){
-  Start("Path Creation");
+bool testPathCreation()
+{
+    start("Path Creation");
 
-  FILE_WRAPPER File;
+    FileWrapper file;
 
-  assert(File.WriteAll("testOutput/A/B/C/D/E/File.txt", (const byte*)"Hello World!\n"), return false);
+    assert(file.writeAll("testOutput/A/B/C/D/E/file.txt", (const byte*)"Hello World!\n"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-int main(){
-  SetupTerminal();
+int main()
+{
+    setupTerminal();
 
-  printf("\n\n");
-  if(!TestFileWrapper ()) goto main_Error;
-  if(!TestPathCreation()) goto main_Error;
+    printf("\n\n");
+    if(!testFileWrapper ()) goto MainError;
+    if(!testPathCreation()) goto MainError;
 
-  info(ANSI_FG_GREEN "All OK"); Done();
-  return 0;
+    info(ANSI_FG_GREEN "All OK"); done();
+    return 0;
 
-  main_Error:
-    Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
-    return -1;
+    MainError:
+        done(); info(ANSI_FG_BRIGHT_RED "There were errors");
+        return -1;
 }
 //------------------------------------------------------------------------------
 

@@ -14,201 +14,205 @@
 #include "FileWrapper.h"
 //------------------------------------------------------------------------------
 
-bool TestBuild(){
-  Start("Testing json building and access functions");
+bool testBuild()
+{
+    start("Testing json building and access functions");
 
-  JSON json;
-  json.AddOrUpdate("String", "MyString");
-  json.AddOrUpdate("Number", 123.456);
-  json.AddOrUpdate("Wierd" , "\\\"/\b\f\n\r\t and some more...");
+    Json json;
+    json.addOrUpdate("String", "MyString");
+    json.addOrUpdate("Number", 123.456);
+    json.addOrUpdate("Wierd" , "\\\"/\b\f\n\r\t and some more...");
 
-  info("json[\"String\"] = %s", json["String"]->Stringify());
-  info("json[\"Number\"] = %s", json["Number"]->Stringify());
-  info("json[\"Wierd\" ] = %s", json["Wierd" ]->Stringify());
-  info("json = %s", json.Stringify());
+    info("json[\"String\"] = %s", json["String"]->stringify());
+    info("json[\"Number\"] = %s", json["Number"]->stringify());
+    info("json[\"Wierd\" ] = %s", json["Wierd" ]->stringify());
+    info("json = %s", json.stringify());
 
-  *json["Number"] = 789.456;
-  info("json[\"Number\"] = %s", json["Number"]->Stringify());
+    *json["Number"] = 789.456;
+    info("json[\"Number\"] = %s", json["Number"]->stringify());
 
-  JSON* MyArray = json.AddOrUpdate("MyArray");
-  info("json[\"MyArray\"] = %s", json["MyArray"]->Stringify());
-  for(int j = 0; j < 10; j++)    json["MyArray"]->Append(j);
-  info("json[\"MyArray\"] = %s", MyArray        ->Stringify());
+    Json* myArray = json.addOrUpdate("MyArray");
+    info("json[\"MyArray\"] = %s", json["MyArray"]->stringify());
+    for(int j = 0; j < 10; j++)    json["MyArray"]->append(j);
+    info("json[\"MyArray\"] = %s", myArray        ->stringify());
 
-  info("json = %s", json.Stringify());
-  assert(!strcmp(json.Stringify(),
-    "{"
-      "\"MyArray\":[0,1,2,3,4,5,6,7,8,9],"
-      "\"Number\":789.456,"
-      "\"String\":\"MyString\","
-      "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"), return false);
+    info("json = %s", json.stringify());
+    assert(!strcmp(json.stringify(),
+        "{"
+            "\"MyArray\":[0,1,2,3,4,5,6,7,8,9],"
+            "\"Number\":789.456,"
+            "\"String\":\"MyString\","
+            "\"Wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
+        "}"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-bool TestLoad(){
-  Start("Testing loading from file");
+bool testLoad()
+{
+    start("Testing loading from file");
 
-  FILE_WRAPPER File;
-  if(!File.Open("Resources/JSON.json", FILE_WRAPPER::faRead)){
-    error("Cannot open \"Resources/JSON.json\" for reading");
-    return false;
-  }
+    FileWrapper file;
+    if(!file.open("Resources/JSON.json", FileWrapper::Access::Read)){
+        error("Cannot open \"Resources/JSON.json\" for reading");
+        return false;
+    }
 
-  int   Size   = (int)File.GetSize();
-  char* Buffer = new char[Size + 1];
-  File.Read(Buffer, Size);
-  Buffer[Size] = 0;
+    int   size   = (int)file.getSize();
+    char* buffer = new char[size + 1];
+    file.read(buffer, size);
+    buffer[size] = 0;
 
-  info("Buffer = %s", Buffer);
+    info("Buffer = %s", buffer);
 
-  JSON json;
-  if(!json.Parse(Buffer)){
-    error("Parse error");
-    return false;
-  }
-  delete[] Buffer;
+    Json json;
+    if(!json.parse(buffer)){
+        error("Parse error");
+        return false;
+    }
+    delete[] buffer;
 
-  info("json = %s", json.Stringify());
-  assert(!strcmp(json.Stringify(),
-    "{"
-      "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-      "\"number\":123.456,"
-      "\"object\":{"
-        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-        "\"array2\":[],"
-        "\"integer\":123,"
-        "\"number\":123.456,"
-        "\"object\":{},"
-        "\"state1\":true,"
-        "\"state2\":false,"
-        "\"state3\":null,"
-        "\"string\":\"String\""
-      "},"
-      "\"state1\":true,"
-      "\"state2\":false,"
-      "\"state3\":null,"
-      "\"string\":\"String with unicode...Ω...\","
-      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"), return false);
+    info("json = %s", json.stringify());
+    assert(!strcmp(json.stringify(),
+        "{"
+            "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+            "\"number\":123.456,"
+            "\"object\":{"
+                "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+                "\"array2\":[],"
+                "\"integer\":123,"
+                "\"number\":123.456,"
+                "\"object\":{},"
+                "\"state1\":true,"
+                "\"state2\":false,"
+                "\"state3\":null,"
+                "\"string\":\"String\""
+            "},"
+            "\"state1\":true,"
+            "\"state2\":false,"
+            "\"state3\":null,"
+            "\"string\":\"String with unicode...Ω...\","
+            "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
+        "}"), return false);
 
-  Done();
-  Start("Testing recursive AddOrUpdate");
+    done();
+    start("Testing recursive addOrUpdate");
 
-  JSON NewJson;
-  NewJson.Parse("{"
-                "  \"string\": \"New String\","
-                "  \"state4\": true,"
-                "  \"array\" : [ 1, 2, 3, 4 ],"
-                "  \"object\": {"
-                "    \"number\": 987.654,"
-                "    \"object\": \"Changed the type to a string\","
-                "    \"array2\": [ 8, 7, 6, 5, 4, 3, 2, 1 ]"
-                "  }"
-                "}");
+    Json newJson;
+    newJson.parse("{"
+                  "  \"string\": \"New String\","
+                  "  \"state4\": true,"
+                  "  \"array\" : [ 1, 2, 3, 4 ],"
+                  "  \"object\": {"
+                  "    \"number\": 987.654,"
+                  "    \"object\": \"Changed the type to a string\","
+                  "    \"array2\": [ 8, 7, 6, 5, 4, 3, 2, 1 ]"
+                  "  }"
+                  "}");
 
-  info("Updating with: %s", NewJson.Stringify());
-  json.AddOrUpdate(NewJson);
-  info("After update: %s", json.Stringify());
-  assert(!strcmp(json.Stringify(),
-    "{"
-      "\"array\":[1,2,3,4],"
-      "\"number\":123.456,"
-      "\"object\":{"
-        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-        "\"array2\":[8,7,6,5,4,3,2,1],"
-        "\"integer\":123,"
-        "\"number\":987.654,"
-        "\"object\":\"Changed the type to a string\","
-        "\"state1\":true,"
-        "\"state2\":false,"
-        "\"state3\":null,"
-        "\"string\":\"String\""
-      "},"
-      "\"state1\":true,"
-      "\"state2\":false,"
-      "\"state3\":null,"
-      "\"state4\":true,"
-      "\"string\":\"New String\","
-      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"), return false);
+    info("Updating with: %s", newJson.stringify());
+    json.addOrUpdate(newJson);
+    info("After update: %s", json.stringify());
+    assert(!strcmp(json.stringify(),
+        "{"
+            "\"array\":[1,2,3,4],"
+            "\"number\":123.456,"
+            "\"object\":{"
+                "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+                "\"array2\":[8,7,6,5,4,3,2,1],"
+                "\"integer\":123,"
+                "\"number\":987.654,"
+                "\"object\":\"Changed the type to a string\","
+                "\"state1\":true,"
+                "\"state2\":false,"
+                "\"state3\":null,"
+                "\"string\":\"String\""
+            "},"
+            "\"state1\":true,"
+            "\"state2\":false,"
+            "\"state3\":null,"
+            "\"state4\":true,"
+            "\"string\":\"New String\","
+            "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
+        "}"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-bool TestJSON5(){
-  Start("Testing JSON5 extensions");
+bool testJSON5()
+{
+    start("Testing JSON5 extensions");
 
-  FILE_WRAPPER File;
-  if(!File.Open("Resources/JSON5.json", FILE_WRAPPER::faRead)){
-    error("Cannot open \"Resources/JSON5.json\" for reading");
-    return false;
-  }
+    FileWrapper file;
+    if(!file.open("Resources/JSON5.json", FileWrapper::Access::Read)){
+        error("Cannot open \"Resources/JSON5.json\" for reading");
+        return false;
+    }
 
-  int   Size   = (int)File.GetSize();
-  char* Buffer = new char[Size + 1];
-  File.Read(Buffer, Size);
-  Buffer[Size] = 0;
+    int   size   = (int)file.getSize();
+    char* buffer = new char[size + 1];
+    file.read(buffer, size);
+    buffer[size] = 0;
 
-  info("Buffer = %s", Buffer);
+    info("Buffer = %s", buffer);
 
-  JSON json;
-  if(!json.Parse(Buffer)){
-    error("Parse error");
-    return false;
-  }
-  delete[] Buffer;
+    Json json;
+    if(!json.parse(buffer)){
+        error("Parse error");
+        return false;
+    }
+    delete[] buffer;
 
-  info("json = %s", json.Stringify());
-  assert(!strcmp(json.Stringify(),
-    "{"
-      "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-      "\"number\":123.456,"
-      "\"object\":{"
-        "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
-        "\"array2\":[],"
-        "\"integer\":123,"
-        "\"number2\":912559,"
-        "\"number3\":-12648430,"
-        "\"object\":{},"
-        "\"onlyFractionPart\":0.456,"
-        "\"state1\":true,"
-        "\"state2\":false,"
-        "\"state3\":null,"
-        "\"string\":\"String\","
-        "\"withExponent\":0.0123,"
-        "\"withFractionPart\":-123.456"
-      "},"
-      "\"state1\":true,"
-      "\"state2\":false,"
-      "\"state3\":null,"
-      "\"string\":\"String with unicode...Ω...\","
-      "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
-    "}"), return false);
+    info("json = %s", json.stringify());
+    assert(!strcmp(json.stringify(),
+        "{"
+            "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+            "\"number\":123.456,"
+            "\"object\":{"
+                "\"array\":[\"one\",\"two\",\"three\",\"four\"],"
+                "\"array2\":[],"
+                "\"integer\":123,"
+                "\"number2\":912559,"
+                "\"number3\":-12648430,"
+                "\"object\":{},"
+                "\"onlyFractionPart\":0.456,"
+                "\"state1\":true,"
+                "\"state2\":false,"
+                "\"state3\":null,"
+                "\"string\":\"String\","
+                "\"withExponent\":0.0123,"
+                "\"withFractionPart\":-123.456"
+            "},"
+            "\"state1\":true,"
+            "\"state2\":false,"
+            "\"state3\":null,"
+            "\"string\":\"String with unicode...Ω...\","
+            "\"wierd\":\"\\\\\\\"\\/\\b\\f\\n\\r\\t and some more...\""
+        "}"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-int main(){
-  SetupTerminal();
+int main()
+{
+    setupTerminal();
 
-  printf("\n\n");
-  if(!TestBuild()) goto main_Error;
-  if(!TestLoad ()) goto main_Error;
-  if(!TestJSON5()) goto main_Error;
+    printf("\n\n");
+    if(!testBuild()) goto MainError;
+    if(!testLoad ()) goto MainError;
+    if(!testJSON5()) goto MainError;
 
-  info(ANSI_FG_GREEN "All OK"); Done();
-  return 0;
+    info(ANSI_FG_GREEN "All OK"); done();
+    return 0;
 
-  main_Error:
-    fflush(stdout);
-    Sleep(100);
-    Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
-    return -1;
+    MainError:
+        fflush(stdout);
+        Sleep(100);
+        done(); info(ANSI_FG_BRIGHT_RED "There were errors");
+        return -1;
 }
 //------------------------------------------------------------------------------
 

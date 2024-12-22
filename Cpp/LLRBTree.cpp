@@ -12,374 +12,404 @@
 #include "LLRBTree.h"
 //------------------------------------------------------------------------------
 
-static int DefaultCompare(void* Left, void* Right){
-  if(Left < Right) return -1;
-  if(Left > Right) return  1;
-  return 0;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node::Node(void* Data, Node* Next, Node* Prev, int Tag){
-  Left = Right = 0;
-  Colour       = true;
-  this->Data   = Data;
-  this->Next   = Next;
-  this->Prev   = Prev;
-  this->Tag    = Tag;
-
-  if(Next) Next->Prev = this;
-  if(Prev) Prev->Next = this;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node::~Node(){
-  if(Next) Next->Prev = Prev;
-  if(Prev) Prev->Next = Next;
-
-  if(Left ) delete Left;
-  if(Right) delete Right;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::LLRB_TREE(){
-  Root         = 0;
-  CurrentNode  = 0;
-  TheItemCount = 0;
-  Compare      = DefaultCompare;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::~LLRB_TREE(){
-  Clear();
-}
-//------------------------------------------------------------------------------
-
-bool LLRB_TREE::IsRed(Node* N){
-  if(N) return N->Colour;
-  return false;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::FixUp(Node* N){
-  if(IsRed(N->Right) && !IsRed(N->Left      )) N = RotateLeft (N);
-  if(IsRed(N->Left ) &&  IsRed(N->Left->Left)) N = RotateRight(N);
-  if(IsRed(N->Left ) &&  IsRed(N->Right     ))     FlipColours(N);
-
-  return N;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::RotateLeft(Node* N){
-  Node* t   = N->Right;
-  N->Right  = t->Left;
-  t->Left   = N;
-  t->Colour = N->Colour;
-  N->Colour = true;
-
-  return t;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::RotateRight(Node* N){
-  Node* t   = N->Left;
-  N->Left   = t->Right;
-  t->Right  = N;
-  t->Colour = N->Colour;
-  N->Colour = true;
-
-  return t;
-}
-//------------------------------------------------------------------------------
-
-void LLRB_TREE::FlipColours(Node* N){
-  N       ->Colour = !N       ->Colour;
-  N->Left ->Colour = !N->Left ->Colour;
-  N->Right->Colour = !N->Right->Colour;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::Insert(Node* N, void* Data, int Tag){
-  if(!N){
-    TheItemCount++;
-    return new Node(Data, TempNext, TempPrev, Tag);
-  }
-
-  int result = Compare(Data, N->Data);
-
-  if(!result){ // Duplicate
-    Tag = N->Tag + 1; // It is "larger" than the duplicate in the tree
-    result = 1;       // and therefore to the right of it
-  }
-
-  if(result < 0){
-    TempNext = N;
-    N->Left  = Insert(N->Left , Data, Tag);
-
-  }else{
-    TempPrev = N;
-    N->Right = Insert(N->Right, Data, Tag);
-  }
-
-  return FixUp(N);
-}
-//------------------------------------------------------------------------------
-
-void LLRB_TREE::Insert(void* Data){
-  TempNext = TempPrev = 0;
-
-  Root = Insert(Root, Data);
-  Root->Colour = false;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::MoveRedLeft(Node* N){
-  FlipColours(N);
-
-  if(IsRed(N->Right->Left)){
-    N->Right = RotateRight(N->Right);
-    N        = RotateLeft (N);
-    FlipColours(N);
-  }
-
-  return N;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::MoveRedRight(Node* N){
-  FlipColours(N);
-
-  if(IsRed(N->Left->Left)){
-    N = RotateRight(N);
-    FlipColours(N);
-  }
-
-  return N;
-}
-//------------------------------------------------------------------------------
-
-int LLRB_TREE::RemoveCompare(void* Left, void* Right, int TagLeft, int TagRight){
-  int result;
-
-  result = Compare(Left, Right);
-  if(!result){
-    if(TagLeft < TagRight) return -1;
-    if(TagLeft > TagRight) return  1;
+static int defaultCompare(void* left, void* right)
+{
+    if(left < right) return -1;
+    if(left > right) return  1;
     return 0;
-  }
-  return result;
 }
 //------------------------------------------------------------------------------
 
-LLRB_TREE::Node* LLRB_TREE::RemoveMin(Node* N){
-  if(!N->Left){
-    if(CurrentNode == N) CurrentNode = 0;
-    TheItemCount--;
-    delete N;
-    return 0;
-  }
+LLRBTree::Node::Node(void* data, Node* next, Node* prev, int tag)
+{
+    left = right = 0;
+    colour       = true;
+    this->data   = data;
+    this->next   = next;
+    this->prev   = prev;
+    this->tag    = tag;
 
-  if(!IsRed(N->Left) && !IsRed(N->Left->Left)) N = MoveRedLeft(N);
-  N->Left = RemoveMin(N->Left);
-
-  return FixUp(N);
+    if(next) next->prev = this;
+    if(prev) prev->next = this;
 }
 //------------------------------------------------------------------------------
 
-LLRB_TREE::Node* LLRB_TREE::Remove(Node* N, void* Key, int Tag){
-  Node* Temp;
+LLRBTree::Node::~Node()
+{
+    if(next) next->prev = prev;
+    if(prev) prev->next = next;
 
-  if(!N) return 0;
+    if(left ) delete left;
+    if(right) delete right;
+}
+//------------------------------------------------------------------------------
 
-  if(RemoveCompare(Key, N->Data, Tag, N->Tag) < 0){
-    if(!N->Left) return N; // Key not in tree
-    if(!IsRed(N->Left) && !IsRed(N->Left->Left)) N = MoveRedLeft(N);
-    N->Left = Remove(N->Left, Key, Tag);
+LLRBTree::LLRBTree()
+{
+    root         = 0;
+    currentNode  = 0;
+    theItemCount = 0;
+    compare      = defaultCompare;
+}
+//------------------------------------------------------------------------------
 
-  }else{
-    if(IsRed(N->Left)) N = RotateRight(N);
+LLRBTree::~LLRBTree()
+{
+    clear();
+}
+//------------------------------------------------------------------------------
 
-    // If N->Right is null, N is always a red leaf;
-    if(!RemoveCompare(Key, N->Data, Tag, N->Tag) && !N->Right){
-      if(CurrentNode == N) CurrentNode = 0;
-      TheItemCount--;
-      delete N;
-      return 0;
+bool LLRBTree::isRed(Node* node)
+{
+    if(node) return node->colour;
+    return false;
+}
+//------------------------------------------------------------------------------
+
+LLRBTree::Node* LLRBTree::fixUp(Node* node)
+{
+    if(isRed(node->right) && !isRed(node->left      )) node = rotateLeft (node);
+    if(isRed(node->left ) &&  isRed(node->left->left)) node = rotateRight(node);
+    if(isRed(node->left ) &&  isRed(node->right     ))        flipColours(node);
+
+    return node;
+}
+//------------------------------------------------------------------------------
+
+LLRBTree::Node* LLRBTree::rotateLeft(Node* node)
+{
+    Node* temp   = node->right;
+    node->right  = temp->left;
+    temp->left   = node;
+    temp->colour = node->colour;
+    node->colour = true;
+
+    return temp;
+}
+//------------------------------------------------------------------------------
+
+LLRBTree::Node* LLRBTree::rotateRight(Node* node)
+{
+    Node* temp   = node->left;
+    node->left   = temp->right;
+    temp->right  = node;
+    temp->colour = node->colour;
+    node->colour = true;
+
+    return temp;
+}
+//------------------------------------------------------------------------------
+
+void LLRBTree::flipColours(Node* node)
+{
+    node       ->colour = !node       ->colour;
+    node->left ->colour = !node->left ->colour;
+    node->right->colour = !node->right->colour;
+}
+//------------------------------------------------------------------------------
+
+LLRBTree::Node* LLRBTree::insert(Node* node, void* data, int tag)
+{
+    if(!node){
+        theItemCount++;
+        return new Node(data, tempNext, tempPrev, tag);
     }
 
-    if(!N->Right) return FixUp(N); // Key not in tree
+    int result = compare(data, node->data);
 
-    if(!IsRed(N->Right) && !IsRed(N->Right->Left)) N = MoveRedRight(N);
-
-    if(!RemoveCompare(Key, N->Data, Tag, N->Tag)){
-      // Find the minimum in the right sub-tree
-      Temp = N->Right;
-      while(Temp && Temp->Left) Temp = Temp->Left;
-      // Copy Temp's data to this location and delete Temp
-      if(CurrentNode == Temp) CurrentNode = N;
-      N->Data  = Temp->Data;
-      N->Right = RemoveMin(N->Right);
-
-    }else{
-      N->Right = Remove(N->Right, Key, Tag);
+    if(!result){ // Duplicate
+        tag    = node->tag + 1; // It is "larger" than the duplicate in the tree
+        result = 1;             // and therefore to the right of it
     }
-  }
 
-  return FixUp(N);
-}
-//------------------------------------------------------------------------------
-
-void LLRB_TREE::Remove(void* Key){
-  Node* Temp;
-  Node* N;
-
-  // Find the first duplicate
-  N = Find(Root, Key);
-
-  // Check if there is a duplicate storing the same pointer
-  Temp = N->Next;
-  while(Temp){
-    if(Compare(Key, Temp->Data)){ // No more duplicates
-      Temp = 0;
-      break;
-    }
-    if(Key == Temp->Data) break; // Found it
-    Temp = Temp->Next;
-  }
-  if(Temp) N = Temp;
-
-  if(!N) return;
-
-  Root = Remove(Root, Key, N->Tag);
-  if(Root) Root->Colour = false;
-}
-//------------------------------------------------------------------------------
-
-LLRB_TREE::Node* LLRB_TREE::Find(Node* N, void* Key){
-  int   result;
-  Node* Temp = 0;
-
-  while(N){
-    result = Compare(Key, N->Data);
-    if     (result < 0) N = N->Left;
-    else if(result > 0) N = N->Right;
-    else{
-      Temp = N;       // Store the current "best match" and
-      N    = N->Left; // carry on searching the left sub-tree
-    }
-  }
-  return Temp;
-}
-//------------------------------------------------------------------------------
-
-void* LLRB_TREE::Find(void* Key){
-  CurrentNode = Find(Root, Key);
-  if(CurrentNode) return CurrentNode->Data;
-
-  return 0;
-}
-//------------------------------------------------------------------------------
-
-void* LLRB_TREE::Before(void* Key){
-  int   result;
-  Node* N;
-
-  CurrentNode = 0;
-
-  N = Root;
-  while(N){
-    result = Compare(Key, N->Data);
-    if(result > 0){
-      CurrentNode = N;
-      N           = N->Right;
-    }else{
-      N           = N->Left;
-    }
-  }
-
-  if(CurrentNode) return CurrentNode->Data;
-  return 0;
-}
-//------------------------------------------------------------------------------
-
-void* LLRB_TREE::After(void* Key){
-  int   result;
-  Node* N;
-
-  CurrentNode = 0;
-
-  N = Root;
-  while(N){
-    result = Compare(Key, N->Data);
     if(result < 0){
-      CurrentNode = N;
-      N           = N->Left;
+        tempNext = node;
+        node->left  = insert(node->left , data, tag);
+
     }else{
-      N           = N->Right;
+        tempPrev = node;
+        node->right = insert(node->right, data, tag);
     }
-  }
 
-  if(CurrentNode) return CurrentNode->Data;
-  return 0;
+    return fixUp(node);
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::First(){
-  if(!Root) return 0;
+void LLRBTree::insert(void* data)
+{
+    tempNext = tempPrev = 0;
 
-  CurrentNode = Root;
-  while(CurrentNode && CurrentNode->Left) CurrentNode = CurrentNode->Left;
-
-  return CurrentNode->Data;
+    root = insert(root, data);
+    root->colour = false;
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::Last(){
-  if(!Root) return 0;
+LLRBTree::Node* LLRBTree::moveRedLeft(Node* node)
+{
+    flipColours(node);
 
-  CurrentNode = Root;
-  while(CurrentNode && CurrentNode->Right) CurrentNode = CurrentNode->Right;
+    if(isRed(node->right->left)){
+        node->right = rotateRight(node->right);
+        node        = rotateLeft (node);
+        flipColours(node);
+    }
 
-  return CurrentNode->Data;
+    return node;
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::Next(){
-  if(CurrentNode) CurrentNode = CurrentNode->Next;
-  if(CurrentNode) return        CurrentNode->Data;
-  return 0;
+LLRBTree::Node* LLRBTree::moveRedRight(Node* node)
+{
+    flipColours(node);
+
+    if(isRed(node->left->left)){
+        node = rotateRight(node);
+        flipColours(node);
+    }
+
+    return node;
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::Previous(){
-  if(CurrentNode) CurrentNode = CurrentNode->Prev;
-  if(CurrentNode) return        CurrentNode->Data;
-  return 0;
+int LLRBTree::removeCompare(void* left, void* right, int tagLeft, int tagRight)
+{
+    int result;
+
+    result = compare(left, right);
+    if(!result){
+        if(tagLeft < tagRight) return -1;
+        if(tagLeft > tagRight) return  1;
+        return 0;
+    }
+    return result;
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::Current(){
-  if(CurrentNode) return CurrentNode->Data;
-  return 0;
+LLRBTree::Node* LLRBTree::removeMin(Node* node)
+{
+    if(!node->left){
+        if(currentNode == node) currentNode = 0;
+        theItemCount--;
+        delete node;
+        return 0;
+    }
+
+    if(!isRed(node->left) && !isRed(node->left->left)) node = moveRedLeft(node);
+    node->left = removeMin(node->left);
+
+    return fixUp(node);
 }
 //------------------------------------------------------------------------------
 
-void* LLRB_TREE::RootItem(){
-  CurrentNode = Root;
-  if(CurrentNode) return CurrentNode->Data;
-  return 0;
+LLRBTree::Node* LLRBTree::remove(Node* node, void* key, int tag)
+{
+    Node* temp;
+
+    if(!node) return 0;
+
+    if(removeCompare(key, node->data, tag, node->tag) < 0){
+        if(!node->left) return node; // Key not in tree
+        if(!isRed(node->left) && !isRed(node->left->left)) node = moveRedLeft(node);
+        node->left = remove(node->left, key, tag);
+
+    }else{
+        if(isRed(node->left)) node = rotateRight(node);
+
+        // If N->Right is null, N is always a red leaf;
+        if(!removeCompare(key, node->data, tag, node->tag) && !node->right){
+            if(currentNode == node) currentNode = 0;
+            theItemCount--;
+            delete node;
+            return 0;
+        }
+
+        if(!node->right) return fixUp(node); // Key not in tree
+
+        if(!isRed(node->right) && !isRed(node->right->left)) node = moveRedRight(node);
+
+        if(!removeCompare(key, node->data, tag, node->tag)){
+            // Find the minimum in the right sub-tree
+            temp = node->right;
+            while(temp && temp->left) temp = temp->left;
+            // Copy temp's data to this location and delete temp
+            if(currentNode == temp) currentNode = node;
+            node->data  = temp->data;
+            node->right = removeMin(node->right);
+
+        }else{
+            node->right = remove(node->right, key, tag);
+        }
+    }
+
+    return fixUp(node);
 }
 //------------------------------------------------------------------------------
 
-void LLRB_TREE::Clear(){
-  if(Root) delete Root;
-  Root         = 0;
-  CurrentNode  = 0;
-  TheItemCount = 0;
+void LLRBTree::remove(void* key)
+{
+    Node* temp;
+    Node* node;
+
+    // Find the first duplicate
+    node = find(root, key);
+
+    // Check if there is a duplicate storing the same pointer
+    temp = node->next;
+    while(temp){
+        if(compare(key, temp->data)){ // No more duplicates
+            temp = 0;
+            break;
+        }
+        if(key == temp->data) break; // Found it
+        temp = temp->next;
+    }
+    if(temp) node = temp;
+
+    if(!node) return;
+
+    root = remove(root, key, node->tag);
+    if(root) root->colour = false;
 }
 //------------------------------------------------------------------------------
 
-unsigned LLRB_TREE::ItemCount(){
-  return TheItemCount;
+LLRBTree::Node* LLRBTree::find(Node* node, void* key)
+{
+    int   result;
+    Node* temp = 0;
+
+    while(node){
+        result = compare(key, node->data);
+        if     (result < 0) node = node->left;
+        else if(result > 0) node = node->right;
+        else{
+            temp = node;       // Store the current "best match" and
+            node = node->left; // Carry on searching the left sub-tree
+        }
+    }
+    return temp;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::find(void* key)
+{
+    currentNode = find(root, key);
+    if(currentNode) return currentNode->data;
+
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::before(void* key)
+{
+    int   result;
+    Node* node;
+
+    currentNode = 0;
+
+    node = root;
+    while(node){
+        result = compare(key, node->data);
+        if(result > 0){
+            currentNode = node;
+            node        = node->right;
+        }else{
+            node        = node->left;
+        }
+    }
+
+    if(currentNode) return currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::after(void* key)
+{
+    int   result;
+    Node* node;
+
+    currentNode = 0;
+
+    node = root;
+    while(node){
+        result = compare(key, node->data);
+        if(result < 0){
+            currentNode = node;
+            node        = node->left;
+        }else{
+            node        = node->right;
+        }
+    }
+
+    if(currentNode) return currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::first()
+{
+    if(!root) return 0;
+
+    currentNode = root;
+    while(currentNode && currentNode->left) currentNode = currentNode->left;
+
+    return currentNode->data;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::last()
+{
+    if(!root) return 0;
+
+    currentNode = root;
+    while(currentNode && currentNode->right) currentNode = currentNode->right;
+
+    return currentNode->data;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::next()
+{
+    if(currentNode) currentNode = currentNode->next;
+    if(currentNode) return        currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::previous()
+{
+    if(currentNode) currentNode = currentNode->prev;
+    if(currentNode) return        currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::current()
+{
+    if(currentNode) return currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void* LLRBTree::rootItem()
+{
+    currentNode = root;
+    if(currentNode) return currentNode->data;
+    return 0;
+}
+//------------------------------------------------------------------------------
+
+void LLRBTree::clear()
+{
+    if(root) delete root;
+    root         = 0;
+    currentNode  = 0;
+    theItemCount = 0;
+}
+//------------------------------------------------------------------------------
+
+unsigned LLRBTree::itemCount()
+{
+    return theItemCount;
 }
 //------------------------------------------------------------------------------
 

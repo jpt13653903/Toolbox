@@ -12,37 +12,39 @@
 #include "test.h"
 //------------------------------------------------------------------------------
 
-bool TestDebugMessages(){
-  Start("Debug Messages");
+bool testDebugMessages()
+{
+    start("Debug Messages");
 
-  debug  ("Testing debug %d"  , 123);
-  info   ("Testing info %d"   , 123);
-  warning("Testing warning %d", 123);
-  error  ("Testing error %d"  , 123);
-  assert (true );
-  assert (true , printf("This should never print\n"));
-  assert (false);
-  assert (false, info("Do something about the failed assertion"));
-  assert (!strcmp("foo", "bar"));
+    debug  ("Testing debug %d"  , 123);
+    info   ("Testing info %d"   , 123);
+    warning("Testing warning %d", 123);
+    error  ("Testing error %d"  , 123);
+    assert (true );
+    assert (true , printf("This should never print\n"));
+    assert (false);
+    assert (false, info("Do something about the failed assertion"));
+    assert (!strcmp("foo", "bar"));
 
-  error("Testing GetErrorString(): \"%s\"", GetErrorString(123));
+    error("Testing getErrorString(): \"%s\"", getErrorString(123));
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-int main(){
-  SetupTerminal();
+int main()
+{
+    setupTerminal();
 
-  printf("\n\n");
-  if(!TestDebugMessages()) goto main_Error;
+    printf("\n\n");
+    if(!testDebugMessages()) goto MainError;
 
-  info(ANSI_FG_GREEN "All OK"); Done();
-  return 0;
+    info(ANSI_FG_GREEN "All OK"); done();
+    return 0;
 
-  main_Error:
-    Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
-    return -1;
+    MainError:
+        done(); info(ANSI_FG_BRIGHT_RED "There were errors");
+        return -1;
 }
 //------------------------------------------------------------------------------
 

@@ -20,104 +20,104 @@ University, Princeton, NJ 08544
 #define Dictionary_h
 //------------------------------------------------------------------------------
 
-class DICTIONARY_BASE{
-  public:
-    typedef void  (*ACTION      )(const char* Name, void* Data);
-    typedef void* (*ON_DUPLICATE)(const char* Name, void* Old, void* New);
+class DictionaryBase{
+    public:
+        typedef void  (*Action     )(const char* name, void* data);
+        typedef void* (*OnDuplicate)(const char* name, void* oldNode, void* newNode);
 
-  private:
-    struct NODE{
-      bool  Red;
+    private:
+        struct Node{
+            bool  red;
 
-      char* Name; ///< This memory is internally managed
-      void* Data; ///< This is arbitrary data and not deleted by this structure
+            char* name; ///< This memory is internally managed
+            void* data; ///< This is arbitrary data and not deleted by this structure
 
-      // Used to point to the children
-      NODE* Left;
-      NODE* Right;
+            // Used to point to the children
+            Node* left;
+            Node* right;
 
-      // Used to linearise the tree
-      NODE* Prev;
-      NODE* Next;
+            // Used to linearise the tree
+            Node* prev;
+            Node* next;
 
-      NODE(const char* Name, void* Data, NODE* Prev, NODE* Next);
-     ~NODE();
-    };
+            Node(const char* name, void* data, Node* prev, Node* next);
+           ~Node();
+        };
 
-    NODE* Root;
-    NODE* Current; // Used in "First" and "Next" calls
-    NODE* TempPrev;
-    NODE* TempNext;
-    int   ItemCount;
+        Node* root;
+        Node* current; // Used in "First" and "Next" calls
+        Node* tempPrev;
+        Node* tempNext;
+        int   itemCount;
 
-    bool  IsRed      (NODE* Node);
-    void  ColourFlip (NODE* Node);
-    NODE* RotateLeft (NODE* Node);
-    NODE* RotateRight(NODE* Node);
+        bool  isRed      (Node* node);
+        void  colourFlip (Node* node);
+        Node* rotateLeft (Node* node);
+        Node* rotateRight(Node* node);
 
-    NODE* Insert(NODE* Node, const char* Name, void* Data);
-    void  Action(NODE* Node, ACTION Function);
+        Node* insert(Node* node, const char* name, void* data);
+        void  action(Node* node, Action function);
 
-    static void* DefaultOnDuplicate(const char* Name, void* Old, void* New);
+        static void* defaultOnDuplicate(const char* name, void* oldNode, void* newNode);
 
-  protected:
-    void  Clear ();
-    void  Insert(const char*  Name, void* Data);
-    void* Find  (const char*  Name);
-    void* First (const char** Name = 0);
-    void* Next  (const char** Name = 0);
+    protected:
+        void  clear ();
+        void  insert(const char*  name, void* data);
+        void* find  (const char*  name);
+        void* first (const char** name = 0);
+        void* next  (const char** name = 0);
 
-  public:
-             DICTIONARY_BASE();
-    virtual ~DICTIONARY_BASE();
+    public:
+                 DictionaryBase();
+        virtual ~DictionaryBase();
 
-    // Callback function called upon duplicate insert.  The return value must
-    // be the data that must be stored at that location.  The default behaviour
-    // is to update to the new data, without calling "delete" or similar.
-    //
-    // NOTE: The template class below does call "delete"
-    ON_DUPLICATE OnDuplicate;
+        // Callback function called upon duplicate insert.  The return value must
+        // be the data that must be stored at that location.  The default behaviour
+        // is to update to the new data, without calling "delete" or similar.
+        //
+        // Note: The template class below does call "delete"
+        OnDuplicate onDuplicate;
 
-    int GetCount();
+        int getCount();
 
-    // This calls the given function for every node, in order
-    void Action(ACTION Function);
+        // This calls the given function for every node, in order
+        void action(Action function);
 };
 //------------------------------------------------------------------------------
 
-template<class type> class DICTIONARY : public DICTIONARY_BASE{
-  private:
-    static type* DefaultOnDuplicate(const char* Name, type* Old, type* New){
-      delete Old;
-      return New;
-    }
-    static void CleanupAction(const char* Name, type* Data){
-      delete Data;
-    }
+template<class type> class Dictionary : public DictionaryBase{
+    private:
+        static type* defaultOnDuplicate(const char* name, type* oldNode, type* newNode){
+            delete oldNode;
+            return newNode;
+        }
+        static void cleanupAction(const char* name, type* data){
+            delete data;
+        }
 
-  public:
-    DICTIONARY(){
-      OnDuplicate = (ON_DUPLICATE)DefaultOnDuplicate;
-    }
-    virtual ~DICTIONARY(){
-      Action((ACTION)CleanupAction);
-    }
-    void Clear(){
-      Action((ACTION)CleanupAction);
-      DICTIONARY_BASE::Clear();
-    }
-    void Insert(const char* Name, type* Data){
-      DICTIONARY_BASE::Insert(Name, Data);
-    }
-    type* Find(const char* Name){
-      return (type*)DICTIONARY_BASE::Find(Name);
-    }
-    type* First(const char** Name = 0){
-      return (type*)DICTIONARY_BASE::First(Name);
-    }
-    type* Next(const char** Name = 0){
-      return (type*)DICTIONARY_BASE::Next(Name);
-    }
+    public:
+        Dictionary(){
+            onDuplicate = (OnDuplicate)defaultOnDuplicate;
+        }
+        virtual ~Dictionary(){
+            action((Action)cleanupAction);
+        }
+        void clear(){
+            action((Action)cleanupAction);
+            DictionaryBase::clear();
+        }
+        void insert(const char* name, type* data){
+            DictionaryBase::insert(name, data);
+        }
+        type* find(const char* name){
+            return (type*)DictionaryBase::find(name);
+        }
+        type* first(const char** name = 0){
+            return (type*)DictionaryBase::first(name);
+        }
+        type* next(const char** name = 0){
+            return (type*)DictionaryBase::next(name);
+        }
 };
 //------------------------------------------------------------------------------
 

@@ -13,100 +13,103 @@
 #include "XML.h"
 //------------------------------------------------------------------------------
 
-bool TestLoad(){
-  Start("Testing loading XML files");
+bool testLoad()
+{
+    start("Testing loading XML files");
 
-  XML xml;
-  assert(xml.Load("Resources/XML.xml"), return false);
+    Xml xml;
+    assert(xml.load("Resources/XML.xml"), return false);
 
-  assert(xml.Save("testOutput/XML.xml"), return false);
+    assert(xml.save("testOutput/XML.xml"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-bool TestBuild(){
-  Start("Testing building XML files");
+bool testBuild()
+{
+    start("Testing building XML files");
 
-  XML xml;
+    Xml xml;
 
-  xml.New("MyDocument");
-    xml.Comment("Comment 1");
-    xml.Comment("Comment 2");
-    xml.Begin("Entity 1");
-      xml.Comment("Comment 2");
-      xml.Comment("Comment 3");
-      xml.Attribute("Integer" , -12345);
-      xml.Attribute("Boolean" , true);
-      xml.Attribute("Double"  , 123.456);
-      xml.Attribute("Unsigned", 12345);
-      xml.Attribute("char_p"  , "Hello World");
-    xml.End();
-    xml.Begin("Entity 2");
-      xml.Begin("Entity 2-1");
-        xml.Comment("Comment 4");
-        xml.Comment("Comment 5");
-        xml.Attribute("Integer" , -12345);
-        xml.Attribute("Boolean" , true);
-        xml.Attribute("Double"  , 123.456);
-        xml.Attribute("Unsigned", 12345);
-        xml.Attribute("char_p"  , "Hello World");
-      xml.End();
-      xml.Begin("Entity 3-1");
-        xml.Comment("Comment 6");
-        xml.Comment("Comment 7");
-        xml.Attribute("Integer" , -12345);
-        xml.Attribute("Boolean" , true);
-        xml.Attribute("Double"  , 123.456);
-        xml.Attribute("Unsigned", 12345);
-        xml.Attribute("char_p"  , "Hello World");
-      xml.End();
-      xml.Comment("Comment 8");
-      xml.Comment("Comment 9");
-      xml.Attribute("Integer" , -12345);
-      xml.Attribute("Boolean" , true);
-      xml.Attribute("Double"  , 123.456);
-      xml.Attribute("Unsigned", 12345);
-      xml.Attribute("char_p"  , "Hello World");
-    xml.End();
-    xml.Begin("Entity 3");
-      xml.Comment("Comment 10");
-      xml.Comment("Comment 11");
-      xml.Attribute("Integer" , -12345);
-      xml.Attribute("Boolean" , true);
-      xml.Attribute("Double"  , 123.456);
-      xml.Attribute("Unsigned", 12345);
-      xml.Attribute("char_p"  , "Hello World");
-      xml.Content  (-12345);        xml.Content("\n");
-      xml.Content  (true);          xml.Content("\n");
-      xml.Content  (123.456);       xml.Content("\n");
-      xml.Content  (12345);         xml.Content("\n");
-      xml.Content  ("Hello World"); xml.Content("\n");
-    xml.End();
-  xml.End();
+    xml.newDocument("MyDocument");
+        xml.comment("Comment 1");
+        xml.comment("Comment 2");
+        xml.begin("Entity 1");
+            xml.comment("Comment 2");
+            xml.comment("Comment 3");
+            xml.attribute("Integer" , -12345);
+            xml.attribute("Boolean" , true);
+            xml.attribute("Double"  , 123.456);
+            xml.attribute("Unsigned", 12345);
+            xml.attribute("char_p"  , "Hello World");
+        xml.end();
+        xml.begin("Entity 2");
+            xml.begin("Entity 2-1");
+                xml.comment("Comment 4");
+                xml.comment("Comment 5");
+                xml.attribute("Integer" , -12345);
+                xml.attribute("Boolean" , true);
+                xml.attribute("Double"  , 123.456);
+                xml.attribute("Unsigned", 12345);
+                xml.attribute("char_p"  , "Hello World");
+            xml.end();
+            xml.begin("Entity 3-1");
+                xml.comment("Comment 6");
+                xml.comment("Comment 7");
+                xml.attribute("Integer" , -12345);
+                xml.attribute("Boolean" , true);
+                xml.attribute("Double"  , 123.456);
+                xml.attribute("Unsigned", 12345);
+                xml.attribute("char_p"  , "Hello World");
+            xml.end();
+            xml.comment("Comment 8");
+            xml.comment("Comment 9");
+            xml.attribute("Integer" , -12345);
+            xml.attribute("Boolean" , true);
+            xml.attribute("Double"  , 123.456);
+            xml.attribute("Unsigned", 12345);
+            xml.attribute("char_p"  , "Hello World");
+        xml.end();
+        xml.begin("Entity 3");
+            xml.comment("Comment 10");
+            xml.comment("Comment 11");
+            xml.attribute("Integer" , -12345);
+            xml.attribute("Boolean" , true);
+            xml.attribute("Double"  , 123.456);
+            xml.attribute("Unsigned", 12345);
+            xml.attribute("char_p"  , "Hello World");
+            xml.content  (-12345);        xml.content("\n");
+            xml.content  (true);          xml.content("\n");
+            xml.content  (123.456);       xml.content("\n");
+            xml.content  (12345);         xml.content("\n");
+            xml.content  ("Hello World"); xml.content("\n");
+        xml.end();
+    xml.end();
 
-  assert(xml.Save("testOutput/Build.xml"), return false);
-  assert(xml.Load("testOutput/Build.xml"), return false);
+    assert(xml.save("testOutput/Build.xml"), return false);
+    assert(xml.load("testOutput/Build.xml"), return false);
 
-  Done(); return true;
+    done(); return true;
 }
 //------------------------------------------------------------------------------
 
-int main(){
-  SetupTerminal();
+int main()
+{
+    setupTerminal();
 
-  printf("\n\n");
-  if(!TestLoad ()) goto main_Error;
-  if(!TestBuild()) goto main_Error;
+    printf("\n\n");
+    if(!testLoad ()) goto MainError;
+    if(!testBuild()) goto MainError;
 
-  info(ANSI_FG_GREEN "All OK"); Done();
-  return 0;
+    info(ANSI_FG_GREEN "All OK"); done();
+    return 0;
 
-  main_Error:
-    fflush(stdout);
-    Sleep(100);
-    Done(); info(ANSI_FG_BRIGHT_RED "There were errors");
-    return -1;
+    MainError:
+        fflush(stdout);
+        Sleep(100);
+        done(); info(ANSI_FG_BRIGHT_RED "There were errors");
+        return -1;
 }
 //------------------------------------------------------------------------------
 

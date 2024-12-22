@@ -13,926 +13,969 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #include "JSON.h"
 //------------------------------------------------------------------------------
 
-using std::string;
-//------------------------------------------------------------------------------
-
-bool operator== (string& A, const char* B){ return !(A.compare(B)); }
+bool operator== (std::string& a, const char* b){ return !(a.compare(b)); }
 //------------------------------------------------------------------------------
 
 // Converts UTF-32 to UTF-8 and appends it to the string
-void operator+= (string& S, uint32_t Char){
-  int  j = 0;
-  byte Head = 0x3F; // Active bits in the leading byte
-  byte Lead = 0x80; // Leading byte
-  byte Cont[6];     // Continuation bytes
+void operator+= (std::string& s, uint32_t character)
+{
+    int  j = 0;
+    byte head = 0x3F; // Active bits in the leading byte
+    byte lead = 0x80; // Leading byte
+    byte cont[6];     // Continuation bytes
 
-  if(Char < 0x80){
-    S += (char)Char;
+    if(character < 0x80){
+        s += (char)character;
 
-  }else{
-    while(Char > Head){ // Doesn't fit in the leading byte
-      Cont[j] = 0x80 | (Char & 0x3F);
-      Lead    = 0x80 | (Lead >> 1);
-      Head  >>= 1;
-      Char  >>= 6;
-      j++;
-    }
-    S += (char)(Lead | Char);
-    for(j--; j >= 0; j--) S += (char)(Cont[j]);
-  }
-}
-void operator+= (string& S, uint16_t Char){ S += (uint32_t)Char; }
-//------------------------------------------------------------------------------
-
-JSON::JSON(){
-  Type   = typeNull;
-  String = "";
-  Number = 0;
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(JSON& Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(const char* Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(int Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(unsigned Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(double Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::JSON(bool Value){
-  Type    = typeNull;
-  String  = "";
-  Number  = 0;
-  operator=(Value);
-}
-//------------------------------------------------------------------------------
-
-JSON::~JSON(){
-  Clear();
-}
-//------------------------------------------------------------------------------
-
-void JSON::Clear(){
-  String = "";
-  Number = 0;
-
-  for(
-    auto Object = Objects.begin();
-    Object != Objects.end();
-    Object++
-  ) delete Object->second;
-  Objects.clear();
-
-  for(size_t n = 0; n < Items.size(); n++) delete Items[n];
-  Items.clear();
-
-  Type = typeNull;
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(JSON& Value){
-  Clear();
-  Type = Value.Type;
-
-  switch(Value.Type){
-    case typeNull:
-    case typeTrue:
-    case typeFalse:
-      break;
-
-    case typeString:
-      String = Value.String;
-      break;
-
-    case typeNumber:
-      Number = Value.Number;
-      break;
-
-    case typeObject:
-      for(
-        auto Object = Value.Objects.begin();
-        Object != Value.Objects.end();
-        Object++
-      ) AddOrUpdate(Object->first.c_str(), *(Object->second));
-      break;
-
-    case typeArray:
-      for(size_t n = 0; n < Value.Items.size(); n++) Append(*(Value.Items[n]));
-      break;
-
-    default:
-      break;
-  }
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(const char* Value){
-  Clear();
-  Type   = typeString;
-  String = Value;
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(int Value){
-  Clear();
-  Type   = typeNumber;
-  Number = Value;
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(unsigned Value){
-  Clear();
-  Type   = typeNumber;
-  Number = Value;
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(double Value){
-  Clear();
-  Type   = typeNumber;
-  Number = Value;
-}
-//------------------------------------------------------------------------------
-
-void JSON::operator=(bool Value){
-  Clear();
-  if(Value) Type = typeTrue;
-  else      Type = typeFalse;
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(JSON& Value){
-  if(Value.Type == typeObject){
-    for(
-      auto Object = Value.Objects.begin();
-      Object != Value.Objects.end();
-      Object++
-    ) AddOrUpdate(Object->first.c_str(), *(Object->second));
-  }else{
-    operator=(Value);
-  }
-  return this;
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, JSON& Value){
-  Type = typeObject;
-
-  JSON* json = operator[](Name);
-  if(json) return json->AddOrUpdate(Value);
-
-  JSON* Object  = new JSON(Value);
-  Objects[Name] = Object;
-
-  return Object;
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, const char* Value){
-  JSON json(Value); return AddOrUpdate(Name, json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, int Value){
-  JSON json(Value); return AddOrUpdate(Name, json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, unsigned Value){
-  JSON json(Value); return AddOrUpdate(Name, json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, double Value){
-  JSON json(Value); return AddOrUpdate(Name, json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name, bool Value){
-  JSON json(Value); return AddOrUpdate(Name, json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::AddOrUpdate(const char* Name){
-  JSON* json = operator[](Name);
-  if(json)   return json;
-  JSON null; return AddOrUpdate(Name, null);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::operator[] (const char* Name){
-  auto Object = Objects.find(Name);
-  if(Object == Objects.end()) return 0;
-  return Object->second;
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(JSON& Value){
-  // If the array is empty, add any existing object as the first item in the array
-  if(Items.empty() && Type != typeNull && Type != typeArray){
-    JSON* Item = new JSON(*this);
-    Items.push_back(Item);
-  }
-  Type = typeArray;
-
-  JSON* Item = new JSON(Value);
-  Items.push_back(Item);
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(const char* Value){
-  JSON json(Value); Append(json);
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(int Value){
-  JSON json(Value); Append(json);
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(unsigned Value){
-  JSON json(Value); Append(json);
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(double Value){
-  JSON json(Value); Append(json);
-}
-//------------------------------------------------------------------------------
-
-void JSON::Append(bool Value){
-  JSON json(Value); Append(json);
-}
-//------------------------------------------------------------------------------
-
-JSON* JSON::operator[] (int Index){
-  if(Index < 0 || (size_t)Index >= Items.size()) return 0;
-  return Items[Index];
-}
-//------------------------------------------------------------------------------
-
-void JSON::ReadError(const char* Message){
-  static bool FirstError = true;
-  if(FirstError) error("JSON error on line %u:\n  %s", ReadLine, Message);
-  FirstError = false;
-}
-//------------------------------------------------------------------------------
-
-void JSON::ReadLineComment(){
-  ReadIndex += 2;
-  while(ReadIndex < ReadSize){
-    switch(ReadBuffer[ReadIndex]){
-      case '\n':
-        ReadLine++;
-        ReadIndex++;
-        if(ReadBuffer[ReadIndex] == '\r') ReadIndex++;
-        return;
-
-      case '\r':
-        ReadLine++;
-        ReadIndex++;
-        if(ReadBuffer[ReadIndex] == '\n') ReadIndex++;
-        return;
-
-      default:
-        ReadIndex++;
-        break;
-    }
-  }
-}
-//------------------------------------------------------------------------------
-
-void JSON::ReadBlockComment(){
-  ReadIndex += 2;
-  while(ReadIndex < ReadSize){
-    switch(ReadBuffer[ReadIndex]){
-      case '\n':
-        ReadLine++;
-        ReadIndex++;
-        if(ReadBuffer[ReadIndex] == '\r') ReadIndex++;
-        break;
-
-      case '\r':
-        ReadLine++;
-        ReadIndex++;
-        if(ReadBuffer[ReadIndex] == '\n') ReadIndex++;
-        break;
-
-      case '*':
-        ReadIndex++;
-        if(ReadBuffer[ReadIndex] == '/'){
-          ReadIndex++;
-          return;
-        }
-        break;
-
-      default:
-        ReadIndex++;
-        break;
-    }
-  }
-}
-//------------------------------------------------------------------------------
-
-void JSON::ReadSpace(){
-  while(ReadIndex < ReadSize){
-    switch(ReadBuffer[ReadIndex]){
-      case '\n': ReadLine++;
-      case '\r':
-      case '\t':
-      case '\v':
-      case ' ' :
-        ReadIndex++;
-        break;
-
-      case '/':
-        switch(ReadBuffer[ReadIndex+1]){
-          case '/':
-            ReadLineComment();
-            break;
-          case '*':
-            ReadBlockComment();
-            break;
-          default:
-            return;
-        }
-        break;
-
-      default:
-        return;
-    }
-  }
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadUnicodeSequence(std::string* String){
-  uint16_t Char = 0;
-
-  if(ReadBuffer[ReadIndex] != 'u') return false;
-
-  for(int n = 0; n < 4; n++){
-    ReadIndex++;
-    if(ReadIndex >= ReadSize) return false;
-
-    if      (ReadBuffer[ReadIndex] >= '0' && ReadBuffer[ReadIndex] <= '9'){
-      Char = 0x10*Char + (ReadBuffer[ReadIndex] - '0');
-    }else if(ReadBuffer[ReadIndex] >= 'a' && ReadBuffer[ReadIndex] <= 'f'){
-      Char = 0x10*Char + (ReadBuffer[ReadIndex] - 'a' + 0xA);
-    }else if(ReadBuffer[ReadIndex] >= 'A' && ReadBuffer[ReadIndex] <= 'F'){
-      Char = 0x10*Char + (ReadBuffer[ReadIndex] - 'A' + 0xA);
     }else{
-      return false;
+        while(character > head){ // Doesn't fit in the leading byte
+            cont[j]     = 0x80 | (character & 0x3F);
+            lead        = 0x80 | (lead >> 1);
+            head      >>= 1;
+            character >>= 6;
+            j++;
+        }
+        s += (char)(lead | character);
+        for(j--; j >= 0; j--) s += (char)(cont[j]);
     }
-  }
-  *String += Char;
-  return true;
+}
+void operator+= (std::string& s, uint16_t character){ s += (uint32_t)character; }
+//------------------------------------------------------------------------------
+
+Json::Json()
+{
+    type   = typeNull;
+    string = "";
+    number = 0;
 }
 //------------------------------------------------------------------------------
 
-bool JSON::ReadIdentifierStart(string* String){
-  if('A' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'Z'){
-    *String += ReadBuffer[ReadIndex++];
-    return true;
-  }
-  if('a' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'z'){
-    *String += ReadBuffer[ReadIndex++];
-    return true;
-  }
-  if(ReadBuffer[ReadIndex] == '$' || ReadBuffer[ReadIndex] == '_'){
-    *String += ReadBuffer[ReadIndex++];
-    return true;
-  }
-  // This is actually wrong, but works when the input is assumed valid
-  if(ReadBuffer[ReadIndex] & 0xC0){
-    *String += ReadBuffer[ReadIndex++];
-    while((ReadBuffer[ReadIndex] & 0xC0) == 0x80) *String += ReadBuffer[ReadIndex++];
-    return true;
-  }
-  if(ReadBuffer[ReadIndex] == '\\'){
-    ReadIndex++;
-    if(!ReadUnicodeSequence(String)){
-      ReadError("Incomplete Unicode escape sequence");
-      return false;
+Json::Json(Json& value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::Json(const char* value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::Json(int value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::Json(unsigned value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::Json(double value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::Json(bool value)
+{
+    type    = typeNull;
+    string  = "";
+    number  = 0;
+    operator=(value);
+}
+//------------------------------------------------------------------------------
+
+Json::~Json()
+{
+    clear();
+}
+//------------------------------------------------------------------------------
+
+void Json::clear()
+{
+    string = "";
+    number = 0;
+
+    for(
+        auto object = objects.begin();
+        object != objects.end();
+        object++
+    ) delete object->second;
+    objects.clear();
+
+    for(size_t n = 0; n < items.size(); n++) delete items[n];
+    items.clear();
+
+    type = typeNull;
+}
+//------------------------------------------------------------------------------
+
+void Json::operator=(Json& value)
+{
+    clear();
+    type = value.type;
+
+    switch(value.type){
+        case typeNull:
+        case typeTrue:
+        case typeFalse:
+            break;
+
+        case typeString:
+            string = value.string;
+            break;
+
+        case typeNumber:
+            number = value.number;
+            break;
+
+        case typeObject:
+            for(
+                auto object = value.objects.begin();
+                object != value.objects.end();
+                object++
+            ) addOrUpdate(object->first.c_str(), *(object->second));
+            break;
+
+        case typeArray:
+            for(size_t n = 0; n < value.items.size(); n++) append(*(value.items[n]));
+            break;
+
+        default:
+            break;
     }
-    return true;
-  }
-  return false;
 }
 //------------------------------------------------------------------------------
 
-bool JSON::ReadIdentifierPart(string* String){
-  if(ReadIdentifierStart(String)) return true;
-
-  if('0' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= '9'){
-    *String += ReadBuffer[ReadIndex++];
-    return true;
-  }
-  return false;
+void Json::operator=(const char* value)
+{
+    clear();
+    type   = typeString;
+    string = value;
 }
 //------------------------------------------------------------------------------
 
-bool JSON::ReadIdentifier(string* String){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
-
-  *String = "";
-
-  if(!ReadIdentifierStart(String)) return false;
-
-  while(ReadIdentifierPart(String));
-
-  return true;
+void Json::operator=(int value)
+{
+    clear();
+    type   = typeNumber;
+    number = value;
 }
 //------------------------------------------------------------------------------
 
-bool JSON::ReadString(string* Value){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
+void Json::operator=(unsigned value)
+{
+    clear();
+    type   = typeNumber;
+    number = value;
+}
+//------------------------------------------------------------------------------
 
-  bool DoubleQuotes;
-  if     (ReadBuffer[ReadIndex] == '"' ) DoubleQuotes = true;
-  else if(ReadBuffer[ReadIndex] == '\'') DoubleQuotes = false;
-  else return false;
-  ReadIndex++;
+void Json::operator=(double value)
+{
+    clear();
+    type   = typeNumber;
+    number = value;
+}
+//------------------------------------------------------------------------------
 
-  *Value = "";
+void Json::operator=(bool value)
+{
+    clear();
+    if(value) type = typeTrue;
+    else      type = typeFalse;
+}
+//------------------------------------------------------------------------------
 
-  while(ReadIndex < ReadSize){
-    switch(ReadBuffer[ReadIndex]){
-      case '"':
-        if(DoubleQuotes){
-          ReadIndex++;
-          return true;
+Json* Json::addOrUpdate(Json& value)
+{
+    if(value.type == typeObject){
+        for(auto object: value.objects)
+            addOrUpdate(object.first.c_str(), *(object.second));
+    }else{
+        operator=(value);
+    }
+    return this;
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, Json& value)
+{
+    type = typeObject;
+
+    Json* json = operator[](name);
+    if(json) return json->addOrUpdate(value);
+
+    Json* object  = new Json(value);
+    objects[name] = object;
+
+    return object;
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, const char* value)
+{
+    Json json(value); return addOrUpdate(name, json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, int value)
+{
+    Json json(value); return addOrUpdate(name, json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, unsigned value)
+{
+    Json json(value); return addOrUpdate(name, json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, double value)
+{
+    Json json(value); return addOrUpdate(name, json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name, bool value)
+{
+    Json json(value); return addOrUpdate(name, json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::addOrUpdate(const char* name)
+{
+    Json* json = operator[](name);
+    if(json)   return json;
+    Json null; return addOrUpdate(name, null);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::operator[] (const char* name)
+{
+    auto object = objects.find(name);
+    if(object == objects.end()) return 0;
+    return object->second;
+}
+//------------------------------------------------------------------------------
+
+void Json::append(Json& value)
+{
+    // if the array is empty, add any existing object as the first item in the array
+    if(items.empty() && type != typeNull && type != typeArray){
+        Json* item = new Json(*this);
+        items.push_back(item);
+    }
+    type = typeArray;
+
+    Json* item = new Json(value);
+    items.push_back(item);
+}
+//------------------------------------------------------------------------------
+
+void Json::append(const char* value)
+{
+    Json json(value); append(json);
+}
+//------------------------------------------------------------------------------
+
+void Json::append(int value)
+{
+    Json json(value); append(json);
+}
+//------------------------------------------------------------------------------
+
+void Json::append(unsigned value)
+{
+    Json json(value); append(json);
+}
+//------------------------------------------------------------------------------
+
+void Json::append(double value)
+{
+    Json json(value); append(json);
+}
+//------------------------------------------------------------------------------
+
+void Json::append(bool value)
+{
+    Json json(value); append(json);
+}
+//------------------------------------------------------------------------------
+
+Json* Json::operator[] (int index)
+{
+    if(index < 0 || (size_t)index >= items.size()) return 0;
+    return items[index];
+}
+//------------------------------------------------------------------------------
+
+void Json::readError(const char* message)
+{
+    static bool firstError = true;
+    if(firstError) error("JSON error on line %u:\n  %s", readLine, message);
+    firstError = false;
+}
+//------------------------------------------------------------------------------
+
+void Json::readLineComment()
+{
+    readIndex += 2;
+    while(readIndex < readSize){
+        switch(readBuffer[readIndex]){
+            case '\n':
+                readLine++;
+                readIndex++;
+                if(readBuffer[readIndex] == '\r') readIndex++;
+                return;
+
+            case '\r':
+                readLine++;
+                readIndex++;
+                if(readBuffer[readIndex] == '\n') readIndex++;
+                return;
+
+            default:
+                readIndex++;
+                break;
         }
-        *Value += ReadBuffer[ReadIndex];
-        break;
+    }
+}
+//------------------------------------------------------------------------------
 
-      case '\'':
-        if(!DoubleQuotes){
-          ReadIndex++;
-          return true;
+void Json::readBlockComment()
+{
+    readIndex += 2;
+    while(readIndex < readSize){
+        switch(readBuffer[readIndex]){
+            case '\n':
+                readLine++;
+                readIndex++;
+                if(readBuffer[readIndex] == '\r') readIndex++;
+                break;
+
+            case '\r':
+                readLine++;
+                readIndex++;
+                if(readBuffer[readIndex] == '\n') readIndex++;
+                break;
+
+            case '*':
+                readIndex++;
+                if(readBuffer[readIndex] == '/'){
+                    readIndex++;
+                    return;
+                }
+                break;
+
+            default:
+                readIndex++;
+                break;
         }
-        *Value += ReadBuffer[ReadIndex];
-        break;
+    }
+}
+//------------------------------------------------------------------------------
 
-      case '\\':
-        ReadIndex++;
-        if(ReadIndex >= ReadSize){
-          ReadError("Incomplete escape sequence");
-          return false;
+void Json::readSpace()
+{
+    while(readIndex < readSize){
+        switch(readBuffer[readIndex]){
+            case '\n': readLine++;
+            case '\r':
+            case '\t':
+            case '\v':
+            case ' ' :
+                readIndex++;
+                break;
+
+            case '/':
+                switch(readBuffer[readIndex+1]){
+                    case '/':
+                        readLineComment();
+                        break;
+                    case '*':
+                        readBlockComment();
+                        break;
+                    default:
+                        return;
+                }
+                break;
+
+            default:
+                return;
         }
-        switch(ReadBuffer[ReadIndex]){
-          case '"' : *Value += '"' ; break;
-          case '\'': *Value += '\''; break;
-          case '\\': *Value += '\\'; break;
-          case '/' : *Value += '/' ; break;
-          case 'b' : *Value += '\b'; break;
-          case 'f' : *Value += '\f'; break;
-          case 'n' : *Value += '\n'; break;
-          case 'r' : *Value += '\r'; break;
-          case 't' : *Value += '\t'; break;
-          case 'u' :
-            if(!ReadUnicodeSequence(Value)){
-              ReadError("Incomplete Unicode escape sequence");
-              return false;
-            }
-            break;
-          case '\n':
-            ReadLine++;
-            if(ReadBuffer[ReadIndex+1] == '\r') ReadIndex++;
-            break;
-          case '\r':
-            ReadLine++;
-            if(ReadBuffer[ReadIndex+1] == '\n') ReadIndex++;
-            break;
+    }
+}
+//------------------------------------------------------------------------------
 
-          default:
-            ReadError("Unrecognised escape sequence");
+bool Json::readUnicodeSequence(std::string* string)
+{
+    uint16_t character = 0;
+
+    if(readBuffer[readIndex] != 'u') return false;
+
+    for(int n = 0; n < 4; n++){
+        readIndex++;
+        if(readIndex >= readSize) return false;
+
+        if      (readBuffer[readIndex] >= '0' && readBuffer[readIndex] <= '9'){
+            character = 0x10*character + (readBuffer[readIndex] - '0');
+        }else if(readBuffer[readIndex] >= 'a' && readBuffer[readIndex] <= 'f'){
+            character = 0x10*character + (readBuffer[readIndex] - 'a' + 0xA);
+        }else if(readBuffer[readIndex] >= 'A' && readBuffer[readIndex] <= 'F'){
+            character = 0x10*character + (readBuffer[readIndex] - 'A' + 0xA);
+        }else{
             return false;
         }
-        break;
-
-      case '\b':
-      case '\f':
-      case '\n':
-      case '\r':
-        ReadError("Unexpected control character in string");
-        return false;
-
-      default:
-        *Value += ReadBuffer[ReadIndex];
-        break;
     }
-    ReadIndex++;
-  }
-  ReadError("Incomplete string");
-  return false;
+    *string += character;
+    return true;
 }
 //------------------------------------------------------------------------------
 
-bool JSON::ReadString(JSON* Value){
-  if(ReadString(&(Value->String))){
-    Value->Type = typeString;
-    return true;
-  }
-  return false;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadHexadecimal(JSON* Value, bool Sign){
-  double Result = 0;
-
-  while(ReadIndex < ReadSize){
-    if      ('0' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= '9'){
-      Result *= 16.0;
-      Result += ReadBuffer[ReadIndex++] - '0';
-    }else if('a' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'f'){
-      Result *= 16.0;
-      Result += ReadBuffer[ReadIndex++] - 'a' + 10;
-    }else if('A' <= ReadBuffer[ReadIndex] && ReadBuffer[ReadIndex] <= 'F'){
-      Result *= 16.0;
-      Result += ReadBuffer[ReadIndex++] - 'A' + 10;
-    }else{
-      break;
+bool Json::readIdentifierStart(std::string* string)
+{
+    if('A' <= readBuffer[readIndex] && readBuffer[readIndex] <= 'Z'){
+        *string += readBuffer[readIndex++];
+        return true;
     }
-  }
-  Value->Number = Sign ? -Result : Result;
-  return true;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadNumber(JSON* Value){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
-
-  if(ReadIndex+8 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "Infinity", 8)){
-    ReadIndex += 8;
-    Value->Type   = typeNumber;
-    Value->Number = 1.0/0.0;
-    return true;
-  }
-  if(ReadIndex+9 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "-Infinity", 9)){
-    ReadIndex += 9;
-    Value->Type   = typeNumber;
-    Value->Number = -1.0/0.0;
-    return true;
-  }
-  if(ReadIndex+3 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "NaN", 3)){
-    ReadIndex += 3;
-    Value->Type   = typeNumber;
-    Value->Number = 0.0/0.0;
-    return true;
-  }
-
-  bool Sign         = false;
-  bool ExponentSign = false;
-
-  if(ReadBuffer[ReadIndex] == '-'){
-    Sign = true;
-    ReadIndex++;
-    if(ReadIndex >= ReadSize) return false;
-  }else if(ReadBuffer[ReadIndex] == '+'){
-    Sign = false;
-    ReadIndex++;
-    if(ReadIndex >= ReadSize) return false;
-  }
-
-  if((ReadBuffer[ReadIndex] <  '0' || ReadBuffer[ReadIndex] > '9') &&
-      ReadBuffer[ReadIndex] != '.' ){
-    if(Sign) ReadError("Incomplete number");
-    return false;
-  }
-
-  if(ReadIndex+2 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "0x", 2)){
-    ReadIndex += 2;
-    Value->Type = typeNumber;
-    return ReadHexadecimal(Value, Sign);
-  }
-  if(ReadIndex+2 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "0X", 2)){
-    ReadIndex += 2;
-    Value->Type = typeNumber;
-    return ReadHexadecimal(Value, Sign);
-  }
-
-  *Value = 0;
-
-  double Result   = 0;
-  double Fraction = 0;
-  double Exponent = 0;
-
-  if(ReadBuffer[ReadIndex] == '0'){
-    ReadIndex++;
-    if(ReadIndex >= ReadSize) return true;
-    if(ReadBuffer[ReadIndex] >= '0' && ReadBuffer[ReadIndex] <= '9'){
-      ReadError("Invalid number format");
-      return false;
+    if('a' <= readBuffer[readIndex] && readBuffer[readIndex] <= 'z'){
+        *string += readBuffer[readIndex++];
+        return true;
     }
-  }
-
-  while(ReadIndex < ReadSize){
-    if(ReadBuffer[ReadIndex] < '0' || ReadBuffer[ReadIndex] > '9') break;
-    Result = 10.0*Result + (ReadBuffer[ReadIndex] - '0');
-    ReadIndex++;
-  }
-
-  if(ReadBuffer[ReadIndex] == '.'){
-    ReadIndex++;
-    Fraction = 0.1;
-    while(ReadIndex < ReadSize){
-      if(ReadBuffer[ReadIndex] < '0' || ReadBuffer[ReadIndex] > '9') break;
-      Result += Fraction * (ReadBuffer[ReadIndex] - '0');
-      Fraction /= 10.0;
-      ReadIndex++;
+    if(readBuffer[readIndex] == '$' || readBuffer[readIndex] == '_'){
+        *string += readBuffer[readIndex++];
+        return true;
     }
-  }
-
-  if(ReadBuffer[ReadIndex] == 'e' || ReadBuffer[ReadIndex] == 'E'){
-    ReadIndex++;
-    if(ReadIndex >= ReadSize){
-      ReadError("Incomplete number");
-      return false;
+    // this is actually wrong, but works when the input is assumed valid
+    if(readBuffer[readIndex] & 0xC0){
+        *string += readBuffer[readIndex++];
+        while((readBuffer[readIndex] & 0xC0) == 0x80) *string += readBuffer[readIndex++];
+        return true;
     }
-    if(ReadBuffer[ReadIndex] == '-' || ReadBuffer[ReadIndex] == '+'){
-      ExponentSign = true;
-      ReadIndex++;
-    }
-    if(ReadIndex >= ReadSize){
-      ReadError("Incomplete number");
-      return false;
-    }
-    while(ReadIndex < ReadSize){
-      if(ReadBuffer[ReadIndex] < '0' || ReadBuffer[ReadIndex] > '9') break;
-      Exponent = 10.0*Exponent + (ReadBuffer[ReadIndex] - '0');
-      ReadIndex++;
-    }
-  }
-
-  if(ExponentSign)    Exponent *= -1.0;
-  if(Exponent != 0.0) Result   *= pow(10.0, Exponent);
-  if(Sign)            Result   *= -1.0;
-
-  *Value = Result;
-  return true;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadObject(JSON* ObjectList){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
-
-  if(ReadBuffer[ReadIndex] != '{') return false;
-  ReadIndex++;
-
-  ObjectList->Clear();
-  ObjectList->Type = typeObject;
-
-  string Name;
-
-  ReadSpace();
-  if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == '}'){
-    ReadIndex++;
-    return true;
-  }
-
-  while(ReadIndex < ReadSize){
-    if(!ReadString(&Name)){
-      if(!ReadIdentifier(&Name)){
-        ReadError("String or Identifier expected");
-        return false;
-      }
-    }
-    ReadSpace();
-    if(ReadBuffer[ReadIndex] != ':'){
-      ReadError("\":\" expected");
-      return false;
-    }
-    ReadIndex++;
-    if(ReadIndex >= ReadSize){
-      ReadError("Incomplete object");
-      return false;
-    }
-    if(!ReadValue(ObjectList->AddOrUpdate(Name.c_str()))){
-      ReadError("Value expected");
-      return false;
-    }
-    ReadSpace();
-    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == '}'){
-      ReadIndex++;
-      return true;
-    }
-    if(ReadIndex >= ReadSize || ReadBuffer[ReadIndex] != ','){
-      ReadError("\",\" expected");
-      return false;
-    }
-    ReadIndex++;
-    ReadSpace();
-    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == '}'){
-      ReadIndex++;
-      return true;
-    }
-  }
-  ReadError("Incomplete object");
-  return false;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadArray(JSON* ObjectList){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
-
-  if(ReadBuffer[ReadIndex] != '[') return false;
-  ReadIndex++;
-
-  ObjectList->Clear();
-  ObjectList->Type = typeArray;
-
-  JSON Value;
-
-  ReadSpace();
-  if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == ']'){
-    ReadIndex++;
-    return true;
-  }
-
-  while(ReadIndex < ReadSize){
-    if(!ReadValue(&Value)){
-      ReadError("Value expected");
-      return false;
-    }
-    ObjectList->Append(Value);
-    ReadSpace();
-    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == ']'){
-      ReadIndex++;
-      return true;
-    }
-    ReadSpace();
-    if(ReadIndex >= ReadSize || ReadBuffer[ReadIndex] != ','){
-      ReadError("\",\" expected");
-      return false;
-    }
-    ReadIndex++;
-    ReadSpace();
-    if(ReadIndex < ReadSize && ReadBuffer[ReadIndex] == ']'){
-      ReadIndex++;
-      return true;
-    }
-  }
-  ReadError("Incomplete object");
-  return false;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::ReadValue(JSON* Value){
-  ReadSpace();
-  if(ReadIndex >= ReadSize) return false;
-
-  if(ReadString(Value)) return true;
-  if(ReadNumber(Value)) return true;
-  if(ReadObject(Value)) return true;
-  if(ReadArray (Value)) return true;
-
-  if(ReadIndex+4 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "true", 4)){
-    ReadIndex += 4;
-    Value->Type = typeTrue;
-    return true;
-  }
-  if(ReadIndex+5 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "false", 5)){
-    ReadIndex += 5;
-    Value->Type = typeFalse;
-    return true;
-  }
-  if(ReadIndex+4 <= ReadSize && !strncmp(ReadBuffer+ReadIndex, "null", 4)){
-    ReadIndex += 4;
-    Value->Type = typeNull;
-    return true;
-  }
-  return false;
-}
-//------------------------------------------------------------------------------
-
-bool JSON::Parse(const char* json, unsigned Length){
-  Clear();
-
-  if(Length) ReadSize = Length;
-  else       ReadSize = strlen(json);
-
-  ReadLine   = 1;
-  ReadIndex  = 0;
-  ReadBuffer = json;
-
-  if(!ReadValue(this)){
-    ReadError("Cannot parse JSON file");
-    return false;
-  }
-  return true;
-}
-//------------------------------------------------------------------------------
-
-const char* JSON::Stringify(){
-  int  n, N;
-  char s[0x100];
-
-  switch(Type){
-    case typeNull:
-      Stringification = "null";
-      break;
-
-    case typeTrue:
-      Stringification = "true";
-      break;
-
-    case typeFalse:
-      Stringification = "false";
-      break;
-
-    case typeString:
-      Stringification  = '"';
-      for(n = 0; String[n]; n++){
-        switch(String[n]){
-          case  '"': Stringification += "\\\""   ; break;
-          case '\\': Stringification += "\\\\"   ; break;
-          case  '/': Stringification += "\\/"    ; break;
-          case '\b': Stringification += "\\b"    ; break;
-          case '\f': Stringification += "\\f"    ; break;
-          case '\n': Stringification += "\\n"    ; break;
-          case '\r': Stringification += "\\r"    ; break;
-          case '\t': Stringification += "\\t"    ; break;
-          default  : Stringification += String[n]; break;
+    if(readBuffer[readIndex] == '\\'){
+        readIndex++;
+        if(!readUnicodeSequence(string)){
+            readError("Incomplete Unicode escape sequence");
+            return false;
         }
-      }
-      Stringification += '"';
-      break;
+        return true;
+    }
+    return false;
+}
+//------------------------------------------------------------------------------
 
-    case typeNumber:
-      sprintf(s, "%.14g", Number);
-      Stringification = s;
-      break;
+bool Json::readIdentifierPart(std::string* string)
+{
+    if(readIdentifierStart(string)) return true;
 
-    case typeObject:
-      Stringification = '{';
-      n = 0;
-      N = Objects.size();
-      for(
-        auto Object = Objects.begin();
-        Object != Objects.end();
-        Object++
-      ){
-        Stringification += '"';
-        Stringification += Object->first;
-        Stringification += '"';
-        Stringification += ':';
-        Stringification += Object->second->Stringify();
-        n++;
-        if(n < N) Stringification += ",";
-      }
-      Stringification += '}';
-      break;
+    if('0' <= readBuffer[readIndex] && readBuffer[readIndex] <= '9'){
+        *string += readBuffer[readIndex++];
+        return true;
+    }
+    return false;
+}
+//------------------------------------------------------------------------------
 
-    case typeArray:
-      Stringification = "[";
-      for(size_t n = 0; n < Items.size(); n++){
-        Stringification += Items[n]->Stringify();
-        if(n < Items.size()-1) Stringification += ",";
-      }
-      Stringification += "]";
-      break;
+bool Json::readIdentifier(std::string* string)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
 
-    default:
-      break;
-  }
-  return Stringification.c_str();
+    *string = "";
+
+    if(!readIdentifierStart(string)) return false;
+
+    while(readIdentifierPart(string));
+
+    return true;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readString(std::string* value)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
+
+    bool doubleQuotes;
+    if     (readBuffer[readIndex] == '"' ) doubleQuotes = true;
+    else if(readBuffer[readIndex] == '\'') doubleQuotes = false;
+    else return false;
+    readIndex++;
+
+    *value = "";
+
+    while(readIndex < readSize){
+        switch(readBuffer[readIndex]){
+            case '"':
+                if(doubleQuotes){
+                    readIndex++;
+                    return true;
+                }
+                *value += readBuffer[readIndex];
+                break;
+
+            case '\'':
+                if(!doubleQuotes){
+                    readIndex++;
+                    return true;
+                }
+                *value += readBuffer[readIndex];
+                break;
+
+            case '\\':
+                readIndex++;
+                if(readIndex >= readSize){
+                    readError("Incomplete escape sequence");
+                    return false;
+                }
+                switch(readBuffer[readIndex]){
+                    case '"' : *value += '"' ; break;
+                    case '\'': *value += '\''; break;
+                    case '\\': *value += '\\'; break;
+                    case '/' : *value += '/' ; break;
+                    case 'b' : *value += '\b'; break;
+                    case 'f' : *value += '\f'; break;
+                    case 'n' : *value += '\n'; break;
+                    case 'r' : *value += '\r'; break;
+                    case 't' : *value += '\t'; break;
+                    case 'u' :
+                        if(!readUnicodeSequence(value)){
+                            readError("Incomplete Unicode escape sequence");
+                            return false;
+                        }
+                        break;
+                    case '\n':
+                        readLine++;
+                        if(readBuffer[readIndex+1] == '\r') readIndex++;
+                        break;
+                    case '\r':
+                        readLine++;
+                        if(readBuffer[readIndex+1] == '\n') readIndex++;
+                        break;
+
+                    default:
+                        readError("Unrecognised escape sequence");
+                        return false;
+                }
+                break;
+
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+                readError("Unexpected control character in string");
+                return false;
+
+            default:
+                *value += readBuffer[readIndex];
+                break;
+        }
+        readIndex++;
+    }
+    readError("Incomplete string");
+    return false;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readString(Json* value)
+{
+    if(readString(&(value->string))){
+        value->type = typeString;
+        return true;
+    }
+    return false;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readHexadecimal(Json* value, bool sign)
+{
+    double result = 0;
+
+    while(readIndex < readSize){
+        if      ('0' <= readBuffer[readIndex] && readBuffer[readIndex] <= '9'){
+            result *= 16.0;
+            result += readBuffer[readIndex++] - '0';
+        }else if('a' <= readBuffer[readIndex] && readBuffer[readIndex] <= 'f'){
+            result *= 16.0;
+            result += readBuffer[readIndex++] - 'a' + 10;
+        }else if('A' <= readBuffer[readIndex] && readBuffer[readIndex] <= 'F'){
+            result *= 16.0;
+            result += readBuffer[readIndex++] - 'A' + 10;
+        }else{
+            break;
+        }
+    }
+    value->number = sign ? -result : result;
+    return true;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readNumber(Json* value)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
+
+    if(readIndex+8 <= readSize && !strncmp(readBuffer+readIndex, "Infinity", 8)){
+        readIndex += 8;
+        value->type   = typeNumber;
+        value->number = 1.0/0.0;
+        return true;
+    }
+    if(readIndex+9 <= readSize && !strncmp(readBuffer+readIndex, "-Infinity", 9)){
+        readIndex += 9;
+        value->type   = typeNumber;
+        value->number = -1.0/0.0;
+        return true;
+    }
+    if(readIndex+3 <= readSize && !strncmp(readBuffer+readIndex, "NaN", 3)){
+        readIndex += 3;
+        value->type   = typeNumber;
+        value->number = 0.0/0.0;
+        return true;
+    }
+
+    bool sign         = false;
+    bool exponentSign = false;
+
+    if(readBuffer[readIndex] == '-'){
+        sign = true;
+        readIndex++;
+        if(readIndex >= readSize) return false;
+    }else if(readBuffer[readIndex] == '+'){
+        sign = false;
+        readIndex++;
+        if(readIndex >= readSize) return false;
+    }
+
+    if((readBuffer[readIndex] <  '0' || readBuffer[readIndex] > '9') &&
+            readBuffer[readIndex] != '.' ){
+        if(sign) readError("Incomplete number");
+        return false;
+    }
+
+    if(readIndex+2 <= readSize && !strncmp(readBuffer+readIndex, "0x", 2)){
+        readIndex += 2;
+        value->type = typeNumber;
+        return readHexadecimal(value, sign);
+    }
+    if(readIndex+2 <= readSize && !strncmp(readBuffer+readIndex, "0X", 2)){
+        readIndex += 2;
+        value->type = typeNumber;
+        return readHexadecimal(value, sign);
+    }
+
+    *value = 0;
+
+    double result   = 0;
+    double fraction = 0;
+    double exponent = 0;
+
+    if(readBuffer[readIndex] == '0'){
+        readIndex++;
+        if(readIndex >= readSize) return true;
+        if(readBuffer[readIndex] >= '0' && readBuffer[readIndex] <= '9'){
+            readError("Invalid number format");
+            return false;
+        }
+    }
+
+    while(readIndex < readSize){
+        if(readBuffer[readIndex] < '0' || readBuffer[readIndex] > '9') break;
+        result = 10.0*result + (readBuffer[readIndex] - '0');
+        readIndex++;
+    }
+
+    if(readBuffer[readIndex] == '.'){
+        readIndex++;
+        fraction = 0.1;
+        while(readIndex < readSize){
+            if(readBuffer[readIndex] < '0' || readBuffer[readIndex] > '9') break;
+            result += fraction * (readBuffer[readIndex] - '0');
+            fraction /= 10.0;
+            readIndex++;
+        }
+    }
+
+    if(readBuffer[readIndex] == 'e' || readBuffer[readIndex] == 'e'){
+        readIndex++;
+        if(readIndex >= readSize){
+            readError("Incomplete number");
+            return false;
+        }
+        if(readBuffer[readIndex] == '-' || readBuffer[readIndex] == '+'){
+            exponentSign = true;
+            readIndex++;
+        }
+        if(readIndex >= readSize){
+            readError("Incomplete number");
+            return false;
+        }
+        while(readIndex < readSize){
+            if(readBuffer[readIndex] < '0' || readBuffer[readIndex] > '9') break;
+            exponent = 10.0*exponent + (readBuffer[readIndex] - '0');
+            readIndex++;
+        }
+    }
+
+    if(exponentSign)    exponent *= -1.0;
+    if(exponent != 0.0) result   *= pow(10.0, exponent);
+    if(sign)            result   *= -1.0;
+
+    *value = result;
+    return true;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readObject(Json* objectList)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
+
+    if(readBuffer[readIndex] != '{') return false;
+    readIndex++;
+
+    objectList->clear();
+    objectList->type = typeObject;
+
+    std::string name;
+
+    readSpace();
+    if(readIndex < readSize && readBuffer[readIndex] == '}'){
+        readIndex++;
+        return true;
+    }
+
+    while(readIndex < readSize){
+        if(!readString(&name)){
+            if(!readIdentifier(&name)){
+                readError("String or Identifier expected");
+                return false;
+            }
+        }
+        readSpace();
+        if(readBuffer[readIndex] != ':'){
+            readError("\":\" expected");
+            return false;
+        }
+        readIndex++;
+        if(readIndex >= readSize){
+            readError("Incomplete object");
+            return false;
+        }
+        if(!readValue(objectList->addOrUpdate(name.c_str()))){
+            readError("Value expected");
+            return false;
+        }
+        readSpace();
+        if(readIndex < readSize && readBuffer[readIndex] == '}'){
+            readIndex++;
+            return true;
+        }
+        if(readIndex >= readSize || readBuffer[readIndex] != ','){
+            readError("\",\" expected");
+            return false;
+        }
+        readIndex++;
+        readSpace();
+        if(readIndex < readSize && readBuffer[readIndex] == '}'){
+            readIndex++;
+            return true;
+        }
+    }
+    readError("Incomplete object");
+    return false;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readArray(Json* objectList)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
+
+    if(readBuffer[readIndex] != '[') return false;
+    readIndex++;
+
+    objectList->clear();
+    objectList->type = typeArray;
+
+    Json value;
+
+    readSpace();
+    if(readIndex < readSize && readBuffer[readIndex] == ']'){
+        readIndex++;
+        return true;
+    }
+
+    while(readIndex < readSize){
+        if(!readValue(&value)){
+            readError("Value expected");
+            return false;
+        }
+        objectList->append(value);
+        readSpace();
+        if(readIndex < readSize && readBuffer[readIndex] == ']'){
+            readIndex++;
+            return true;
+        }
+        readSpace();
+        if(readIndex >= readSize || readBuffer[readIndex] != ','){
+            readError("\",\" expected");
+            return false;
+        }
+        readIndex++;
+        readSpace();
+        if(readIndex < readSize && readBuffer[readIndex] == ']'){
+            readIndex++;
+            return true;
+        }
+    }
+    readError("Incomplete object");
+    return false;
+}
+//------------------------------------------------------------------------------
+
+bool Json::readValue(Json* value)
+{
+    readSpace();
+    if(readIndex >= readSize) return false;
+
+    if(readString(value)) return true;
+    if(readNumber(value)) return true;
+    if(readObject(value)) return true;
+    if(readArray (value)) return true;
+
+    if(readIndex+4 <= readSize && !strncmp(readBuffer+readIndex, "true", 4)){
+        readIndex += 4;
+        value->type = typeTrue;
+        return true;
+    }
+    if(readIndex+5 <= readSize && !strncmp(readBuffer+readIndex, "false", 5)){
+        readIndex += 5;
+        value->type = typeFalse;
+        return true;
+    }
+    if(readIndex+4 <= readSize && !strncmp(readBuffer+readIndex, "null", 4)){
+        readIndex += 4;
+        value->type = typeNull;
+        return true;
+    }
+    return false;
+}
+//------------------------------------------------------------------------------
+
+bool Json::parse(const char* json, unsigned length)
+{
+    clear();
+
+    if(length) readSize = length;
+    else       readSize = strlen(json);
+
+    readLine   = 1;
+    readIndex  = 0;
+    readBuffer = json;
+
+    if(!readValue(this)){
+        readError("Cannot parse JSON file");
+        return false;
+    }
+    return true;
+}
+//------------------------------------------------------------------------------
+
+const char* Json::stringify()
+{
+    int  n, N;
+    char s[0x100];
+
+    switch(type){
+        case typeNull:
+            stringification = "null";
+            break;
+
+        case typeTrue:
+            stringification = "true";
+            break;
+
+        case typeFalse:
+            stringification = "false";
+            break;
+
+        case typeString:
+            stringification  = '"';
+            for(n = 0; string[n]; n++){
+                switch(string[n]){
+                    case  '"': stringification += "\\\""   ; break;
+                    case '\\': stringification += "\\\\"   ; break;
+                    case  '/': stringification += "\\/"    ; break;
+                    case '\b': stringification += "\\b"    ; break;
+                    case '\f': stringification += "\\f"    ; break;
+                    case '\n': stringification += "\\n"    ; break;
+                    case '\r': stringification += "\\r"    ; break;
+                    case '\t': stringification += "\\t"    ; break;
+                    default  : stringification += string[n]; break;
+                }
+            }
+            stringification += '"';
+            break;
+
+        case typeNumber:
+            sprintf(s, "%.14g", number);
+            stringification = s;
+            break;
+
+        case typeObject:
+            stringification = '{';
+            n = 0;
+            N = objects.size();
+            for(
+                auto object = objects.begin();
+                object != objects.end();
+                object++
+            ){
+                stringification += '"';
+                stringification += object->first;
+                stringification += '"';
+                stringification += ':';
+                stringification += object->second->stringify();
+                n++;
+                if(n < N) stringification += ",";
+            }
+            stringification += '}';
+            break;
+
+        case typeArray:
+            stringification = "[";
+            for(size_t n = 0; n < items.size(); n++){
+                stringification += items[n]->stringify();
+                if(n < items.size()-1) stringification += ",";
+            }
+            stringification += "]";
+            break;
+
+        default:
+            break;
+    }
+    return stringification.c_str();
 }
 //------------------------------------------------------------------------------
 

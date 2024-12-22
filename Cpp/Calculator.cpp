@@ -19,2750 +19,2780 @@ using namespace std;
 #define pi 3.141592653589793238463L
 //------------------------------------------------------------------------------
 
-void operator+= (string& S, double d){
-  char s[0x100]; sprintf(s, "%0.12lg", d); S += s;
+void operator+= (string& S, double d)
+{
+    char s[0x100]; sprintf(s, "%0.12lg", d); S += s;
 }
 //------------------------------------------------------------------------------
 
-void operator+= (string& S, int i){
-  char s[0x100]; sprintf(s, "%d", i); S += s;
+void operator+= (string& S, int i)
+{
+    char s[0x100]; sprintf(s, "%d", i); S += s;
 }
 //------------------------------------------------------------------------------
 
-void operator+= (string& S, void* p){
-  char s[0x100]; sprintf(s, "%p", p); S += s;
+void operator+= (string& S, void* p)
+{
+    char s[0x100]; sprintf(s, "%p", p); S += s;
 }
 //------------------------------------------------------------------------------
 
-long double fix(long double x){
-  if(x < 0.0) return ceill(x);
-  else        return floorl(x);
+long double fix(long double x)
+{
+    if(x < 0.0) return ceill(x);
+    else        return floorl(x);
 }
 //------------------------------------------------------------------------------
 
-CALCULATOR::CALCULATOR(){
-  Tree    = 0;
-  Measure = Radians;
+Calculator::Calculator()
+{
+    tree    = 0;
+    measure = Radians;
 
-  Constants["e"        ] = e;
-  Constants["pi"       ] = pi;
-  Constants["\\c"      ] = 2.99792458e8L;
-  Constants["\\G"      ] = 6.67259e-11L;
-  Constants["\\g"      ] = 9.80665L;
-  Constants["\\me"     ] = 9.1093897e-31L;
-  Constants["\\mp"     ] = 1.6726231e-27L;
-  Constants["\\mn"     ] = 1.6749286e-27L;
-  Constants["\\u"      ] = 1.6605402e-27L;
-  Constants["\\e"      ] = 1.60217646e-19L;
-  Constants["\\h"      ] = 6.6260689633e-34L;
-  Constants["\\k"      ] = 1.380650424e-23L;
-  Constants["\\mu"     ] = pi*4e-7L;
-  Constants["\\epsilon"] = 8.854187817e-12L;
-  Constants["\\Phi"    ] = 2.06783461e-15L;
-  Constants["\\NA"     ] = 6.0221417930e23L;
-  Constants["\\R"      ] = 8.31447215L;
-  Constants["\\rhoAl"  ] = 26.53e-9L;
-  Constants["\\rhoCu"  ] = 16.78e-9L;
-  Constants["\\F"      ] = 9.6485304e4L;
-  Constants["\\AU"     ] = 1.4959787e11L;
-  Constants["\\pc"     ] = 3.0856776e16L;
-  Constants["\\mil"    ] = 25.4e-6L;
+    constants["e"        ] = e;
+    constants["pi"       ] = pi;
+    constants["\\c"      ] = 2.99792458e8L;
+    constants["\\G"      ] = 6.67259e-11L;
+    constants["\\g"      ] = 9.80665L;
+    constants["\\me"     ] = 9.1093897e-31L;
+    constants["\\mp"     ] = 1.6726231e-27L;
+    constants["\\mn"     ] = 1.6749286e-27L;
+    constants["\\u"      ] = 1.6605402e-27L;
+    constants["\\e"      ] = 1.60217646e-19L;
+    constants["\\h"      ] = 6.6260689633e-34L;
+    constants["\\k"      ] = 1.380650424e-23L;
+    constants["\\mu"     ] = pi*4e-7L;
+    constants["\\epsilon"] = 8.854187817e-12L;
+    constants["\\Phi"    ] = 2.06783461e-15L;
+    constants["\\NA"     ] = 6.0221417930e23L;
+    constants["\\R"      ] = 8.31447215L;
+    constants["\\rhoAl"  ] = 26.53e-9L;
+    constants["\\rhoCu"  ] = 16.78e-9L;
+    constants["\\F"      ] = 9.6485304e4L;
+    constants["\\AU"     ] = 1.4959787e11L;
+    constants["\\pc"     ] = 3.0856776e16L;
+    constants["\\mil"    ] = 25.4e-6L;
 }
 //------------------------------------------------------------------------------
 
-CALCULATOR::~CALCULATOR(){
-  DeleteTree(Tree);
+Calculator::~Calculator()
+{
+    deleteTree(tree);
 }
 //------------------------------------------------------------------------------
 
-CALCULATOR::NODE::NODE(){
-  Operation = Val;
-  Value     = 0.0;
-  Left      = 0;
-  Right     = 0;
-  Other     = 0;
+Calculator::Node::Node()
+{
+    operation = Val;
+    value     = 0.0;
+    left      = 0;
+    right     = 0;
+    other     = 0;
 }
 //------------------------------------------------------------------------------
 
-void CALCULATOR::DeleteTree(NODE* Root){
-  if(Root){
-    DeleteTree(Root->Left );
-    DeleteTree(Root->Right);
-    DeleteTree(Root->Other);
-    delete Root;
-  }
+void Calculator::deleteTree(Node* root)
+{
+    if(root){
+        deleteTree(root->left );
+        deleteTree(root->right);
+        deleteTree(root->other);
+        delete root;
+    }
 }
 //------------------------------------------------------------------------------
 
-CALCULATOR::NODE* CALCULATOR::CopyNode(NODE* Root){
-  NODE* N = new NODE;
-  if(Root){
-    N->Operation = Root->Operation;
-    N->Value     = Root->Value;
-    N->Left      = CopyNode(Root->Left );
-    N->Right     = CopyNode(Root->Right);
-    N->Other     = CopyNode(Root->Other);
-    N->Name =              (Root->Name );
-    return N;
-  }else{
-    return 0;
-  }
-}
-//------------------------------------------------------------------------------
-
-CALCULATOR::NODE* CALCULATOR::NewNode(NODE* Root){
-  NODE* N = new NODE;
-  if(Root){
-    N->Operation = Root->Operation;
-    N->Value     = Root->Value;
-    N->Left      = Root->Left;
-    N->Right     = Root->Right;
-    N->Other     = Root->Other;
-    N->Name      = Root->Name;
-  }
-  return N;
-}
-//------------------------------------------------------------------------------
-
-bool CALCULATOR::ConditionOp(NODE* Root){
-  if(Buffer[Index] == '['){
-    Index++;
-    Root->Operation = Condition;
-    Root->Left  = NewNode();
-    Root->Right = NewNode();
-    if(!LogicOp(Root->Left)) return false;
-    if(Buffer[Index++] != ']') return false;
-    if(!LogicOp(Root->Right)) return false;
-    if(Buffer[Index] == 0){
-      return true;
+Calculator::Node* Calculator::copyNode(Node* root)
+{
+    Node* N = new Node;
+    if(root){
+        N->operation = root->operation;
+        N->value     = root->value;
+        N->left      = copyNode(root->left );
+        N->right     = copyNode(root->right);
+        N->other     = copyNode(root->other);
+        N->name      =         (root->name );
+        return N;
     }else{
-      Root->Other = NewNode();
-      return ConditionOp(Root->Other);
+        return 0;
     }
-  }else{
-    return LogicOp(Root);
-  }
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::LogicOp(NODE* Root){
-  NODE* N;
+Calculator::Node* Calculator::newNode(Node* root)
+{
+    Node* N = new Node;
+    if(root){
+        N->operation = root->operation;
+        N->value     = root->value;
+        N->left      = root->left;
+        N->right     = root->right;
+        N->other     = root->other;
+        N->name      = root->name;
+    }
+    return N;
+}
+//------------------------------------------------------------------------------
 
-  if(AddOp(Root)){
-    while(Buffer[Index]){
-      switch(Buffer[Index]){
-        case '>':
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          if(Buffer[Index+1] == '='){
-            Root->Operation = GreaterEqual;
-            Index += 2;
-          }else{
-            Root->Operation = Greater;
-            Index += 1;
-          }
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case '<':
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          if(Buffer[Index+1] == '='){
-            Root->Operation = LessEqual;
-            Index += 2;
-          }else{
-            Root->Operation = Less;
-            Index += 1;
-          }
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case '~':
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          if(Buffer[Index+1] == '='){
-            Root->Operation = NotEqual;
-            Index += 2;
-          }else{
-            return false;
-          }
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case '=':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Equal;
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case '&':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = And;
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case '|':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Or;
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case ':':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Xor;
-          if(!AddOp(Root->Right)) return false;
-          break;
-        case 'a':
-          if((Buffer[Index+1] == 'n') && (Buffer[Index+2] == 'd')){
-            Index += 3;
-            N = NewNode(Root);
-            Root->Left  = N;
-            Root->Right = NewNode();
-            Root->Operation = bAnd;
-            if(!AddOp(Root->Right)) return false;
-          }else{
+bool Calculator::conditionOp(Node* root)
+{
+    if(buffer[index] == '['){
+        index++;
+        root->operation = Condition;
+        root->left  = newNode();
+        root->right = newNode();
+        if(!logicOp(root->left)) return false;
+        if(buffer[index++] != ']') return false;
+        if(!logicOp(root->right)) return false;
+        if(buffer[index] == 0){
             return true;
-          }
-          break;
-        case 'o':
-          if(Buffer[Index+1] == 'r'){
-            Index += 2;
-            N = NewNode(Root);
-            Root->Left  = N;
-            Root->Right = NewNode();
-            Root->Operation = bOr;
-            if(!AddOp(Root->Right)) return false;
-          }else{
-            return true;
-          }
-          break;
-        case 'x':
-          if((Buffer[Index+1] == 'o') && (Buffer[Index+2] == 'r')){
-            Index += 3;
-            N = NewNode(Root);
-            Root->Left  = N;
-            Root->Right = NewNode();
-            Root->Operation = bXor;
-            if(!AddOp(Root->Right)) return false;
-          }else{
-            return true;
-          }
-          break;
-        default:
-          return true;
-      }
+        }else{
+            root->other = newNode();
+            return conditionOp(root->other);
+        }
+    }else{
+        return logicOp(root);
     }
-  }else{
-    return false;
-  }
-  return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::AddOp(NODE* Root){
-  NODE* N;
+bool Calculator::logicOp(Node* root)
+{
+    Node* N;
 
-  if(MulOp(Root)){
-    while(Buffer[Index]){
-      switch(Buffer[Index]){
-        case '+':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Add;
-          if(!MulOp(Root->Right)) return false;
-          break;
-        case '-':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Subtract;
-          if(!MulOp(Root->Right)) return false;
-          break;
-        default:
-          return true;
-      }
+    if(addOp(root)){
+        while(buffer[index]){
+            switch(buffer[index]){
+                case '>':
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    if(buffer[index+1] == '='){
+                        root->operation = GreaterEqual;
+                        index += 2;
+                    }else{
+                        root->operation = Greater;
+                        index += 1;
+                    }
+                    if(!addOp(root->right)) return false;
+                    break;
+                case '<':
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    if(buffer[index+1] == '='){
+                        root->operation = LessEqual;
+                        index += 2;
+                    }else{
+                        root->operation = Less;
+                        index += 1;
+                    }
+                    if(!addOp(root->right)) return false;
+                    break;
+                case '~':
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    if(buffer[index+1] == '='){
+                        root->operation = NotEqual;
+                        index += 2;
+                    }else{
+                        return false;
+                    }
+                    if(!addOp(root->right)) return false;
+                    break;
+                case '=':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Equal;
+                    if(!addOp(root->right)) return false;
+                    break;
+                case '&':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = And;
+                    if(!addOp(root->right)) return false;
+                    break;
+                case '|':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Or;
+                    if(!addOp(root->right)) return false;
+                    break;
+                case ':':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Xor;
+                    if(!addOp(root->right)) return false;
+                    break;
+                case 'a':
+                    if((buffer[index+1] == 'n') && (buffer[index+2] == 'd')){
+                        index += 3;
+                        N = newNode(root);
+                        root->left  = N;
+                        root->right = newNode();
+                        root->operation = bAnd;
+                        if(!addOp(root->right)) return false;
+                    }else{
+                        return true;
+                    }
+                    break;
+                case 'o':
+                    if(buffer[index+1] == 'r'){
+                        index += 2;
+                        N = newNode(root);
+                        root->left  = N;
+                        root->right = newNode();
+                        root->operation = bOr;
+                        if(!addOp(root->right)) return false;
+                    }else{
+                        return true;
+                    }
+                    break;
+                case 'x':
+                    if((buffer[index+1] == 'o') && (buffer[index+2] == 'r')){
+                        index += 3;
+                        N = newNode(root);
+                        root->left  = N;
+                        root->right = newNode();
+                        root->operation = bXor;
+                        if(!addOp(root->right)) return false;
+                    }else{
+                        return true;
+                    }
+                    break;
+                default:
+                    return true;
+            }
+        }
+    }else{
+        return false;
     }
-  }else{
-    return false;
-  }
-  return true;
+    return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::MulOp(NODE* Root){
-  NODE* N;
+bool Calculator::addOp(Node* root)
+{
+    Node* N;
 
-  if(PowerOp(Root)){
-    while(Buffer[Index]){
-      switch(Buffer[Index]){
-        case '*':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Multiply;
-          if(!PowerOp(Root->Right)) return false;
-          break;
-        case '/':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Divide;
-          if(!PowerOp(Root->Right)) return false;
-          break;
-        case '%':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Remainder;
-          if(!PowerOp(Root->Right)) return false;
-          break;
-        case 'r':
-          if((Buffer[Index+1] == 'e') && (Buffer[Index+2] == 'm')){
-            Index += 3;
-            N = NewNode(Root);
-            Root->Left  = N;
-            Root->Right = NewNode();
-            Root->Operation = Remainder;
-            if(!PowerOp(Root->Right)) return false;
-          }else{
-            return true;
-          }
-          break;
-        default:
-          return true;
-      }
+    if(mulOp(root)){
+        while(buffer[index]){
+            switch(buffer[index]){
+                case '+':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Add;
+                    if(!mulOp(root->right)) return false;
+                    break;
+                case '-':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Subtract;
+                    if(!mulOp(root->right)) return false;
+                    break;
+                default:
+                    return true;
+            }
+        }
+    }else{
+        return false;
     }
-  }else{
-    return false;
-  }
-  return true;
+    return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::PowerOp(NODE* Root){
-  NODE* N;
+bool Calculator::mulOp(Node* root)
+{
+    Node* N;
 
-  if(Function(Root)){
-    while(Buffer[Index]){
-      switch(Buffer[Index]){
-        case '^':
-          Index++;
-          N = NewNode(Root);
-          Root->Left  = N;
-          Root->Right = NewNode();
-          Root->Operation = Power;
-          if(!Function(Root->Right)) return false;
-          break;
-        default:
-          return true;
-      }
+    if(powerOp(root)){
+        while(buffer[index]){
+            switch(buffer[index]){
+                case '*':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Multiply;
+                    if(!powerOp(root->right)) return false;
+                    break;
+                case '/':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Divide;
+                    if(!powerOp(root->right)) return false;
+                    break;
+                case '%':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Remainder;
+                    if(!powerOp(root->right)) return false;
+                    break;
+                case 'r':
+                    if((buffer[index+1] == 'e') && (buffer[index+2] == 'm')){
+                        index += 3;
+                        N = newNode(root);
+                        root->left  = N;
+                        root->right = newNode();
+                        root->operation = Remainder;
+                        if(!powerOp(root->right)) return false;
+                    }else{
+                        return true;
+                    }
+                    break;
+                default:
+                    return true;
+            }
+        }
+    }else{
+        return false;
     }
-  }else{
-    return false;
-  }
-  return true;
+    return true;
 }
 //------------------------------------------------------------------------------
 
-void CALCULATOR::FuncName(string* Name){
-  *Name = "";
+bool Calculator::powerOp(Node* root)
+{
+    Node* N;
 
-  int i = Index;
-  while(
-    ((Buffer[i] >= 'a') && (Buffer[i] <= 'z')) ||
-    ((Buffer[i] >= 'A') && (Buffer[i] <= 'Z')) ||
-    ( Buffer[i] == '\\'                      )
-  ){
-    *Name += Buffer[i++];
-  }
+    if(function(root)){
+        while(buffer[index]){
+            switch(buffer[index]){
+                case '^':
+                    index++;
+                    N = newNode(root);
+                    root->left  = N;
+                    root->right = newNode();
+                    root->operation = Power;
+                    if(!function(root->right)) return false;
+                    break;
+                default:
+                    return true;
+            }
+        }
+    }else{
+        return false;
+    }
+    return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::Function(NODE* Root){
-  NODE*  N;
-  string s;
-  bool   Minus = false;
+void Calculator::funcName(string* name)
+{
+    *name = "";
 
-  if(Buffer[Index] == '-'){
-    Index++;
-    Minus = true;
-  }else if(Buffer[Index] == '~'){
-    Index++;
-    Root->Operation = Not;
-    Root->Right = NewNode();
-    return Factorial(Root->Right);
-  }
-
-  FuncName(&s);
-
-  if((Buffer[Index] == 'd') && (Buffer[Index+1] == '(')){
-    Index++;
-    if(!LogicOp(Root)) return false;
-    if(Buffer[Index++] != 'd') return false;
-    N = NewNode();
-    if(!Value(N)) return false;
-    if(N->Operation != Var) return false;
-    Diff(Root, N->Name.c_str());
-    DeleteTree(N);
-  }else if(s == "log"){
-    Index += 3;
-    Root->Operation = Log;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "lb"){
-    Index += 2;
-    Root->Operation = Log2;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "ln"){
-    Index += 2;
-    Root->Operation = Ln;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "abs"){
-    Index += 3;
-    Root->Operation = Abs;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "round"){
-    Index += 5;
-    Root->Operation = Round;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "fix"){
-    Index += 3;
-    Root->Operation = Fix;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "floor"){
-    Index += 5;
-    Root->Operation = Floor;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "ceil"){
-    Index += 4;
-    Root->Operation = Ceil;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "rand"){
-    Index += 4;
-    Root->Operation = Rand;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "sin"){
-    Index += 3;
-    Root->Operation = Sin;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "asin"){
-    Index += 4;
-    Root->Operation = ASin;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "cos"){
-    Index += 3;
-    Root->Operation = Cos;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acos"){
-    Index += 4;
-    Root->Operation = ACos;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "tan"){
-    Index += 3;
-    Root->Operation = Tan;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "atan"){
-    Index += 4;
-    Root->Operation = ATan;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "sec"){
-    Index += 3;
-    Root->Operation = Sec;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "asec"){
-    Index += 4;
-    Root->Operation = ASec;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "cosec"){
-    Index += 5;
-    Root->Operation = Cosec;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acosec"){
-    Index += 6;
-    Root->Operation = ACosec;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "cot"){
-    Index += 3;
-    Root->Operation = Cot;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acot"){
-    Index += 4;
-    Root->Operation = ACot;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "sinh"){
-    Index += 4;
-    Root->Operation = Sinh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "asinh"){
-    Index += 5;
-    Root->Operation = ASinh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "cosh"){
-    Index += 4;
-    Root->Operation = Cosh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acosh"){
-    Index += 5;
-    Root->Operation = ACosh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "tanh"){
-    Index += 4;
-    Root->Operation = Tanh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "atanh"){
-    Index += 5;
-    Root->Operation = ATanh;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "sech"){
-    Index += 4;
-    Root->Operation = Sech;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "asech"){
-    Index += 5;
-    Root->Operation = ASech;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "cosech"){
-    Index += 6;
-    Root->Operation = Cosech;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acosech"){
-    Index += 7;
-    Root->Operation = ACosech;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "coth"){
-    Index += 4;
-    Root->Operation = Coth;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "acoth"){
-    Index += 5;
-    Root->Operation = ACoth;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else if(s == "not"){
-    Index += 3;
-    Root->Operation = bNot;
-    Root->Right = NewNode();
-    if(!Factorial(Root->Right)) return false;
-  }else{
-    if(Minus) Index--;
-    return Factorial(Root);
-  }
-
-  if(Minus){
-  N = NewNode(Root);
-  Root->Operation = Multiply;
-  Root->Left = NewNode();
-  Root->Left->Value = -1.;
-  Root->Right = N;
-  }
-
-  return true;
+    int i = index;
+    while(
+        ((buffer[i] >= 'a') && (buffer[i] <= 'z')) ||
+        ((buffer[i] >= 'A') && (buffer[i] <= 'Z')) ||
+        ( buffer[i] == '\\'                      )
+    ){
+        *name += buffer[i++];
+    }
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::Factorial(NODE* Root){
-NODE* N;
-if(Value(Root)){
-  if(Buffer[Index] == '!'){
-    Index++;
-    N = NewNode(Root);
-    Root->Left      = 0;
-    Root->Right     = N;
-    Root->Operation = Fact;
-  }
+bool Calculator::function(Node* root)
+{
+    Node*  N;
+    string s;
+    bool   Minus = false;
+
+    if(buffer[index] == '-'){
+        index++;
+        Minus = true;
+    }else if(buffer[index] == '~'){
+        index++;
+        root->operation = Not;
+        root->right = newNode();
+        return Factorial(root->right);
+    }
+
+    funcName(&s);
+
+    if((buffer[index] == 'd') && (buffer[index+1] == '(')){
+        index++;
+        if(!logicOp(root)) return false;
+        if(buffer[index++] != 'd') return false;
+        N = newNode();
+        if(!value(N)) return false;
+        if(N->operation != Var) return false;
+        diff(root, N->name.c_str());
+        deleteTree(N);
+    }else if(s == "log"){
+        index += 3;
+        root->operation = Log;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "lb"){
+        index += 2;
+        root->operation = Log2;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "ln"){
+        index += 2;
+        root->operation = Ln;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "abs"){
+        index += 3;
+        root->operation = Abs;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "round"){
+        index += 5;
+        root->operation = Round;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "fix"){
+        index += 3;
+        root->operation = Fix;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "floor"){
+        index += 5;
+        root->operation = Floor;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "ceil"){
+        index += 4;
+        root->operation = Ceil;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "rand"){
+        index += 4;
+        root->operation = Rand;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "sin"){
+        index += 3;
+        root->operation = Sin;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "asin"){
+        index += 4;
+        root->operation = ASin;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "cos"){
+        index += 3;
+        root->operation = Cos;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acos"){
+        index += 4;
+        root->operation = ACos;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "tan"){
+        index += 3;
+        root->operation = Tan;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "atan"){
+        index += 4;
+        root->operation = ATan;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "sec"){
+        index += 3;
+        root->operation = Sec;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "asec"){
+        index += 4;
+        root->operation = ASec;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "cosec"){
+        index += 5;
+        root->operation = Cosec;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acosec"){
+        index += 6;
+        root->operation = ACosec;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "cot"){
+        index += 3;
+        root->operation = Cot;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acot"){
+        index += 4;
+        root->operation = ACot;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "sinh"){
+        index += 4;
+        root->operation = Sinh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "asinh"){
+        index += 5;
+        root->operation = ASinh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "cosh"){
+        index += 4;
+        root->operation = Cosh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acosh"){
+        index += 5;
+        root->operation = ACosh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "tanh"){
+        index += 4;
+        root->operation = Tanh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "atanh"){
+        index += 5;
+        root->operation = ATanh;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "sech"){
+        index += 4;
+        root->operation = Sech;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "asech"){
+        index += 5;
+        root->operation = ASech;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "cosech"){
+        index += 6;
+        root->operation = Cosech;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acosech"){
+        index += 7;
+        root->operation = ACosech;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "coth"){
+        index += 4;
+        root->operation = Coth;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "acoth"){
+        index += 5;
+        root->operation = ACoth;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else if(s == "not"){
+        index += 3;
+        root->operation = bNot;
+        root->right = newNode();
+        if(!Factorial(root->right)) return false;
+    }else{
+        if(Minus) index--;
+        return Factorial(root);
+    }
+
+    if(Minus){
+    N = newNode(root);
+    root->operation = Multiply;
+    root->left = newNode();
+    root->left->value = -1.;
+    root->right = N;
+    }
+
+    return true;
+}
+//------------------------------------------------------------------------------
+
+bool Calculator::Factorial(Node* root)
+{
+Node* N;
+if(value(root))
+{
+    if(buffer[index] == '!'){
+        index++;
+        N = newNode(root);
+        root->left      = 0;
+        root->right     = N;
+        root->operation = Fact;
+    }
 }else{
-  return false;
+    return false;
 }
 return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::Exponent(NODE* Root){
-  int  s = 1;
-  int  i;
-  bool Binary;
+bool Calculator::Exponent(Node* root)
+{
+    int  s = 1;
+    int  i;
+    bool Binary;
 
-  if(Buffer[Index] == 'e' || Buffer[Index] == 'E') Binary = false;
-  else if(Buffer[Index] == 'p' || Buffer[Index] == 'P') Binary = true;
-  else return true; // It's not an exponent, but not an error either
-  Index++;
+    if     (buffer[index] == 'e' || buffer[index] == 'E') Binary = false;
+    else if(buffer[index] == 'p' || buffer[index] == 'P') Binary = true;
+    else return true; // It's not an exponent, but not an error either
+    index++;
 
-  s = 1;
-  if(Buffer[Index] == '+'){
-    Index++;
-  }else if(Buffer[Index] == '-'){
-    Index++;
-    s = -1;
-  }
-  i = 0;
-  while((Buffer[Index] >= '0') && (Buffer[Index] <= '9')){
-    i = i * 10 + (Buffer[Index] - '0');
-    Index++;
-  }
-  i *= s;
+    s = 1;
+    if(buffer[index] == '+'){
+        index++;
+    }else if(buffer[index] == '-'){
+        index++;
+        s = -1;
+    }
+    i = 0;
+    while((buffer[index] >= '0') && (buffer[index] <= '9')){
+        i = i * 10 + (buffer[index] - '0');
+        index++;
+    }
+    i *= s;
 
-  if(Binary) Root->Value *= pow( 2.0, i);
-  else       Root->Value *= pow(10.0, i);
+    if(Binary) root->value *= pow( 2.0, i);
+    else       root->value *= pow(10.0, i);
 
-  return true;
+    return true;
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::Value(NODE* Root){
-  bool        Minus = false;
-  string      s;
-  NODE*       N;
-  long double f;
+bool Calculator::value(Node* root)
+{
+    bool        Minus = false;
+    string      s;
+    Node*       N;
+    long double f;
 
-  if(Buffer[Index] == '-'){
-    Index++;
-    Minus = true;
-  }
-
-  if((Buffer[Index] == '0') && (Buffer[Index+1] == 'x')){
-    Index += 2;
-    f = 0;
-    while(((Buffer[Index] >= '0') && (Buffer[Index] <= '9')) ||
-    ((Buffer[Index] >= 'a') && (Buffer[Index] <= 'f')) ||
-    ((Buffer[Index] >= 'A') && (Buffer[Index] <= 'F')) ){
-      if(Buffer[Index] <= '9'){
-        f = f * 16. + (Buffer[Index] - '0');
-      }else if(Buffer[Index] <= 'F'){
-        f = f * 16. + (Buffer[Index] - 'A' + 10.);
-      }else{
-        f = f * 16. + (Buffer[Index] - 'a' + 10.);
-      }
-      Index++;
+    if(buffer[index] == '-'){
+        index++;
+        Minus = true;
     }
-    if(Minus) f *= -1.;
-    Root->Operation = Val;
-    Root->Value     = f;
-    if(!Exponent(Root)) return false;
 
-  }else if((Buffer[Index] == '0') && (Buffer[Index+1] == 'b')){
-    Index += 2;
-    f = 0;
-    while(Buffer[Index] == '0' || Buffer[Index] == '1'){
-      f = f * 2. + Buffer[Index] - '0';
-      Index++;
-    }
-    if(Minus) f *= -1.;
-    Root->Operation = Val;
-    Root->Value     = f;
-    if(!Exponent(Root)) return false;
-
-  }else if(((Buffer[Index] >= '0') && (Buffer[Index] <= '9')) ||
-  ((Buffer[Index] == '.') || (Buffer[Index] == ',')) ){
-    if(!Float(&f)) return false;
-    if(Minus) f *= -1.;
-    Root->Operation = Val;
-    Root->Value     = f;
-    if(!Exponent(Root)) return false;
-
-  }else if(Buffer[Index] == '('){
-    Index++;
-    if(!LogicOp(Root)) return false;
-    if(Buffer[Index++] != ')') return false;
-    if(Minus){
-      N = NewNode(Root);
-      Root->Operation   = Multiply;
-      Root->Left        = NewNode();
-      Root->Left->Value = -1.;
-      Root->Right       = N;
-    }
-  }else{
-    FuncName(&s);
-    if(s.length()){
-      auto Constant = Constants.find(s);
-      if(Constant != Constants.end()){
-        Index += Constant->first.length();
-        Root->Operation = Val;
-        Root->Value = Constant->second;
-        if(Minus) Root->Value *= -1.;
-
-      }else{
-        Index += s.length();
-        Root->Operation = Var;
-        Root->Name      = s;
-        if(Minus){
-          N = NewNode(Root);
-          Root->Operation   = Multiply;
-          Root->Left        = NewNode();
-          Root->Left->Value = -1.;
-          Root->Right       = N;
-        }
-      }
-    }else{
-      return false;
-    }
-  }
-  return true;
-}
-//------------------------------------------------------------------------------
-
-bool CALCULATOR::Float(long double* f){
-  int s = 1;
-  int i;
-  long double temp;
-
-  temp = 0.0;
-  while((Buffer[Index] >= '0') && (Buffer[Index] <= '9')){
-    temp = temp * 10. + (Buffer[Index] - '0');
-    Index++;
-  }
-  temp *= s;
-
-  if((Buffer[Index] == '.') || (Buffer[Index] == ',')){
-    Index++;
-    i = -1;
-    while((Buffer[Index] >= '0') && (Buffer[Index] <= '9')){
-      temp += (Buffer[Index] - '0') * pow(10., i--);
-      Index++;
-    }
-  }
-  *f = temp;
-
-  return true;
-}
-//------------------------------------------------------------------------------
-
-void CALCULATOR::BuildTree(const char* Formula){
-  DeleteTree(Tree);
-  Tree = 0;
-  int j, q;
-
-  for(j = 0; Formula[j]; j++);
-  Buffer = new char[j+1];
-
-  q = 0;
-  for(j = 0; Formula[j]; j++){
-    if(Formula[j] != ' ' && Formula[j] != '\t') Buffer[q++] = Formula[j];
-  }
-  Buffer[q] = 0;
-
-  if(q){
-    Index = 0;
-    Tree  = NewNode();
-    if(!ConditionOp(Tree)){
-      DeleteTree(Tree);
-      Tree = 0;
-    }
-  }
-
-  delete[] Buffer;
-
-  while(Simplify(Tree));
-}
-//------------------------------------------------------------------------------
-
-bool comp(char* a, char* b){
-  for(int j = 0; j < 10; j++){
-    if(a[j] != b[j]) return false;
-  }
-  return true;
-}
-//------------------------------------------------------------------------------
-
-long double CALCULATOR::CalcTree(NODE* Root, const char* Variable,
-long double Value){
-  long double A;
-  long double B;
-  long double nan = 0.0/0.0;
-  long double inf = 1.0/0.0;
-  int i1, i2;
-
-  if(Root){
-    if(Root->Right){ // Function
-    switch(Root->Operation){
-      case Fact:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A < 0.) return nan;
-        i1 = floor(A);
-        if(A != i1) return nan;
-        A = 1.;
-        for(; i1 > 1; i1--){
-          A *= i1;
-        }
-        return A;
-      case Power:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        i1 = round(B);
-        if(i1 == B){
-          return pow(A, i1);
-        }else{
-          if(A < 0.) return nan;
-          if(comp((char*)(&A), (char*)(&nan)) ||
-          comp((char*)(&B), (char*)(&nan)) ||
-          A ==  inf                        ||
-          B ==  inf                        ||
-          A == -inf                        ||
-          B == -inf                        ){
-            return nan;
-          }else{
-            return pow(A, B);
-          }
-        }
-      case Multiply:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return A * B;
-      case Divide:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(B == 0.){
-          if(A < 0.){
-            return -1*inf;
-          }else if (A > 0.){
-            return inf;
-          }else{
-            return nan;
-          }
-        }else{
-          return A / B;
-        }
-      case Remainder:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(B == 0.){
-          return nan;
-        }else{
-          i1 = round(A);
-          i2 = round(B);
-          if((i1 == A) && (i2 == B)){
-            return i1 % i2;
-          }else{
-            if(((A > 0.) && (B > 0.)) ||
-            ((A < 0.) && (B < 0.)) ){
-              while(A > B) A -= B;
-              return A;
+    if((buffer[index] == '0') && (buffer[index+1] == 'x')){
+        index += 2;
+        f = 0;
+        while(((buffer[index] >= '0') && (buffer[index] <= '9')) ||
+              ((buffer[index] >= 'a') && (buffer[index] <= 'f')) ||
+              ((buffer[index] >= 'A') && (buffer[index] <= 'F')) ){
+            if(buffer[index] <= '9'){
+                f = f * 16. + (buffer[index] - '0');
+            }else if(buffer[index] <= 'F'){
+                f = f * 16. + (buffer[index] - 'A' + 10.);
             }else{
-              while(A < B) A += B;
-              return A;
+                f = f * 16. + (buffer[index] - 'a' + 10.);
             }
-          }
+            index++;
         }
-      case Add:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return A + B;
-      case Subtract:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return A - B;
-      case Log:
-        A = CalcTree(Root->Right, Variable, Value);
-        return log10l(A);
-      case Log2:
-        A = CalcTree(Root->Right, Variable, Value);
-        return log2l(A);
-      case Ln:
-        A = CalcTree(Root->Right, Variable, Value);
-        return logl(A);
-      case Abs:
-        A = CalcTree(Root->Right, Variable, Value);
-        return fabsl(A);
-      case Round:
-        A = CalcTree(Root->Right, Variable, Value);
-        return round(A);
-      case Fix:
-        A = CalcTree(Root->Right, Variable, Value);
-        return fix(A);
-      case Floor:
-        A = CalcTree(Root->Right, Variable, Value);
-        return floorl(A);
-      case Ceil:
-        A = CalcTree(Root->Right, Variable, Value);
-        return ceill(A);
-      case Rand:
-        A = CalcTree(Root->Right, Variable, Value);
-        B = rand();
-        B /= RAND_MAX;
-        return A * B;
-      case Sin:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        return sinl(A);
-      case ASin:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = asinl(A);
-        if(Measure == Degrees) A *= 180./pi;
-        return A;
-      case Cos:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        return cosl(A);
-      case ACos:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = acosl(A);
-        if(Measure == Degrees) A *= 180./pi;
-        return A;
-      case Tan:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        return tanl(A);
-      case ATan:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = atanl(A);
-        if(Measure == Degrees) A *= 180./pi;
-        return A;
-      case Sec:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        A = cosl(A);
-        if(A == 0.){
-          return inf;
+        if(Minus) f *= -1.;
+        root->operation = Val;
+        root->value     = f;
+        if(!Exponent(root)) return false;
+
+    }else if((buffer[index] == '0') && (buffer[index+1] == 'b')){
+        index += 2;
+        f = 0;
+        while(buffer[index] == '0' || buffer[index] == '1'){
+            f = f * 2. + buffer[index] - '0';
+            index++;
+        }
+        if(Minus) f *= -1.;
+        root->operation = Val;
+        root->value     = f;
+        if(!Exponent(root)) return false;
+
+    }else if(((buffer[index] >= '0') && (buffer[index] <= '9')) ||
+             ((buffer[index] == '.') || (buffer[index] == ',')) ){
+        if(!parseFloat(&f)) return false;
+        if(Minus) f *= -1.;
+        root->operation = Val;
+        root->value     = f;
+        if(!Exponent(root)) return false;
+
+    }else if(buffer[index] == '('){
+        index++;
+        if(!logicOp(root)) return false;
+        if(buffer[index++] != ')') return false;
+        if(Minus){
+            N = newNode(root);
+            root->operation   = Multiply;
+            root->left        = newNode();
+            root->left->value = -1.;
+            root->right       = N;
+        }
+    }else{
+        funcName(&s);
+        if(s.length()){
+            auto Constant = constants.find(s);
+            if(Constant != constants.end()){
+                index += Constant->first.length();
+                root->operation = Val;
+                root->value = Constant->second;
+                if(Minus) root->value *= -1.;
+
+            }else{
+                index += s.length();
+                root->operation = Var;
+                root->name      = s;
+                if(Minus){
+                    N = newNode(root);
+                    root->operation   = Multiply;
+                    root->left        = newNode();
+                    root->left->value = -1.;
+                    root->right       = N;
+                }
+            }
         }else{
-          return 1/A;
+            return false;
         }
-      case ASec:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A == 0.){
-          return nan;
-        }else{
-          A = 1/A;
-          A = acosl(A);
-          if(Measure == Degrees) A *= 180./pi;
-          return A;
-        }
-      case Cosec:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        A = sinl(A);
-        if(A == 0.){
-          return inf;
-        }else{
-          return 1/A;
-        }
-      case ACosec:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A == 0.){
-          return nan;
-        }else{
-          A = 1/A;
-          A = asinl(A);
-          if(Measure == Degrees) A *= 180./pi;
-          return A;
-        }
-      case Cot:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(Measure == Degrees) A *= pi/180.;
-        A = tanl(A);
-        if(A == 0.){
-          return inf;
-        }else{
-          return 1/A;
-        }
-      case ACot:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A == 0.){
-          return nan;
-        }else{
-          A = 1/A;
-          A = atanl(A);
-          if(Measure == Degrees) A *= 180./pi;
-          return A;
-        }
-      case Sinh:
-        A = CalcTree(Root->Right, Variable, Value);
-        return sinhl(A);
-      case ASinh:
-        A = CalcTree(Root->Right, Variable, Value);
-        return logl(A + sqrtl(A*A + 1));
-      case Cosh:
-        A = CalcTree(Root->Right, Variable, Value);
-        return coshl(A);
-      case ACosh:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A < 1.){
-          return nan;
-        }else{
-          return logl(A + sqrt(A*A - 1));
-        }
-      case Tanh:
-        A = CalcTree(Root->Right, Variable, Value);
-        return tanhl(A);
-      case ATanh:
-        A = CalcTree(Root->Right, Variable, Value);
-        if((-1. < A) && (A < 1.)){
-          return 0.5 * logl((1 + A)/(1 - A));
-        }else{
-          return nan;
-        }
-      case Sech:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = coshl(A);
-        if(A == 0.){
-          return inf;
-        }else{
-          return 1/A;
-        }
-      case ASech:
-        A = CalcTree(Root->Right, Variable, Value);
-        if((A <= 0.) || (A > 1.)){
-          return nan;
-        }else{
-          return logl(1/A + sqrt(1/A/A - 1));
-        }
-      case Cosech:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = sinh(A);
-        if(A == 0.){
-          return inf;
-        }else{
-          return 1/A;
-        }
-      case ACosech:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A == 0.){
-          return nan;
-        }else{
-          return logl(1/A + sqrt(1/A/A + 1));
-        }
-      case Coth:
-        A = CalcTree(Root->Right, Variable, Value);
-        A = tanhl(A);
-        if(A == 0.){
-          return inf;
-        }else{
-          return 1/A;
-        }
-      case ACoth:
-        A = CalcTree(Root->Right, Variable, Value);
-        if((-1 <= A) && (A <= 1.)){
-          return nan;
-        }else{
-          return 0.5 * logl((A+1)/(A-1));
-        }
-      case Condition:
-        A = CalcTree(Root->Left, Variable, Value);
-        if(A != 0.){
-          return CalcTree(Root->Right, Variable, Value);
-        }else{
-          return CalcTree(Root->Other, Variable, Value);
-        }
-      case Greater:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A > B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case Less:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A < B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case Equal:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A == B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case GreaterEqual:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A >= B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case LessEqual:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A <= B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case NotEqual:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(A != B){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case Not:
-        A = CalcTree(Root->Right, Variable, Value);
-        if(A == 0.){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case bNot:
-        A = CalcTree(Root->Right, Variable, Value);
-        return ~((uint64_t)A);
-      case And:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if((A != 0.) && (B != 0.)){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case Or:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if((A != 0.) || (B != 0.)){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case Xor:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        if(((A != 0.) && (B == 0.)) ||
-        ((A == 0.) && (B != 0.)) ){
-          return 1.;
-        }else{
-          return 0.;
-        }
-      case bAnd:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return ((uint64_t)A) & ((uint64_t)B);
-      case bOr:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return ((uint64_t)A) | ((uint64_t)B);
-      case bXor:
-        A = CalcTree(Root->Left , Variable, Value);
-        B = CalcTree(Root->Right, Variable, Value);
-        return ((uint64_t)A) ^ ((uint64_t)B);
-      default:
-        break;
     }
-    }else{ // Value
-    if(Root->Operation == Var){
-      if(Root->Name == Variable){
-        return Value;
-      }else{
+    return true;
+}
+//------------------------------------------------------------------------------
+
+bool Calculator::parseFloat(long double* f)
+{
+    int s = 1;
+    int i;
+    long double temp;
+
+    temp = 0.0;
+    while((buffer[index] >= '0') && (buffer[index] <= '9')){
+        temp = temp * 10. + (buffer[index] - '0');
+        index++;
+    }
+    temp *= s;
+
+    if((buffer[index] == '.') || (buffer[index] == ',')){
+        index++;
+        i = -1;
+        while((buffer[index] >= '0') && (buffer[index] <= '9')){
+            temp += (buffer[index] - '0') * pow(10., i--);
+            index++;
+        }
+    }
+    *f = temp;
+
+    return true;
+}
+//------------------------------------------------------------------------------
+
+void Calculator::buildTree(const char* formula)
+{
+    deleteTree(tree);
+    tree = 0;
+    int j, q;
+
+    for(j = 0; formula[j]; j++);
+    buffer = new char[j+1];
+
+    q = 0;
+    for(j = 0; formula[j]; j++){
+        if(formula[j] != ' ' && formula[j] != '\t') buffer[q++] = formula[j];
+    }
+    buffer[q] = 0;
+
+    if(q){
+        index = 0;
+        tree  = newNode();
+        if(!conditionOp(tree)){
+            deleteTree(tree);
+            tree = 0;
+        }
+    }
+
+    delete[] buffer;
+
+    while(simplify(tree));
+}
+//------------------------------------------------------------------------------
+
+bool comp(char* a, char* b)
+{
+    for(int j = 0; j < 10; j++){
+        if(a[j] != b[j]) return false;
+    }
+    return true;
+}
+//------------------------------------------------------------------------------
+
+long double Calculator::calcTree(Node* root, const char* variable,
+long double value)
+{
+    long double A;
+    long double B;
+    long double nan = 0.0/0.0;
+    long double inf = 1.0/0.0;
+    int i1, i2;
+
+    if(root){
+        if(root->right){ // function
+            switch(root->operation){
+                case Fact:
+                    A = calcTree(root->right, variable, value);
+                    if(A < 0.) return nan;
+                    i1 = floor(A);
+                    if(A != i1) return nan;
+                    A = 1.;
+                    for(; i1 > 1; i1--){
+                        A *= i1;
+                    }
+                    return A;
+                case Power:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    i1 = round(B);
+                    if(i1 == B){
+                        return pow(A, i1);
+                    }else{
+                        if(A < 0.) return nan;
+                        if(comp((char*)(&A), (char*)(&nan)) ||
+                           comp((char*)(&B), (char*)(&nan)) ||
+                           A ==  inf                        ||
+                           B ==  inf                        ||
+                           A == -inf                        ||
+                           B == -inf                        ){
+                            return nan;
+                        }else{
+                            return pow(A, B);
+                        }
+                    }
+                case Multiply:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return A * B;
+                case Divide:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(B == 0.){
+                        if(A < 0.){
+                            return -1*inf;
+                        }else if (A > 0.){
+                            return inf;
+                        }else{
+                            return nan;
+                        }
+                    }else{
+                        return A / B;
+                    }
+                case Remainder:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(B == 0.){
+                        return nan;
+                    }else{
+                        i1 = round(A);
+                        i2 = round(B);
+                        if((i1 == A) && (i2 == B)){
+                            return i1 % i2;
+                        }else{
+                            if(((A > 0.) && (B > 0.)) ||
+                            ((A < 0.) && (B < 0.)) ){
+                                while(A > B) A -= B;
+                                return A;
+                            }else{
+                                while(A < B) A += B;
+                                return A;
+                            }
+                        }
+                    }
+                case Add:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return A + B;
+                case Subtract:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return A - B;
+                case Log:
+                    A = calcTree(root->right, variable, value);
+                    return log10l(A);
+                case Log2:
+                    A = calcTree(root->right, variable, value);
+                    return log2l(A);
+                case Ln:
+                    A = calcTree(root->right, variable, value);
+                    return logl(A);
+                case Abs:
+                    A = calcTree(root->right, variable, value);
+                    return fabsl(A);
+                case Round:
+                    A = calcTree(root->right, variable, value);
+                    return round(A);
+                case Fix:
+                    A = calcTree(root->right, variable, value);
+                    return fix(A);
+                case Floor:
+                    A = calcTree(root->right, variable, value);
+                    return floorl(A);
+                case Ceil:
+                    A = calcTree(root->right, variable, value);
+                    return ceill(A);
+                case Rand:
+                    A = calcTree(root->right, variable, value);
+                    B = rand();
+                    B /= RAND_MAX;
+                    return A * B;
+                case Sin:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    return sinl(A);
+                case ASin:
+                    A = calcTree(root->right, variable, value);
+                    A = asinl(A);
+                    if(measure == Degrees) A *= 180./pi;
+                    return A;
+                case Cos:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    return cosl(A);
+                case ACos:
+                    A = calcTree(root->right, variable, value);
+                    A = acosl(A);
+                    if(measure == Degrees) A *= 180./pi;
+                    return A;
+                case Tan:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    return tanl(A);
+                case ATan:
+                    A = calcTree(root->right, variable, value);
+                    A = atanl(A);
+                    if(measure == Degrees) A *= 180./pi;
+                    return A;
+                case Sec:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    A = cosl(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ASec:
+                    A = calcTree(root->right, variable, value);
+                    if(A == 0.){
+                        return nan;
+                    }else{
+                        A = 1/A;
+                        A = acosl(A);
+                        if(measure == Degrees) A *= 180./pi;
+                        return A;
+                    }
+                case Cosec:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    A = sinl(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ACosec:
+                    A = calcTree(root->right, variable, value);
+                    if(A == 0.){
+                        return nan;
+                    }else{
+                        A = 1/A;
+                        A = asinl(A);
+                        if(measure == Degrees) A *= 180./pi;
+                        return A;
+                    }
+                case Cot:
+                    A = calcTree(root->right, variable, value);
+                    if(measure == Degrees) A *= pi/180.;
+                    A = tanl(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ACot:
+                    A = calcTree(root->right, variable, value);
+                    if(A == 0.){
+                        return nan;
+                    }else{
+                        A = 1/A;
+                        A = atanl(A);
+                        if(measure == Degrees) A *= 180./pi;
+                        return A;
+                    }
+                case Sinh:
+                    A = calcTree(root->right, variable, value);
+                    return sinhl(A);
+                case ASinh:
+                    A = calcTree(root->right, variable, value);
+                    return logl(A + sqrtl(A*A + 1));
+                case Cosh:
+                    A = calcTree(root->right, variable, value);
+                    return coshl(A);
+                case ACosh:
+                    A = calcTree(root->right, variable, value);
+                    if(A < 1.){
+                        return nan;
+                    }else{
+                        return logl(A + sqrt(A*A - 1));
+                    }
+                case Tanh:
+                    A = calcTree(root->right, variable, value);
+                    return tanhl(A);
+                case ATanh:
+                    A = calcTree(root->right, variable, value);
+                    if((-1. < A) && (A < 1.)){
+                        return 0.5 * logl((1 + A)/(1 - A));
+                    }else{
+                        return nan;
+                    }
+                case Sech:
+                    A = calcTree(root->right, variable, value);
+                    A = coshl(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ASech:
+                    A = calcTree(root->right, variable, value);
+                    if((A <= 0.) || (A > 1.)){
+                        return nan;
+                    }else{
+                        return logl(1/A + sqrt(1/A/A - 1));
+                    }
+                case Cosech:
+                    A = calcTree(root->right, variable, value);
+                    A = sinh(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ACosech:
+                    A = calcTree(root->right, variable, value);
+                    if(A == 0.){
+                        return nan;
+                    }else{
+                        return logl(1/A + sqrt(1/A/A + 1));
+                    }
+                case Coth:
+                    A = calcTree(root->right, variable, value);
+                    A = tanhl(A);
+                    if(A == 0.){
+                        return inf;
+                    }else{
+                        return 1/A;
+                    }
+                case ACoth:
+                    A = calcTree(root->right, variable, value);
+                    if((-1 <= A) && (A <= 1.)){
+                        return nan;
+                    }else{
+                        return 0.5 * logl((A+1)/(A-1));
+                    }
+                case Condition:
+                    A = calcTree(root->left, variable, value);
+                    if(A != 0.){
+                        return calcTree(root->right, variable, value);
+                    }else{
+                        return calcTree(root->other, variable, value);
+                    }
+                case Greater:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A > B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case Less:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A < B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case Equal:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A == B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case GreaterEqual:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A >= B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case LessEqual:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A <= B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case NotEqual:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(A != B){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case Not:
+                    A = calcTree(root->right, variable, value);
+                    if(A == 0.){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case bNot:
+                    A = calcTree(root->right, variable, value);
+                    return ~((uint64_t)A);
+                case And:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if((A != 0.) && (B != 0.)){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case Or:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if((A != 0.) || (B != 0.)){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case Xor:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    if(((A != 0.) && (B == 0.)) ||
+                    ((A == 0.) && (B != 0.)) ){
+                        return 1.;
+                    }else{
+                        return 0.;
+                    }
+                case bAnd:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return ((uint64_t)A) & ((uint64_t)B);
+                case bOr:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return ((uint64_t)A) | ((uint64_t)B);
+                case bXor:
+                    A = calcTree(root->left , variable, value);
+                    B = calcTree(root->right, variable, value);
+                    return ((uint64_t)A) ^ ((uint64_t)B);
+                default:
+                    break;
+            }
+        }else{ // value
+            if(root->operation == Var){
+                if(root->name == variable){
+                    return value;
+                }else{
+                    return 0.;
+                }
+            }else{
+                return root->value;
+            }
+        }
+    }else{
         return 0.;
-      }
-    }else{
-      return Root->Value;
     }
-    }
-  }else{
     return 0.;
-  }
-  return 0.;
 }
 //------------------------------------------------------------------------------
 
-long double CALCULATOR::CalculateTree(const char* Variable, long double Value){
-  return CalcTree(Tree, Variable, Value);
+long double Calculator::calculateTree(const char* variable, long double value)
+{
+    return calcTree(tree, variable, value);
 }
 //------------------------------------------------------------------------------
 
-long double CALCULATOR::Calculate(
-  const char* Formula,
-  const char* Variable,
-  long double Value
+long double Calculator::calculate(
+    const char* formula,
+    const char* variable,
+    long double value
 ){
-  BuildTree(Formula);
-  return CalculateTree(Variable, Value);
+    buildTree(formula);
+    return calculateTree(variable, value);
 }
 //------------------------------------------------------------------------------
 
-bool CALCULATOR::Simplify(NODE* Root){
-  NODE* N;
-  if(Root){
-    while(Simplify(Root->Left ));
-    while(Simplify(Root->Right));
+bool Calculator::simplify(Node* root)
+{
+    Node* N;
+    if(root){
+        while(simplify(root->left ));
+        while(simplify(root->right));
 
-    if(Root->Right){ // Function
-      if(Root->Right->Operation == Val  &&
-         Root->Operation        != Rand
-      ){
-        if(Root->Left            == 0  ||
-           Root->Left->Operation == Val
-        ){
-          Root->Value = CalcTree(Root, 0, 0.);
-          Root->Operation = Val;
-          DeleteTree(Root->Left);
-          Root->Left = 0;
-          DeleteTree(Root->Right);
-          Root->Right = 0;
-          return true;
+        if(root->right){ // function
+            if(root->right->operation == Val  &&
+                  root->operation        != Rand
+            ){
+                if(root->left            == 0  ||
+                      root->left->operation == Val
+                ){
+                    root->value = calcTree(root, 0, 0.);
+                    root->operation = Val;
+                    deleteTree(root->left);
+                    root->left = 0;
+                    deleteTree(root->right);
+                    root->right = 0;
+                    return true;
+                }
+            }
+
+            switch(root->operation){
+                case Power:
+                    if(root->right->operation == Val){
+                        if(root->right->value == 0.){
+                            deleteTree(root->left);
+                            root->left = 0;
+                            deleteTree(root->right);
+                            root->right = 0;
+                            root->operation = Val;
+                            root->value = 1.;
+                            return true;
+                        }else if(root->right->value == 1.){
+                            deleteTree(root->right);
+                            N = root->left;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case Multiply:
+                    if(root->right->operation == Val){
+                        if(root->right->value == 0.){
+                            deleteTree(root->left);
+                            root->left = 0;
+                            deleteTree(root->right);
+                            root->right = 0;
+                            root->operation = Val;
+                            root->value = 0.;
+                            return true;
+                        }else if(root->right->value == 1.){
+                            deleteTree(root->right);
+                            N = root->left;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }else if(root->left->operation == Val){
+                        if(root->left->value == 0.){
+                            deleteTree(root->left);
+                            root->left = 0;
+                            deleteTree(root->right);
+                            root->right = 0;
+                            root->operation = Val;
+                            root->value = 0.;
+                            return true;
+                        }else if(root->left->value == 1.){
+                            deleteTree(root->left);
+                            N = root->right;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case Divide:
+                    if(root->right->operation == Val){
+                        if(root->right->value == 1.){
+                            deleteTree(root->right);
+                            N = root->left;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }else{
+                        if(root->left->operation == Val &&
+                        root->left->value     == 0.  ){
+                            root->operation = Val;
+                            root->value = 0.;
+                            deleteTree(root->left);
+                            root->left = 0;
+                            deleteTree(root->right);
+                            root->right = 0;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case Add:
+                    if(root->right->operation == Val){
+                        if(root->right->value == 0.){
+                            deleteTree(root->right);
+                            N = root->left;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }else if(root->left->operation == Val){
+                        if(root->left->value == 0.){
+                            deleteTree(root->left);
+                            N = root->right;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case Subtract:
+                    if(root->right->operation == Val){
+                        if(root->right->value == 0.){
+                            deleteTree(root->right);
+                            N = root->left;
+                            root->operation = N->operation;
+                            root->value     = N->value;
+                            root->left      = N->left;
+                            root->right     = N->right;
+                            root->other     = N->other;
+                            root->name      = N->name;
+                            delete N;
+                            return true;
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
         }
-      }
-
-      switch(Root->Operation){
-        case Power:
-          if(Root->Right->Operation == Val){
-            if(Root->Right->Value == 0.){
-              DeleteTree(Root->Left);
-              Root->Left = 0;
-              DeleteTree(Root->Right);
-              Root->Right = 0;
-              Root->Operation = Val;
-              Root->Value = 1.;
-              return true;
-            }else if(Root->Right->Value == 1.){
-              DeleteTree(Root->Right);
-              N = Root->Left;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }
-          break;
-
-        case Multiply:
-          if(Root->Right->Operation == Val){
-            if(Root->Right->Value == 0.){
-              DeleteTree(Root->Left);
-              Root->Left = 0;
-              DeleteTree(Root->Right);
-              Root->Right = 0;
-              Root->Operation = Val;
-              Root->Value = 0.;
-              return true;
-            }else if(Root->Right->Value == 1.){
-              DeleteTree(Root->Right);
-              N = Root->Left;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }else if(Root->Left->Operation == Val){
-            if(Root->Left->Value == 0.){
-              DeleteTree(Root->Left);
-              Root->Left = 0;
-              DeleteTree(Root->Right);
-              Root->Right = 0;
-              Root->Operation = Val;
-              Root->Value = 0.;
-              return true;
-            }else if(Root->Left->Value == 1.){
-              DeleteTree(Root->Left);
-              N = Root->Right;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }
-          break;
-
-        case Divide:
-          if(Root->Right->Operation == Val){
-            if(Root->Right->Value == 1.){
-              DeleteTree(Root->Right);
-              N = Root->Left;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }else{
-            if(Root->Left->Operation == Val &&
-            Root->Left->Value     == 0.  ){
-              Root->Operation = Val;
-              Root->Value = 0.;
-              DeleteTree(Root->Left);
-              Root->Left = 0;
-              DeleteTree(Root->Right);
-              Root->Right = 0;
-              return true;
-            }
-          }
-          break;
-
-        case Add:
-          if(Root->Right->Operation == Val){
-            if(Root->Right->Value == 0.){
-              DeleteTree(Root->Right);
-              N = Root->Left;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }else if(Root->Left->Operation == Val){
-            if(Root->Left->Value == 0.){
-              DeleteTree(Root->Left);
-              N = Root->Right;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }
-          break;
-
-        case Subtract:
-          if(Root->Right->Operation == Val){
-            if(Root->Right->Value == 0.){
-              DeleteTree(Root->Right);
-              N = Root->Left;
-              Root->Operation = N->Operation;
-              Root->Value     = N->Value;
-              Root->Left      = N->Left;
-              Root->Right     = N->Right;
-              Root->Other     = N->Other;
-              Root->Name      = N->Name;
-              delete N;
-              return true;
-            }
-          }
-          break;
-
-        default:
-          break;
-      }
     }
-  }
-  return false;
+    return false;
 }
 //------------------------------------------------------------------------------
 
-void CALCULATOR::Diff(NODE* Root, const char* Variable){
-  NODE* N;
-  NODE* Temp;
-  if(Root){
-    if(Root->Right){ // Function
-    switch(Root->Operation){
-      case Power:
-        N = NewNode(Root);
-        Root->Operation = Add;
-        Root->Left      = NewNode();
-        Root->Right     = NewNode();
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = CopyNode(N->Left);
-        Diff(Temp->Right, Variable);
-
-        Temp            = Temp->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = CopyNode(N->Right);
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Power;
-        Temp->Left      = CopyNode(N->Left);
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Subtract;
-        Temp->Left      = CopyNode(N->Right);
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = CopyNode(N->Right);
-        Diff(Temp->Right, Variable);
-
-        Temp            = Temp->Left;
-        Temp->Operation = Ln;
-        Temp->Right     = CopyNode(N->Left);
-        break;
-      case Multiply:
-        N = NewNode(Root);
-        Root->Operation = Add;
-        Root->Left      = N;
-        Root->Right     = CopyNode(N);
-        Diff(Root->Left ->Left , Variable);
-        Diff(Root->Right->Right, Variable);
-        break;
-      case Divide:
-        N = NewNode(Root);
-        Root->Operation = Divide;
-        Root->Left      = NewNode();
-        Root->Right     = NewNode();
-
-        Temp            = Root->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = N;
-        Temp->Right     = CopyNode(N);
-        Diff(Temp->Left ->Left , Variable);
-        Diff(Temp->Right->Right, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Power;
-        Temp->Left      = CopyNode(N->Right);
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case Add:
-        Diff(Root->Left , Variable);
-        Diff(Root->Right, Variable);
-        break;
-      case Subtract:
-        Diff(Root->Left , Variable);
-        Diff(Root->Right, Variable);
-        break;
-      case Log:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = N;
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 0.434294481903251828; // log(e)
-        break;
-      case Log2:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = N;
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.44269504088896341; // log2(e)
-        break;
-      case Ln:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = N;
-        Root->Right     = CopyNode(N);
-        Diff(Root->Left, Variable);
-        break;
-      case Sin:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Cos;
-        Temp->Right     = N;
-        break;
-      case ASin:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Cos:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Sin;
-        Temp->Right     = N;
-        break;
-      case ACos:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Left->Right->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Tan:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Sec;
-        Temp->Right     = N;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case ATan:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Add;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case Sec:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Sec;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Tan;
-        Temp->Right     = N;
-        break;
-      case ASec:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Abs;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Right->Right->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Cosec:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = NewNode();
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Cosec;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = CopyNode(N);
-        Diff(Temp->Right, Variable);
-
-        Temp            = Temp->Left;
-        Temp->Operation = Cot;
-        Temp->Right     = N;
-        break;
-      case ACosec:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Abs;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Left->Right->Right->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Left->Right->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Cot:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Cosec;
-        Temp->Right     = N;
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case ACot:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Add;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1;
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case Sinh:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Cosh;
-        Temp->Right     = N;
-        break;
-      case ASinh:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Add;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Right->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Cosh:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Sinh;
-        Temp->Right     = N;
-        break;
-      case ACosh:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Right->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Tanh:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Sech;
-        Temp->Right     = N;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case ATanh:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case Sech:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = NewNode();
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Sech;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = CopyNode(N);
-        Diff(Temp->Right, Variable);
-
-        Temp            = Temp->Left;
-        Temp->Operation = Tanh;
-        Temp->Right     = N;
-        break;
-      case ASech:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = CopyNode(N);
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Left->Right->Right->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Left->Right->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Cosech:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = NewNode();
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Cosech;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = CopyNode(N);
-        Diff(Temp->Right, Variable);
-
-        Temp            = Temp->Left;
-        Temp->Operation = Coth;
-        Temp->Right     = N;
-        break;
-      case ACosech:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Divide;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Abs;
-        Temp->Right     = CopyNode(N);
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Add;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Left->Right->Right->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-
-        Temp            = Root->Left->Right->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 0.5;
-        break;
-      case Coth:
-        N = Root->Right;
-        Root->Operation = Multiply;
-        Root->Left      = NewNode();
-        Root->Right     = CopyNode(N);
-        Diff(Root->Right, Variable);
-
-        Temp            = Root->Left;
-        Temp->Operation = Multiply;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = -1.;
-
-        Temp            = Root->Left->Right;
-        Temp->Operation = Power;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Cosech;
-        Temp->Right     = N;
-
-        Temp            = Root->Left->Right->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      case ACoth:
-        N = Root->Right;
-        Root->Operation = Divide;
-        Root->Left      = CopyNode(N);
-        Root->Right     = NewNode();
-        Diff(Root->Left, Variable);
-
-        Temp            = Root->Right;
-        Temp->Operation = Subtract;
-        Temp->Left      = NewNode();
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Left;
-        Temp->Operation = Val;
-        Temp->Value     = 1.;
-
-        Temp            = Root->Right->Right;
-        Temp->Operation = Power;
-        Temp->Left      = N;
-        Temp->Right     = NewNode();
-
-        Temp            = Temp->Right;
-        Temp->Operation = Val;
-        Temp->Value     = 2.;
-        break;
-      default:
-        DeleteTree(Root->Right);
-        Root->Right = 0;
-        Root->Operation = Val;
-        Root->Value = 0.;
-        break;
+void Calculator::diff(Node* root, const char* variable)
+{
+    Node* N;
+    Node* Temp;
+    if(root){
+        if(root->right){ // function
+            switch(root->operation){
+                case Power:
+                    N = newNode(root);
+                    root->operation = Add;
+                    root->left      = newNode();
+                    root->right     = newNode();
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = copyNode(N->left);
+                    diff(Temp->right, variable);
+
+                    Temp            = Temp->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = copyNode(N->right);
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Power;
+                    Temp->left      = copyNode(N->left);
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Subtract;
+                    Temp->left      = copyNode(N->right);
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = copyNode(N->right);
+                    diff(Temp->right, variable);
+
+                    Temp            = Temp->left;
+                    Temp->operation = Ln;
+                    Temp->right     = copyNode(N->left);
+                    break;
+                case Multiply:
+                    N = newNode(root);
+                    root->operation = Add;
+                    root->left      = N;
+                    root->right     = copyNode(N);
+                    diff(root->left ->left , variable);
+                    diff(root->right->right, variable);
+                    break;
+                case Divide:
+                    N = newNode(root);
+                    root->operation = Divide;
+                    root->left      = newNode();
+                    root->right     = newNode();
+
+                    Temp            = root->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = N;
+                    Temp->right     = copyNode(N);
+                    diff(Temp->left ->left , variable);
+                    diff(Temp->right->right, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Power;
+                    Temp->left      = copyNode(N->right);
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case Add:
+                    diff(root->left , variable);
+                    diff(root->right, variable);
+                    break;
+                case Subtract:
+                    diff(root->left , variable);
+                    diff(root->right, variable);
+                    break;
+                case Log:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = N;
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 0.434294481903251828; // log(e)
+                    break;
+                case Log2:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = N;
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.44269504088896341; // log2(e)
+                    break;
+                case Ln:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = N;
+                    root->right     = copyNode(N);
+                    diff(root->left, variable);
+                    break;
+                case Sin:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Cos;
+                    Temp->right     = N;
+                    break;
+                case ASin:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Cos:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Sin;
+                    Temp->right     = N;
+                    break;
+                case ACos:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->left->right->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Tan:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Sec;
+                    Temp->right     = N;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case ATan:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Add;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case Sec:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Sec;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->left->right;
+                    Temp->operation = Tan;
+                    Temp->right     = N;
+                    break;
+                case ASec:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Abs;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->right->right->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Cosec:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = newNode();
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Cosec;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = copyNode(N);
+                    diff(Temp->right, variable);
+
+                    Temp            = Temp->left;
+                    Temp->operation = Cot;
+                    Temp->right     = N;
+                    break;
+                case ACosec:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Abs;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->left->right->right->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->left->right->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Cot:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Cosec;
+                    Temp->right     = N;
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case ACot:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Add;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1;
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case Sinh:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Cosh;
+                    Temp->right     = N;
+                    break;
+                case ASinh:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Add;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->right->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Cosh:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Sinh;
+                    Temp->right     = N;
+                    break;
+                case ACosh:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->right->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Tanh:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Sech;
+                    Temp->right     = N;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case ATanh:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case Sech:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = newNode();
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Sech;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = copyNode(N);
+                    diff(Temp->right, variable);
+
+                    Temp            = Temp->left;
+                    Temp->operation = Tanh;
+                    Temp->right     = N;
+                    break;
+                case ASech:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = copyNode(N);
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->left->right->right->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->left->right->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Cosech:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = newNode();
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Cosech;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = copyNode(N);
+                    diff(Temp->right, variable);
+
+                    Temp            = Temp->left;
+                    Temp->operation = Coth;
+                    Temp->right     = N;
+                    break;
+                case ACosech:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Divide;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Abs;
+                    Temp->right     = copyNode(N);
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Add;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->left->right->right->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+
+                    Temp            = root->left->right->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 0.5;
+                    break;
+                case Coth:
+                    N = root->right;
+                    root->operation = Multiply;
+                    root->left      = newNode();
+                    root->right     = copyNode(N);
+                    diff(root->right, variable);
+
+                    Temp            = root->left;
+                    Temp->operation = Multiply;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = -1.;
+
+                    Temp            = root->left->right;
+                    Temp->operation = Power;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Cosech;
+                    Temp->right     = N;
+
+                    Temp            = root->left->right->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                case ACoth:
+                    N = root->right;
+                    root->operation = Divide;
+                    root->left      = copyNode(N);
+                    root->right     = newNode();
+                    diff(root->left, variable);
+
+                    Temp            = root->right;
+                    Temp->operation = Subtract;
+                    Temp->left      = newNode();
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->left;
+                    Temp->operation = Val;
+                    Temp->value     = 1.;
+
+                    Temp            = root->right->right;
+                    Temp->operation = Power;
+                    Temp->left      = N;
+                    Temp->right     = newNode();
+
+                    Temp            = Temp->right;
+                    Temp->operation = Val;
+                    Temp->value     = 2.;
+                    break;
+                default:
+                    deleteTree(root->right);
+                    root->right = 0;
+                    root->operation = Val;
+                    root->value = 0.;
+                    break;
+            }
+            while(simplify(root));
+        }else{ // value
+            if(root->operation == Var){
+                if(root->name == variable){
+                    root->operation = Val;
+                    root->value = 1.;
+                }
+            }else{
+                root->operation = Val;
+                root->value = 0.;
+            }
+        }
     }
-    while(Simplify(Root));
-    }else{ // Value
-    if(Root->Operation == Var){
-      if(Root->Name == Variable){
-        Root->Operation = Val;
-        Root->Value = 1.;
-      }
+}
+//------------------------------------------------------------------------------
+
+void Calculator::viewTree(Node* root, string* result)
+{
+    string A, B;
+
+    if(root){
+        if(root->right){ // function
+            switch(root->operation){
+                case Fact:
+                    viewTree(root->right, &A);
+                    *result += A ;
+                    *result += "!";
+                    return;
+
+                case Power:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += ")^(";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Multiply:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += "*";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Divide:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += "/";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Remainder:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += "rem";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Add:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += "+";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Subtract:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result += "(";
+                    *result += A ;
+                    *result += "-";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Log:
+                    viewTree(root->right, &A);
+                    *result += "log(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Log2:
+                    viewTree(root->right, &A);
+                    *result += "log2(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Ln:
+                    viewTree(root->right, &A);
+                    *result += "ln(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Abs:
+                    viewTree(root->right, &A);
+                    *result += "abs(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Round:
+                    viewTree(root->right, &A);
+                    *result += "round(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Fix:
+                    viewTree(root->right, &A);
+                    *result += "fix(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Floor:
+                    viewTree(root->right, &A);
+                    *result += "floor(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Ceil:
+                    viewTree(root->right, &A);
+                    *result += "ceil(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Rand:
+                    viewTree(root->right, &A);
+                    *result += "rand(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Sin:
+                    viewTree(root->right, &A);
+                    *result += "sin(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ASin:
+                    viewTree(root->right, &A);
+                    *result += "asin(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Cos:
+                    viewTree(root->right, &A);
+                    *result += "cos(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACos:
+                    viewTree(root->right, &A);
+                    *result += "acos(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Tan:
+                    viewTree(root->right, &A);
+                    *result += "tan(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ATan:
+                    viewTree(root->right, &A);
+                    *result += "atan(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Sec:
+                    viewTree(root->right, &A);
+                    *result += "sec(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ASec:
+                    viewTree(root->right, &A);
+                    *result += "asec(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Cosec:
+                    viewTree(root->right, &A);
+                    *result += "cosec(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACosec:
+                    viewTree(root->right, &A);
+                    *result += "acosec(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Cot:
+                    viewTree(root->right, &A);
+                    *result += "cot(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACot:
+                    viewTree(root->right, &A);
+                    *result += "acot(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Sinh:
+                    viewTree(root->right, &A);
+                    *result += "sinh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ASinh:
+                    viewTree(root->right, &A);
+                    *result += "asinh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Cosh:
+                    viewTree(root->right, &A);
+                    *result += "cosh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACosh:
+                    viewTree(root->right, &A);
+                    *result += "acosh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Tanh:
+                    viewTree(root->right, &A);
+                    *result += "tanh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ATanh:
+                    viewTree(root->right, &A);
+                    *result += "atanh(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Sech:
+                    viewTree(root->right, &A);
+                    *result += "sech(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ASech:
+                    viewTree(root->right, &A);
+                    *result += "asech(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Cosech:
+                    viewTree(root->right, &A);
+                    *result += "cosech(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACosech:
+                    viewTree(root->right, &A);
+                    *result += "acosech(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Coth:
+                    viewTree(root->right, &A);
+                    *result += "coth(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case ACoth:
+                    viewTree(root->right, &A);
+                    *result += "acoth(";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case Condition:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "[";
+                    *result += A ;
+                    *result += "]";
+                    *result += B ;
+                    viewTree(root->other, &A);
+                    *result += A ;
+                    return;
+
+                case Greater:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += ">";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Less:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "<";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Equal:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "=";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case GreaterEqual:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += ">=";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case LessEqual:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "<=";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case NotEqual:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "~=";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Not:
+                    viewTree(root->left , &A);
+                    *result  = "(~";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case bNot:
+                    viewTree(root->left , &A);
+                    *result  = "(not";
+                    *result += A ;
+                    *result += ")";
+                    return;
+
+                case And:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "&";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Or:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += "|";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case Xor:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += ":";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case bAnd:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += " and ";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case bOr:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += " or ";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                case bXor:
+                    viewTree(root->left , &A);
+                    viewTree(root->right, &B);
+                    *result  = "(";
+                    *result += A ;
+                    *result += " xor ";
+                    *result += B ;
+                    *result += ")";
+                    return;
+
+                default:
+                    *result  = "(Unknown operation: ";
+                    *result += (int)root->operation;
+                    *result += ", value: 0x";
+                    *result += (double)round(root->value);
+                    *result += ", name: ";
+                    *result += root->name;
+                    *result += ", left: ";
+                    *result += root->left;
+                    *result += ", right: ";
+                    *result += root->right;
+                    *result += ", other: ";
+                    *result += root->other;
+                    *result += ")";
+                    return;
+            }
+        }else{ // value
+            if(root->operation == Var){
+                *result = root->name;
+                return;
+
+            }else if(root->operation == Val){
+                if(root->value < 0.0){
+                    *result  = '(';
+                    *result += (double)root->value;
+                    *result += ')';
+                }else{
+                    *result  = "";
+                    *result += (double)root->value;
+                }
+                return;
+
+            }else{
+                *result  = "(Invalid node: operation: ";
+                *result += (int)root->operation;
+                *result += ", value: ";
+                *result += (double)root->value;
+                *result += ", name: ";
+                *result += root->name;
+                *result += ", left: ";
+                *result += root->left;
+                *result += ", right: ";
+                *result += root->right;
+                *result += ", other: ";
+                *result += root->other;
+                *result += ")";
+                return;
+            }
+        }
     }else{
-      Root->Operation = Val;
-      Root->Value = 0.;
+        *result = "";
     }
-    }
-  }
+    *result = "";
 }
 //------------------------------------------------------------------------------
 
-void CALCULATOR::ViewTree(NODE* Root, string* Result){
-  string A, B;
-
-  if(Root){
-    if(Root->Right){ // Function
-      switch(Root->Operation){
-        case Fact:
-          ViewTree(Root->Right, &A);
-          *Result += A ;
-          *Result += "!";
-          return;
-
-        case Power:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += ")^(";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Multiply:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += "*";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Divide:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += "/";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Remainder:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += "rem";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Add:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += "+";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Subtract:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result += "(";
-          *Result += A ;
-          *Result += "-";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Log:
-          ViewTree(Root->Right, &A);
-          *Result += "log(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Log2:
-          ViewTree(Root->Right, &A);
-          *Result += "log2(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Ln:
-          ViewTree(Root->Right, &A);
-          *Result += "ln(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Abs:
-          ViewTree(Root->Right, &A);
-          *Result += "abs(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Round:
-          ViewTree(Root->Right, &A);
-          *Result += "round(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Fix:
-          ViewTree(Root->Right, &A);
-          *Result += "fix(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Floor:
-          ViewTree(Root->Right, &A);
-          *Result += "floor(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Ceil:
-          ViewTree(Root->Right, &A);
-          *Result += "ceil(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Rand:
-          ViewTree(Root->Right, &A);
-          *Result += "rand(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Sin:
-          ViewTree(Root->Right, &A);
-          *Result += "sin(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ASin:
-          ViewTree(Root->Right, &A);
-          *Result += "asin(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Cos:
-          ViewTree(Root->Right, &A);
-          *Result += "cos(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACos:
-          ViewTree(Root->Right, &A);
-          *Result += "acos(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Tan:
-          ViewTree(Root->Right, &A);
-          *Result += "tan(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ATan:
-          ViewTree(Root->Right, &A);
-          *Result += "atan(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Sec:
-          ViewTree(Root->Right, &A);
-          *Result += "sec(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ASec:
-          ViewTree(Root->Right, &A);
-          *Result += "asec(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Cosec:
-          ViewTree(Root->Right, &A);
-          *Result += "cosec(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACosec:
-          ViewTree(Root->Right, &A);
-          *Result += "acosec(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Cot:
-          ViewTree(Root->Right, &A);
-          *Result += "cot(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACot:
-          ViewTree(Root->Right, &A);
-          *Result += "acot(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Sinh:
-          ViewTree(Root->Right, &A);
-          *Result += "sinh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ASinh:
-          ViewTree(Root->Right, &A);
-          *Result += "asinh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Cosh:
-          ViewTree(Root->Right, &A);
-          *Result += "cosh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACosh:
-          ViewTree(Root->Right, &A);
-          *Result += "acosh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Tanh:
-          ViewTree(Root->Right, &A);
-          *Result += "tanh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ATanh:
-          ViewTree(Root->Right, &A);
-          *Result += "atanh(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Sech:
-          ViewTree(Root->Right, &A);
-          *Result += "sech(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ASech:
-          ViewTree(Root->Right, &A);
-          *Result += "asech(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Cosech:
-          ViewTree(Root->Right, &A);
-          *Result += "cosech(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACosech:
-          ViewTree(Root->Right, &A);
-          *Result += "acosech(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Coth:
-          ViewTree(Root->Right, &A);
-          *Result += "coth(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case ACoth:
-          ViewTree(Root->Right, &A);
-          *Result += "acoth(";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case Condition:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "[";
-          *Result += A ;
-          *Result += "]";
-          *Result += B ;
-          ViewTree(Root->Other, &A);
-          *Result += A ;
-          return;
-
-        case Greater:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += ">";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Less:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "<";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Equal:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "=";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case GreaterEqual:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += ">=";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case LessEqual:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "<=";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case NotEqual:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "~=";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Not:
-          ViewTree(Root->Left , &A);
-          *Result  = "(~";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case bNot:
-          ViewTree(Root->Left , &A);
-          *Result  = "(not";
-          *Result += A ;
-          *Result += ")";
-          return;
-
-        case And:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "&";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Or:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += "|";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case Xor:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += ":";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case bAnd:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += " and ";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case bOr:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += " or ";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        case bXor:
-          ViewTree(Root->Left , &A);
-          ViewTree(Root->Right, &B);
-          *Result  = "(";
-          *Result += A ;
-          *Result += " xor ";
-          *Result += B ;
-          *Result += ")";
-          return;
-
-        default:
-          *Result  = "(Unknown Operation: ";
-          *Result += (int)Root->Operation;
-          *Result += ", Value: 0x";
-          *Result += (double)round(Root->Value);
-          *Result += ", Name: ";
-          *Result += Root->Name;
-          *Result += ", Left: ";
-          *Result += Root->Left;
-          *Result += ", Right: ";
-          *Result += Root->Right;
-          *Result += ", Other: ";
-          *Result += Root->Other;
-          *Result += ")";
-          return;
-      }
-    }else{ // Value
-      if(Root->Operation == Var){
-        *Result = Root->Name;
-        return;
-
-      }else if(Root->Operation == Val){
-        if(Root->Value < 0.0){
-          *Result  = '(';
-          *Result += (double)Root->Value;
-          *Result += ')';
-        }else{
-          *Result  = "";
-          *Result += (double)Root->Value;
-        }
-        return;
-
-      }else{
-        *Result  = "(Invalid node: Operation: ";
-        *Result += (int)Root->Operation;
-        *Result += ", Value: ";
-        *Result += (double)Root->Value;
-        *Result += ", Name: ";
-        *Result += Root->Name;
-        *Result += ", Left: ";
-        *Result += Root->Left;
-        *Result += ", Right: ";
-        *Result += Root->Right;
-        *Result += ", Other: ";
-        *Result += Root->Other;
-        *Result += ")";
-        return;
-      }
-    }
-  }else{
-    *Result = "";
-  }
-  *Result = "";
-}
-//------------------------------------------------------------------------------
-
-void CALCULATOR::ShowTree(string* Result){
-  *Result = "";
-  ViewTree(Tree, Result);
+void Calculator::showTree(string* result)
+{
+    *result = "";
+    viewTree(tree, result);
 }
 //------------------------------------------------------------------------------
 
