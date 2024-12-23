@@ -91,8 +91,6 @@ typedef uint8_t  byte;
 typedef uint16_t word;
 //------------------------------------------------------------------------------
 
-// Useful with standard C++ containers
-#define foreach(item, container) for(auto item = (container).begin(); item != (container).end(); item++)
 #define forrange(n, N) for(uint32_t n = 0; n < (N); n++)
 //------------------------------------------------------------------------------
 
