@@ -17,6 +17,7 @@
 #endif
 //------------------------------------------------------------------------------
 
+using std::string;
 using std::wstring;
 using std::vector;
 //------------------------------------------------------------------------------
@@ -351,11 +352,11 @@ void FileWrapper::getTime(
     #ifdef WINVER
         GetFileTime(handle, creation, access, modified);
     #else
-        struct stat stat;
-        if(!stat(filename.c_str(), &stat)){
-            *creation = stat.st_ctime;
-            *access   = stat.st_atime;
-            *modified = stat.st_mtime;
+        struct stat statbuf;
+        if(!stat(filename.c_str(), &statbuf)){
+            *creation = statbuf.st_ctime;
+            *access   = statbuf.st_atime;
+            *modified = statbuf.st_mtime;
         }
     #endif
 }

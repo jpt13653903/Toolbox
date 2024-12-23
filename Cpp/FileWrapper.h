@@ -39,7 +39,7 @@ class FileWrapper{
             HANDLE handle;
         #elif defined(NIX)
             std::string filename;
-            File*       handle;
+            FILE*       handle;
         #endif
 
         void getLongName(const wchar_t* filename, std::wstring& longName);
