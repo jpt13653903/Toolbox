@@ -142,8 +142,7 @@ typedef uint16_t word;
 
 #define info(...) do {                                    \
     printf(ANSI_FG_CYAN "Info: " ANSI_RESET __VA_ARGS__); \
-    printf(ANSI_FG_BRIGHT_BLACK " [%s +%d \"%s(...)\"]\n" \
-           ANSI_RESET, __FILE__, __LINE__, __func__);     \
+    printf(ANSI_RESET "\n");                              \
     fflush(stdout);                                       \
 }while(0)
 
