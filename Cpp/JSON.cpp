@@ -209,8 +209,8 @@ void Json::operator=(bool value)
 Json* Json::addOrUpdate(Json& value)
 {
     if(value.type == typeObject){
-        for(auto object: value.objects)
-            addOrUpdate(object.first.c_str(), *(object.second));
+        for(auto& [name, object]: value.objects)
+            addOrUpdate(name.c_str(), *(object));
     }else{
         operator=(value);
     }
