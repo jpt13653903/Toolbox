@@ -52,6 +52,7 @@ Calculator::Calculator()
     constants["e"        ] = e;
     constants["pi"       ] = pi;
     constants["\\c"      ] = 2.99792458e8L;
+    constants["\\cAir"   ] = 2.99702547e8L;
     constants["\\G"      ] = 6.67259e-11L;
     constants["\\g"      ] = 9.80665L;
     constants["\\me"     ] = 9.1093897e-31L;

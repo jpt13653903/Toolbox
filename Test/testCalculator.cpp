@@ -32,6 +32,7 @@ bool testConstants()
     if(!calculate("e"        , 2.718281828459045235360)) return false;
     if(!calculate("pi"       , 3.141592653589793238463)) return false;
     if(!calculate("\\c"      , 2.99792458e8           )) return false;
+    if(!calculate("\\cAir"   , 2.99702547e8           )) return false;
     if(!calculate("\\G"      , 6.67259e-11            )) return false;
     if(!calculate("\\g"      , 9.80665                )) return false;
     if(!calculate("\\me"     , 9.1093897e-31          )) return false;
