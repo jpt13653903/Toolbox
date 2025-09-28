@@ -49,7 +49,7 @@ void setupTerminal()
         GetConsoleScreenBufferInfo(TerminalHandle, &Info);
         Info.dwSize.Y = 0x7FFF;
         while(!SetConsoleScreenBufferSize(TerminalHandle, Info.dwSize) &&
-                    GetLastError() == ERROR_INVALID_PARAMETER){
+               GetLastError() == ERROR_INVALID_PARAMETER){
             Info.dwSize.Y--;
         }
     #endif
